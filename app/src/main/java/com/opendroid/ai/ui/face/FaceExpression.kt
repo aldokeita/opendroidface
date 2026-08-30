@@ -34,6 +34,20 @@ fun AgentState.toExpression(): FaceExpression = when (this) {
 }
 
 /**
+ * Text equivalent of the expression, for TalkBack. The face is the only status
+ * indicator in Auto mode, so without this a screen reader user gets nothing.
+ */
+fun FaceExpression.contentDescription(): String = when (this) {
+    FaceExpression.NEUTRAL -> "Assistant face: idle"
+    FaceExpression.LISTENING -> "Assistant face: listening"
+    FaceExpression.THINKING -> "Assistant face: thinking"
+    FaceExpression.CURIOUS -> "Assistant face: waiting for your approval"
+    FaceExpression.FOCUSED -> "Assistant face: running your request"
+    FaceExpression.SPEAKING -> "Assistant face: speaking"
+    FaceExpression.SAD -> "Assistant face: something went wrong"
+}
+
+/**
  * Parameter geometri wajah yang dianimasikan. Semua ternormalisasi supaya
  * transisi antar-ekspresi bisa dilakukan dengan interpolasi linear sederhana.
  *

@@ -59,6 +59,7 @@ import com.opendroid.ai.data.models.effectiveGrantedActions
 import com.opendroid.ai.data.models.resolvedAutoMode
 import com.opendroid.ai.data.repository.ChatSession
 import com.opendroid.ai.ui.components.ContactPickerCard
+import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
@@ -359,6 +360,21 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(bottom = 80.dp)
             ) {
+                // Robot face header. It shrinks once the conversation starts so the
+                // messages keep the screen; on an empty chat it is the whole greeting.
+                val faceHeight by animateDpAsState(
+                    targetValue = if (history.isEmpty()) 200.dp else 96.dp,
+                    animationSpec = tween(300),
+                    label = "faceHeight"
+                )
+                RobotFace(
+                    state = visibleAgentState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(faceHeight)
+                        .padding(top = 8.dp)
+                )
+
                 // Messages List
                 LazyColumn(
                     state = listState,
