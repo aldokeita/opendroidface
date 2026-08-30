@@ -168,9 +168,14 @@ wajah "senang" saat `Error` akan terasa rusak.
   layar dijaga tetap menyala, mikrofon menyalakan dirinya sendiri saat agent menganggur
   (berhenti setelah 30 kali sunyi beruntun), dan seluruh wajah bergeser sangat lambat
   untuk mencegah burn-in OLED. Keluar dengan tekan-lama. Lihat `ui/face/KioskMode.kt`.
-- **Desktop bridge terdokumentasi** — tulis `docs/desktop-mcp.md`: `adb forward tcp:8765 tcp:8765`,
-  contoh konfigurasi MCP client, daftar tool yang diekspos `McpServer.tools()`
-- **MCP lewat jaringan** — ganti `LOOPBACK` → `0.0.0.0` **hanya setelah** ada token auth + pairing
+- ~~**Desktop bridge terdokumentasi**~~ — selesai. Lihat `docs/desktop-mcp.md`.
+- ~~**MCP lewat jaringan**~~ — selesai. Token auth ternyata sudah ada di upstream
+  (`McpConfigStore.accessToken()`: 122 bit acak, envelope Keystore, perbandingan
+  constant-time) — yang hilang adalah cara pengguna melihatnya. Layar **Desktop bridge**
+  (ikon komputer di bar atas Chat) menampilkan token, bisa menyalin dan me-*rotate*-nya,
+  serta memegang satu-satunya switch yang memindahkan bind dari `127.0.0.1` ke `0.0.0.0`
+  — mati secara bawaan, dengan dialog konfirmasi, dan server di-restart karena alamat bind
+  ditetapkan saat socket dibuka. Lihat `core/bridge/McpNetworkPolicy.kt`.
 - ~~**Aksesibilitas**~~ — selesai. Wajah berhenti bergerak saat perangkat mematikan animasi
   (`Settings.Global.ANIMATOR_DURATION_SCALE` = 0), diawasi lewat `ContentObserver` sehingga
   berlaku langsung tanpa keluar layar. Chip **MOTION** di layar Hands-free memutar

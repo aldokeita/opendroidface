@@ -60,6 +60,20 @@ class McpConfigStore private constructor(
         return token
     }
 
+    /**
+     * Replace the access token, invalidating every desktop client already paired.
+     *
+     * Needed because a token that can be shown can also be leaked — into a
+     * screenshot, a shared terminal, a pasted config file — and a bearer secret
+     * with no way to revoke it is one that has to be assumed valid forever.
+     */
+    @Synchronized
+    fun rotateAccessToken(): String {
+        val token = UUID.randomUUID().toString().replace("-", "")
+        writeSecret(TOKEN_KEY, TOKEN_AAD, token)
+        return token
+    }
+
     @Synchronized
     fun list(): List<McpEndpointConfig> {
         val raw = readSecret(ENDPOINTS_KEY, ENDPOINTS_AAD) ?: "[]"

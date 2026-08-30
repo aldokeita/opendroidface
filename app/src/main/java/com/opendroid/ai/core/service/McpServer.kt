@@ -6,6 +6,7 @@ import android.util.Log
 import com.opendroid.ai.BuildConfig
 import com.opendroid.ai.actions.ActionDispatcher
 import com.opendroid.ai.actions.base.ActionResult
+import com.opendroid.ai.core.bridge.McpNetworkPolicy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
@@ -27,7 +28,8 @@ class McpServer @Inject constructor(
     private val actionDispatcher: ActionDispatcher,
     private val commandExecutor: PrivilegedCommandExecutor,
     private val configStore: McpConfigStore,
-    private val terminalManager: PersistentTerminalManager
+    private val terminalManager: PersistentTerminalManager,
+    private val networkPolicy: McpNetworkPolicy
 ) {
 
     private val running = AtomicBoolean(false)
@@ -56,9 +58,29 @@ class McpServer @Inject constructor(
         terminalManager.closeAll()
     }
 
+    /**
+     * Re-open the socket, which is the only way a change of bind address takes
+     * effect: the interface is fixed when the ServerSocket is constructed.
+     */
+    @Synchronized
+    fun restart() {
+        stop()
+        start()
+    }
+
     private fun serve() {
         try {
-            ServerSocket(PORT, BACKLOG, InetAddress.getByName(LOOPBACK)).use { socket ->
+            // Loopback unless the owner has explicitly exposed the server in the
+            // app. Read here rather than held in a field so a restart is all it
+            // takes to move it.
+            val bindAddress = networkPolicy.bindAddress()
+            if (bindAddress != LOOPBACK) {
+                // Worth a line in the log: this server can run shell commands, and
+                // "when did it stop being loopback" is a question worth answering
+                // after the fact. The token is never logged.
+                Log.w(TAG, "MCP server is listening on $bindAddress:$PORT, not loopback")
+            }
+            ServerSocket(PORT, BACKLOG, InetAddress.getByName(bindAddress)).use { socket ->
                 serverSocket = socket
                 while (running.get()) {
                     try {

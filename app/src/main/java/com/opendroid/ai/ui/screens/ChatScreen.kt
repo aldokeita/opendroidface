@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Forum
@@ -60,6 +61,9 @@ import com.opendroid.ai.data.models.effectiveGrantedActions
 import com.opendroid.ai.data.models.resolvedAutoMode
 import com.opendroid.ai.data.repository.ChatSession
 import com.opendroid.ai.ui.components.ContactPickerCard
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.opendroid.ai.ui.bridge.DesktopBridgeScreen
 import com.opendroid.ai.ui.face.AutoModeButton
 import com.opendroid.ai.ui.face.AutoModeHost
 import com.opendroid.ai.ui.face.RobotFace
@@ -112,6 +116,9 @@ fun ChatScreen(
     // Voice-only face mode. Kept in the composable rather than in ChatViewModel:
     // it is a view concern and nothing outside this screen needs to know about it.
     var autoModeActive by rememberSaveable { mutableStateOf(false) }
+    // The MCP bridge screen: the access token, and the switch that decides which
+    // interface the server listens on.
+    var showDesktopBridge by rememberSaveable { mutableStateOf(false) }
 
     // Merges a piece of dictated text into whatever the user already typed, so review/edit
     // never clobbers text entered before dictation started.
@@ -247,6 +254,13 @@ fun ChatScreen(
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+                    IconButton(onClick = { showDesktopBridge = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Computer,
+                            contentDescription = "Desktop bridge",
+                            tint = TextSecondary
                         )
                     }
                     IconButton(onClick = { viewModel.newChat() }) {
@@ -658,6 +672,17 @@ fun ChatScreen(
 
     // Hands-free mode covers the whole screen, bottom navigation included; it
     // hosts itself in a Dialog, so Back is handled there too.
+    // Same Dialog trick as hands-free mode: this screen sits inside the app's
+    // Scaffold, and the bridge screen wants the whole display.
+    if (showDesktopBridge) {
+        Dialog(
+            onDismissRequest = { showDesktopBridge = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            DesktopBridgeScreen(onClose = { showDesktopBridge = false })
+        }
+    }
+
     if (autoModeActive) {
         AutoModeHost(
             viewModel = viewModel,
