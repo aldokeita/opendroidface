@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,7 +65,9 @@ fun FaceGallery(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(colors.background)
+            // Same pure black as hands-free, so switching between them is not a
+            // change of surface.
+            .background(Color.Black)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
@@ -125,6 +128,7 @@ fun FaceGallery(
                             state = AgentState.Idle,
                             expressionOverride = expression,
                             styleOverride = shownStyle,
+                            backgroundColor = Color.Black,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f)

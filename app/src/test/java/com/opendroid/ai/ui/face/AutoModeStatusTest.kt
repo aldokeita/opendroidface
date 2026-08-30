@@ -30,7 +30,12 @@ class AutoModeStatusTest {
 
     @Test
     fun `idle with a closed microphone invites the user to speak`() {
-        assertEquals("Tap to speak", autoModeStatusLabel(AgentState.Idle, isListening = false))
+        // The whole screen is the button now, so the invitation has to say so -
+        // there is nothing left on screen to point at.
+        assertEquals(
+            "Tap anywhere to speak",
+            autoModeStatusLabel(AgentState.Idle, isListening = false)
+        )
     }
 
     @Test

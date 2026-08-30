@@ -91,6 +91,8 @@ fun RobotFace(
     faceColor: Color? = null,
     /** Overrides the user's stored style; used by the gallery to show both at once. */
     styleOverride: FaceStyle? = null,
+    /** The surface the face is drawn on. Defaults to the app background. */
+    backgroundColor: Color? = null,
 ) {
     val colors = LocalOpenDroidColors.current
     val expression = expressionOverride ?: state.toExpression()
@@ -172,13 +174,10 @@ fun RobotFace(
     )
 
     val description = expression.contentDescription()
-    val panelColor = if (colors.isDark) {
-        // A shade below the app background so the panel reads as a screen inside
-        // the screen rather than a floating rectangle.
-        lerp(colors.background, Color.Black, 0.55f)
-    } else {
-        Color(0xFF10151C)
-    }
+    // Whatever is behind the face. The style-1 eyelid is drawn in this colour to
+    // cut into the eye, so it has to match the surface exactly or the lid shows
+    // up as a grey slab.
+    val panelColor = backgroundColor ?: colors.background
 
     Box(modifier.semantics { contentDescription = description }) {
         // Every animated value below is read INSIDE the draw lambda on purpose:
@@ -196,10 +195,10 @@ fun RobotFace(
 
             // Each style decides where its screen is; the expression itself is drawn
             // the same way inside it, so a new expression appears in both styles.
-            // Both styles sit on the same bare panel; what differs is the face
-            // drawn on it. A moulded head around the eyes was tried and dropped:
-            // the accessory drew attention away from the face it framed.
-            val screen = drawScreenShell(panelColor, face, center)
+            // Both styles draw straight onto the background; what differs is the
+            // face, not the frame. A moulded head was tried and dropped — the
+            // accessory drew more attention than the face it framed.
+            val screen = computeScreen(face, center)
             val unit = screen.width / 6.4f
 
             drawDecorations(
@@ -302,23 +301,16 @@ private fun FaceScreen.clipPath(): Path = Path().apply {
     )
 }
 
-/** Style 1: the dark panel, with a soft vignette so it has depth. */
-private fun DrawScope.drawScreenShell(panelColor: Color, face: Float, center: Offset): FaceScreen {
+/**
+ * Where the face is drawn, and how far it may spill.
+ *
+ * Nothing is painted here on purpose. A filled panel looked right on the black
+ * hands-free screen and showed up as a black card floating on the chat screen,
+ * which is a slightly different black. The face now sits directly on whatever is
+ * behind it.
+ */
+private fun computeScreen(face: Float, center: Offset): FaceScreen {
     val side = face * 0.98f
-    val topLeft = Offset(center.x - side / 2f, center.y - side / 2f)
-    val radius = CornerRadius(side * 0.24f, side * 0.24f)
-
-    drawRoundRect(color = panelColor, topLeft = topLeft, size = Size(side, side), cornerRadius = radius)
-    drawRoundRect(
-        brush = Brush.radialGradient(
-            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f)),
-            center = center,
-            radius = side * 0.75f,
-        ),
-        topLeft = topLeft,
-        size = Size(side, side),
-        cornerRadius = radius,
-    )
     return FaceScreen(
         center = center,
         width = side * 0.62f,
@@ -839,14 +831,17 @@ private fun DrawScope.drawDecorations(
 ) {
     // ── Listening: rings expanding outward from the face ──
     if (ringAmount > 0.01f) {
-        val baseRadius = shellRadius
+        // Sized from the eyes, not from the panel. Tied to the panel they grew
+        // wider than the screen and read as two lines crossing it, not as a face
+        // emitting anything.
+        val baseRadius = unit * 3.3f
         // Two rings half a cycle apart read as a continuous emission rather than
         // a single pulse that restarts.
         listOf(0f, 0.5f).forEach { offset ->
             val p = (phase + offset) % 1f
             drawCircle(
-                color = accent.copy(alpha = (1f - p) * 0.30f * ringAmount),
-                radius = baseRadius + p * unit * (2.0f + amplitude * 2.2f),
+                color = accent.copy(alpha = (1f - p) * 0.32f * ringAmount),
+                radius = baseRadius + p * unit * (1.5f + amplitude * 2.0f),
                 center = center,
                 style = Stroke(width = unit * 0.08f),
             )

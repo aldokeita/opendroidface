@@ -74,7 +74,15 @@ fun AutoModeHost(
                 isListening = false
                 transcript = ""
                 voiceError = err
-            }
+            },
+            // Hearing nothing is what an open microphone does when nobody speaks.
+            // Showing it as "No speech match found" made the screen look broken
+            // every time the user paused to think.
+            onNoSpeech = {
+                isListening = false
+                transcript = ""
+                voiceError = null
+            },
         )
     }
 

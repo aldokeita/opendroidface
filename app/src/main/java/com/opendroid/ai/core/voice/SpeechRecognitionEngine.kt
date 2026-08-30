@@ -69,7 +69,15 @@ class SpeechRecognitionEngine(
     fun startListening(
         onResult: (String) -> Unit,
         onPartialResult: (String) -> Unit = {},
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        /**
+         * Called instead of [onError] when the recognizer simply heard nothing -
+         * no speech, or silence for long enough to give up. That is the normal
+         * outcome of an open microphone nobody spoke into, not a failure, and a
+         * caller that leaves this null keeps the old behaviour of treating it as
+         * an error.
+         */
+        onNoSpeech: (() -> Unit)? = null,
     ) {
         if (speechRecognizer == null) {
             onError("Speech recognition not available on this device")
@@ -102,6 +110,13 @@ class SpeechRecognitionEngine(
             override fun onError(error: Int) {
                 if (sessionId != activeSessionId) return
                 amplitude?.reset()
+                if (onNoSpeech != null &&
+                    (error == SpeechRecognizer.ERROR_NO_MATCH ||
+                        error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT)
+                ) {
+                    onNoSpeech()
+                    return
+                }
                 val message = when (error) {
                     SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
                     SpeechRecognizer.ERROR_CLIENT -> "Client side error"
