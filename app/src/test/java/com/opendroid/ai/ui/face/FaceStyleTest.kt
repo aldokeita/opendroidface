@@ -28,9 +28,14 @@ class FaceStyleTest {
     }
 
     @Test
-    fun `both styles draw the same expressions`() {
-        // The styles differ in what surrounds the face, never in what it can feel;
-        // otherwise a user would pick a look and silently lose expressions.
-        assertEquals(12, FaceExpression.entries.size)
+    fun `both styles cover the whole vocabulary`() {
+        // The styles differ in how a feeling is drawn, never in which feelings
+        // exist; otherwise a user would pick a look and silently lose expressions.
+        // Both tables are exhaustive `when`s over the enum, so this only has to
+        // prove they are actually callable for every entry.
+        FaceExpression.entries.forEach {
+            it.params()
+            it.oledEyes()
+        }
     }
 }

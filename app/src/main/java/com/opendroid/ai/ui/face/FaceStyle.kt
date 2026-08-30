@@ -15,11 +15,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class FaceStyle(val label: String, val galleryTitle: String) {
-    /** A flat dark panel — the face is the screen. */
+    /** Glossy eyes, a mouth and a corner icon, on a flat dark panel. */
     SCREEN("Screen", "Gallery 1 · Screen"),
 
-    /** A moulded robot head with a visor, shaded to read as a solid object. */
-    DROID("Droid", "Gallery 2 · Droid"),
+    /**
+     * Cozmo-style eyes on the same bare panel: two rectangles, no mouth, no
+     * icons, everything said by height, width, spacing and eyelid slant.
+     *
+     * The enum name stays DROID because it is what earlier builds wrote into the
+     * preference file.
+     */
+    DROID("Eyes", "Gallery 2 · Eyes"),
 }
 
 const val DEFAULT_FACE_STYLE = "SCREEN"

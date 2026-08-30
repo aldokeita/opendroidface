@@ -53,6 +53,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -195,10 +196,10 @@ fun RobotFace(
 
             // Each style decides where its screen is; the expression itself is drawn
             // the same way inside it, so a new expression appears in both styles.
-            val screen = when (faceStyle) {
-                FaceStyle.SCREEN -> drawScreenShell(panelColor, face, center)
-                FaceStyle.DROID -> drawDroidShell(panelColor, eyeColor, face, center, colors.isDark)
-            }
+            // Both styles sit on the same bare panel; what differs is the face
+            // drawn on it. A moulded head around the eyes was tried and dropped:
+            // the accessory drew attention away from the face it framed.
+            val screen = drawScreenShell(panelColor, face, center)
             val unit = screen.width / 6.4f
 
             drawDecorations(
@@ -214,43 +215,60 @@ fun RobotFace(
 
             // Everything the expression draws stays on the screen it belongs to.
             clipPath(screen.clipPath()) {
-            translate(top = drift) {
-                rotate(degrees = headTilt, pivot = screen.center) {
-                    drawFaceContent(
-                        style = target.eyeStyle,
-                        mouthShape = target.mouth,
-                        eyeColor = eyeColor,
-                        panelColor = panelColor,
+                translate(top = drift) {
+                    rotate(degrees = headTilt, pivot = screen.center) {
+                        when (faceStyle) {
+                            FaceStyle.SCREEN -> drawFaceContent(
+                                style = target.eyeStyle,
+                                mouthShape = target.mouth,
+                                eyeColor = eyeColor,
+                                panelColor = panelColor,
+                                unit = unit,
+                                center = screen.center,
+                                eyeOpen = eyeOpen * blinkFactor,
+                                eyeSquint = eyeSquint,
+                                eyeScale = eyeScale,
+                                lidAngle = lidAngle,
+                                mouthOpen = max(mouthOpen, talk),
+                                mouthCurve = mouthCurve,
+                                gazeX = gazeX,
+                                gazeY = gazeY,
+                            )
+
+                            FaceStyle.DROID -> drawOledEyes(
+                                eyes = expression.oledEyes(),
+                                eyeColor = eyeColor,
+                                panelColor = panelColor,
+                                unit = unit,
+                                center = screen.center,
+                                blink = blinkAnim,
+                                // A talking face on an eyes-only design has no mouth
+                                // to move, so the voice lifts the eyes instead.
+                                voice = max(mouthOpen, talk),
+                                gazeX = gazeX,
+                                gazeY = gazeY,
+                            )
+                        }
+                    }
+                }
+
+                // Style 2 says everything with its eyes; an icon on it would be a
+                // second language on the same face.
+                if (faceStyle == FaceStyle.SCREEN) {
+                    drawIcon(
+                        icon = target.icon,
+                        color = eyeColor,
                         unit = unit,
-                        center = screen.center,
-                        eyeOpen = eyeOpen * blinkFactor,
-                        eyeSquint = eyeSquint,
-                        eyeScale = eyeScale,
-                        lidAngle = lidAngle,
-                        mouthOpen = max(mouthOpen, talk),
-                        mouthCurve = mouthCurve,
-                        gazeX = gazeX,
-                        gazeY = gazeY,
+                        // Pulled in from the corner: the clip means an icon placed
+                        // too far out loses half of itself to the rounded edge.
+                        anchor = Offset(
+                            screen.center.x + screen.width * 0.30f,
+                            screen.center.y - screen.height * 0.28f,
+                        ),
+                        phase = phase,
                     )
                 }
             }
-
-            drawIcon(
-                icon = target.icon,
-                color = eyeColor,
-                unit = unit,
-                // Pulled in from the corner: the clip means an icon placed too far
-                // out loses half of itself to the rounded edge of the screen.
-                anchor = Offset(
-                    screen.center.x + screen.width * 0.30f,
-                    screen.center.y - screen.height * 0.28f,
-                ),
-                phase = phase,
-            )
-            }
-
-            // Last, so the glass sits in front of everything behind it.
-            if (faceStyle == FaceStyle.DROID) drawVisorSheen(screen)
         }
     }
 }
@@ -312,148 +330,119 @@ private fun DrawScope.drawScreenShell(panelColor: Color, face: Float, center: Of
 }
 
 /**
- * Style 2: a moulded robot head.
+ * Style 2's face: two rectangles and nothing else.
  *
- * Nothing here is a 3D renderer — the volume is painted. A vertical body
- * gradient gives it a lit top and a shaded chin, a bright rim along the upper
- * edge separates it from the background, a contact shadow sits it on a surface,
- * and the visor gets an inner shadow plus a sheen that follows its curve. Those
- * four cues are what the eye reads as a solid object.
+ * No gradient, no highlight, no mouth. The shape carries everything, the way it
+ * does on a small monochrome display — which is what makes this a different face
+ * rather than the same one in another frame.
  */
-private fun DrawScope.drawDroidShell(
+private fun DrawScope.drawOledEyes(
+    eyes: OledEyeParams,
+    eyeColor: Color,
     panelColor: Color,
-    accent: Color,
-    face: Float,
+    unit: Float,
     center: Offset,
-    isDark: Boolean,
-): FaceScreen {
-    val headW = face * 0.86f
-    val headH = face * 0.80f
-    val headTopLeft = Offset(center.x - headW / 2f, center.y - headH / 2f)
-    val headRadius = CornerRadius(headW * 0.34f, headW * 0.34f)
+    blink: Float,
+    voice: Float,
+    gazeX: Float,
+    gazeY: Float,
+) {
+    val baseW = unit * 1.7f * eyes.width
+    val baseH = unit * 2.45f
+    val dx = unit * 1.85f * eyes.gap
+    val cy = center.y + unit * eyes.offsetY + gazeY * unit * 0.5f
+    val cx = center.x + gazeX * unit * 0.5f
 
-    val shellLight = if (isDark) Color(0xFFE6EDF5) else Color(0xFFFFFFFF)
-    val shellMid = if (isDark) Color(0xFFB9C6D6) else Color(0xFFD8E1EC)
-    val shellDark = if (isDark) Color(0xFF7C8CA0) else Color(0xFFA9B6C6)
+    listOf(-1f to eyes.heightL, 1f to eyes.heightR).forEach { (side, heightScale) ->
+        // The voice lifts the eyes a little while speaking; a face with no mouth
+        // still has to look like it is the one talking.
+        val h = max(unit * 0.22f, baseH * heightScale * blink * (1f + voice * 0.18f))
+        val eyeCenter = Offset(cx + side * dx, cy)
+        val topLeft = Offset(eyeCenter.x - baseW / 2f, eyeCenter.y - h / 2f)
+        val radius = if (eyes.bottomHeavy) {
+            // Flat on top, fully round underneath: the smiling-eye shape.
+            CornerRadius(baseW * 0.18f, baseW * 0.18f)
+        } else {
+            CornerRadius(baseW * eyes.radius, baseW * eyes.radius)
+        }
 
-    // Contact shadow: without it the head floats.
-    drawOval(
-        brush = Brush.radialGradient(
-            colors = listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent),
-            center = Offset(center.x, center.y + headH * 0.56f),
-            radius = headW * 0.45f,
-        ),
-        topLeft = Offset(center.x - headW * 0.42f, center.y + headH * 0.40f),
-        size = Size(headW * 0.84f, headH * 0.22f),
-    )
+        // The eyelid CUTS the eye rather than being painted over it. Painting a
+        // slab in the panel colour looked right on a flat panel and vanished
+        // inside the visor, which has a gradient of its own.
+        // Positive slope drops the OUTER corner (sad); negative drops the inner
+        // one, which is the only way this face can look angry.
+        val slope = (if (side < 0f) eyes.slopeL else eyes.slopeR) * side
+        val drawEye = {
+            if (eyes.bottomHeavy) {
+                // A smiling eye is the eye with a bite taken out of the top: the
+                // "^" shape. Drawing a rounded rect and adding a circle underneath
+                // produced a fat pill instead, which read as no expression at all.
+                val body = Path().apply {
+                    addRoundRect(
+                        RoundRect(
+                            left = topLeft.x, top = topLeft.y,
+                            right = topLeft.x + baseW, bottom = topLeft.y + h,
+                            cornerRadius = CornerRadius(baseW * 0.30f, baseW * 0.30f),
+                        )
+                    )
+                }
+                val bite = Path().apply {
+                    val r = baseW * 0.78f
+                    addOval(
+                        androidx.compose.ui.geometry.Rect(
+                            center = Offset(eyeCenter.x, eyeCenter.y - h * 0.62f),
+                            radius = r,
+                        )
+                    )
+                }
+                drawPath(Path().apply { op(body, bite, PathOperation.Difference) }, eyeColor)
+            } else {
+                drawRoundRect(color = eyeColor, topLeft = topLeft, size = Size(baseW, h), cornerRadius = radius)
+            }
+        }
 
-    // Antenna, drawn before the head so its base disappears behind the shell.
-    val antennaTop = Offset(center.x, center.y - headH * 0.66f)
-    drawLine(
-        color = shellMid,
-        start = Offset(center.x, center.y - headH * 0.44f),
-        end = antennaTop,
-        strokeWidth = face * 0.022f,
-        cap = StrokeCap.Round,
-    )
-    drawCircle(color = accent.copy(alpha = 0.25f), radius = face * 0.045f, center = antennaTop)
-    drawCircle(color = accent, radius = face * 0.028f, center = antennaTop)
-
-    // Ears / speaker pods.
-    listOf(-1f, 1f).forEach { side ->
-        val earW = face * 0.075f
-        val earH = headH * 0.30f
-        drawRoundRect(
-            brush = Brush.verticalGradient(listOf(shellMid, shellDark)),
-            topLeft = Offset(center.x + side * (headW / 2f) - earW * (if (side < 0) 0.35f else 0.65f), center.y - earH / 2f),
-            size = Size(earW, earH),
-            cornerRadius = CornerRadius(earW * 0.5f, earW * 0.5f),
-        )
+        if (slope == 0f) {
+            drawEye()
+        } else {
+            // The lid also bites into the eye, not just grazes its top corner.
+            // Rotating a line that starts exactly at the top edge only shaves the
+            // corner that the corner radius had already rounded away, and the
+            // expression stayed invisible.
+            val bite = h * (0.10f + kotlin.math.abs(slope) / 34f * 0.22f)
+            clipPath(
+                slantedLidClip(eyeCenter, slope, baseW * 2.2f, h * 2.4f, h * 0.5f - bite)
+            ) { drawEye() }
+        }
     }
-
-    // Head shell: lit from above.
-    drawRoundRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(shellLight, shellMid, shellDark),
-            startY = headTopLeft.y,
-            endY = headTopLeft.y + headH,
-        ),
-        topLeft = headTopLeft,
-        size = Size(headW, headH),
-        cornerRadius = headRadius,
-    )
-    // Rim light along the top edge.
-    drawRoundRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(Color.White.copy(alpha = 0.75f), Color.Transparent),
-            startY = headTopLeft.y,
-            endY = headTopLeft.y + headH * 0.30f,
-        ),
-        topLeft = headTopLeft,
-        size = Size(headW, headH),
-        cornerRadius = headRadius,
-        style = Stroke(width = face * 0.012f),
-    )
-
-    // Visor.
-    val visorW = headW * 0.78f
-    val visorH = headH * 0.60f
-    val visorCenter = Offset(center.x, center.y - headH * 0.02f)
-    val visorTopLeft = Offset(visorCenter.x - visorW / 2f, visorCenter.y - visorH / 2f)
-    val visorRadius = CornerRadius(visorH * 0.42f, visorH * 0.42f)
-
-    // Accent trim, so the visor reads as inset rather than painted on.
-    drawRoundRect(
-        color = accent.copy(alpha = 0.55f),
-        topLeft = Offset(visorTopLeft.x - face * 0.012f, visorTopLeft.y - face * 0.012f),
-        size = Size(visorW + face * 0.024f, visorH + face * 0.024f),
-        cornerRadius = CornerRadius(visorRadius.x + face * 0.012f, visorRadius.y + face * 0.012f),
-    )
-    drawRoundRect(
-        color = panelColor,
-        topLeft = visorTopLeft,
-        size = Size(visorW, visorH),
-        cornerRadius = visorRadius,
-    )
-    // Inner shadow: darker at the edges, so the glass looks recessed.
-    drawRoundRect(
-        brush = Brush.radialGradient(
-            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.55f)),
-            center = visorCenter,
-            radius = visorW * 0.62f,
-        ),
-        topLeft = visorTopLeft,
-        size = Size(visorW, visorH),
-        cornerRadius = visorRadius,
-    )
-
-    return FaceScreen(
-        center = visorCenter,
-        width = visorW,
-        height = visorH,
-        clipWidth = visorW,
-        clipHeight = visorH,
-        clipRadius = visorRadius.x,
-    )
 }
 
-/** A sheen across the top of the visor, drawn after the face so it sits on the glass. */
-private fun DrawScope.drawVisorSheen(screen: FaceScreen) {
-    val w = screen.width
-    val h = screen.height
-    val path = Path().apply {
-        moveTo(screen.center.x - w * 0.46f, screen.center.y - h * 0.22f)
-        quadraticTo(
-            screen.center.x - w * 0.05f, screen.center.y - h * 0.62f,
-            screen.center.x + w * 0.40f, screen.center.y - h * 0.44f,
-        )
-        quadraticTo(
-            screen.center.x - w * 0.02f, screen.center.y - h * 0.30f,
-            screen.center.x - w * 0.46f, screen.center.y - h * 0.22f,
-        )
-        close()
+/**
+ * The area below a slanted eyelid, as a path.
+ *
+ * Built by rotating the four corners by hand rather than with a rotate() block,
+ * because the clip has to persist for the drawing that follows it.
+ */
+private fun slantedLidClip(
+    center: Offset,
+    angleDeg: Float,
+    width: Float,
+    height: Float,
+    lidTop: Float,
+): Path {
+    val rad = angleDeg * PI.toFloat() / 180f
+    val cos = kotlin.math.cos(rad)
+    val sin = kotlin.math.sin(rad)
+    fun point(dx: Float, dy: Float) = Offset(
+        center.x + dx * cos - dy * sin,
+        center.y + dx * sin + dy * cos,
+    )
+    return Path().apply {
+        val a = point(-width / 2f, -lidTop)
+        val b = point(width / 2f, -lidTop)
+        val c = point(width / 2f, height)
+        val d = point(-width / 2f, height)
+        moveTo(a.x, a.y); lineTo(b.x, b.y); lineTo(c.x, c.y); lineTo(d.x, d.y); close()
     }
-    drawPath(path, Color.White.copy(alpha = 0.07f))
 }
 
 private fun DrawScope.drawFaceContent(

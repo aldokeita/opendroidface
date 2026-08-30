@@ -16,6 +16,7 @@ import com.opendroid.ai.core.agent.AgentState
  * saat agent error akan terasa rusak.
  */
 enum class FaceExpression {
+    // ── Terhubung ke AgentState ──
     NEUTRAL,
     LISTENING,
     THINKING,
@@ -24,12 +25,28 @@ enum class FaceExpression {
     SPEAKING,
     SAD,
 
-    // Kosakata tambahan (Fase 4)
+    // ── Kosakata emosi (Fase 4) ──
+    // Nama-nama di bawah mengikuti daftar 18 emosi milik esp32-eyes
+    // (github.com/playfultechnology/esp32-eyes, FaceEmotions.hpp), ditambah
+    // beberapa yang kita butuhkan sendiri. Hanya nama dan bentuknya yang
+    // diambil sebagai rujukan — tidak ada kode dari sana yang dipakai.
     HAPPY,
-    CONFUSED,
-    SLEEPY,
-    SURPRISED,
+    GLEE,
     LOVE,
+    AWE,
+    SURPRISED,
+    SCARED,
+    WORRIED,
+    CONFUSED,
+    SKEPTIC,
+    SUSPICIOUS,
+    UNIMPRESSED,
+    ANNOYED,
+    ANGRY,
+    FURIOUS,
+    FRUSTRATED,
+    SQUINT,
+    SLEEPY,
 }
 
 fun AgentState.toExpression(): FaceExpression = when (this) {
@@ -75,10 +92,22 @@ fun FaceExpression.contentDescription(): String = when (this) {
     FaceExpression.SPEAKING -> "Assistant face: speaking"
     FaceExpression.SAD -> "Assistant face: something went wrong"
     FaceExpression.HAPPY -> "Assistant face: pleased"
-    FaceExpression.CONFUSED -> "Assistant face: unsure"
-    FaceExpression.SLEEPY -> "Assistant face: idle for a while"
+    FaceExpression.GLEE -> "Assistant face: delighted"
+    FaceExpression.LOVE -> "Assistant face: fond"
+    FaceExpression.AWE -> "Assistant face: impressed"
     FaceExpression.SURPRISED -> "Assistant face: surprised"
-    FaceExpression.LOVE -> "Assistant face: delighted"
+    FaceExpression.SCARED -> "Assistant face: alarmed"
+    FaceExpression.WORRIED -> "Assistant face: worried"
+    FaceExpression.CONFUSED -> "Assistant face: unsure"
+    FaceExpression.SKEPTIC -> "Assistant face: doubtful"
+    FaceExpression.SUSPICIOUS -> "Assistant face: suspicious"
+    FaceExpression.UNIMPRESSED -> "Assistant face: unimpressed"
+    FaceExpression.ANNOYED -> "Assistant face: annoyed"
+    FaceExpression.ANGRY -> "Assistant face: angry"
+    FaceExpression.FURIOUS -> "Assistant face: furious"
+    FaceExpression.FRUSTRATED -> "Assistant face: frustrated"
+    FaceExpression.SQUINT -> "Assistant face: peering"
+    FaceExpression.SLEEPY -> "Assistant face: idle for a while"
 }
 
 /**
@@ -238,6 +267,41 @@ fun FaceExpression.params(): FaceParams = when (this) {
         icon = FaceIcon.SPARKLE,
     )
 
+    FaceExpression.GLEE -> FaceParams(
+        eyeStyle = EyeStyle.ARC_UP,
+        eyeScale = 1.1f,
+        mouth = MouthShape.ROUND,
+        mouthOpen = 0.7f,
+        mouthCurve = 0.9f,
+        icon = FaceIcon.SPARKLE,
+    )
+
+    FaceExpression.AWE -> FaceParams(
+        eyeScale = 1.25f,
+        gazeY = -0.25f,
+        mouth = MouthShape.ROUND,
+        mouthOpen = 0.35f,
+        icon = FaceIcon.SPARKLE,
+    )
+
+    FaceExpression.SCARED -> FaceParams(
+        eyeScale = 1.35f,
+        eyeOpen = 1.1f,
+        mouth = MouthShape.WAVY,
+        headTilt = -3f,
+        gazeY = 0.15f,
+        icon = FaceIcon.ALERT,
+    )
+
+    FaceExpression.WORRIED -> FaceParams(
+        eyeScale = 1.05f,
+        eyeSquint = 0.2f,
+        gazeX = -0.35f,
+        gazeY = 0.2f,
+        mouth = MouthShape.WAVY,
+        headTilt = 3f,
+    )
+
     FaceExpression.CONFUSED -> FaceParams(
         eyeScale = 0.98f,
         gazeX = -0.5f,
@@ -245,6 +309,68 @@ fun FaceExpression.params(): FaceParams = when (this) {
         headTilt = 7f,
         mouth = MouthShape.WAVY,
         icon = FaceIcon.QUESTION,
+    )
+
+    FaceExpression.SKEPTIC -> FaceParams(
+        eyeScale = 0.95f,
+        eyeSquint = 0.35f,
+        gazeX = 0.35f,
+        mouth = MouthShape.LINE,
+        headTilt = 4f,
+        icon = FaceIcon.QUESTION,
+    )
+
+    FaceExpression.SUSPICIOUS -> FaceParams(
+        eyeScale = 0.9f,
+        eyeSquint = 0.55f,
+        gazeX = 0.6f,
+        mouth = MouthShape.LINE,
+    )
+
+    FaceExpression.UNIMPRESSED -> FaceParams(
+        eyeStyle = EyeStyle.LINE,
+        eyeOpen = 0.7f,
+        eyeSquint = 0.3f,
+        mouth = MouthShape.CURVE,
+        mouthCurve = -0.2f,
+    )
+
+    FaceExpression.ANNOYED -> FaceParams(
+        eyeScale = 0.92f,
+        eyeSquint = 0.45f,
+        mouth = MouthShape.CURVE,
+        mouthCurve = -0.3f,
+        gazeX = -0.25f,
+    )
+
+    FaceExpression.ANGRY -> FaceParams(
+        eyeScale = 0.95f,
+        eyeSquint = 0.4f,
+        mouth = MouthShape.CURVE,
+        mouthCurve = -0.6f,
+    )
+
+    FaceExpression.FURIOUS -> FaceParams(
+        eyeScale = 1.05f,
+        eyeSquint = 0.5f,
+        mouth = MouthShape.ROUND,
+        mouthOpen = 0.55f,
+        mouthCurve = -0.8f,
+        icon = FaceIcon.ALERT,
+    )
+
+    FaceExpression.FRUSTRATED -> FaceParams(
+        eyeStyle = EyeStyle.CROSS,
+        mouth = MouthShape.WAVY,
+        headTilt = -2f,
+        icon = FaceIcon.ALERT,
+    )
+
+    FaceExpression.SQUINT -> FaceParams(
+        eyeScale = 0.85f,
+        eyeSquint = 0.7f,
+        gazeX = 0.15f,
+        mouth = MouthShape.LINE,
     )
 
     // Mengantuk: garis mata mendatar. Kepala hampir tidak dimiringkan — kemiringan
