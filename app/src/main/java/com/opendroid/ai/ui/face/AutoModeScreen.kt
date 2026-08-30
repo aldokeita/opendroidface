@@ -63,6 +63,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -313,17 +316,17 @@ private fun TopControls(
     }
 }
 
+
 /**
  * The microphone indicator, in place of a button.
  *
- * Bars that rise with the voice, with a wave travelling through them so the
- * meter looks alive between syllables instead of freezing at a level. It shows
- * what a mic button showed — whether the microphone is open — without claiming
- * the bottom of the screen as a control, and it proves the microphone is
- * actually hearing something, which a static icon never did.
+ * A Siri-style spectrum: several translucent waves of different colours running
+ * across each other. Each layer has its own frequency, speed and hue, so where
+ * they overlap the colour builds up — that echo is what makes the shape read as
+ * a voice rather than as a meter.
  *
- * Idle it settles into a row of dots: still visible, no longer asking for
- * attention.
+ * The waves taper to nothing at both ends, so the band has no hard edges to
+ * fight the black screen, and idle they flatten to a single quiet line.
  */
 @Composable
 private fun VoiceMeter(
@@ -335,103 +338,70 @@ private fun VoiceMeter(
 ) {
     val level by animateFloatAsState(
         targetValue = if (isListening) amplitude else 0f,
-        animationSpec = tween(90),
+        animationSpec = tween(110),
         label = "meterLevel",
     )
     val active by animateFloatAsState(
         targetValue = if (isListening) 1f else 0f,
-        animationSpec = tween(280),
+        animationSpec = tween(320),
         label = "meterActive",
     )
-    val wave = rememberInfiniteTransition(label = "meterWave")
-    val phase by wave.animateFloat(
+    val motion = rememberInfiniteTransition(label = "spectrum")
+    // One slow clock. Layers derive their own speeds from it by multiplying, which
+    // keeps them from ever landing back in step and looking like a single wave.
+    val phase by motion.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
-        label = "meterPhase",
+        animationSpec = infiniteRepeatable(tween(3600, easing = LinearEasing)),
+        label = "spectrumPhase",
     )
 
-    val bars = if (compact) 7 else 13
-    // Peaks fall on their own, the way a hardware meter's hold marker does. Kept
-    // outside the draw lambda so the fall is continuous rather than restarting
-    // with every recomposition.
-    val peaks = remember(bars) { FloatArray(bars) }
+    // Layer = colour, frequency, speed, amplitude share. The colours run from the
+    // face colour through violet to magenta; the user's choice stays the anchor so
+    // the meter still belongs to the face.
+    val layers = listOf(
+        Triple(color, 1.0f, 1.0f),
+        Triple(lerp(color, Color(0xFF8B5CF6), 0.75f), 1.7f, -1.45f),
+        Triple(lerp(color, Color(0xFFFF2FB0), 0.8f), 2.6f, 1.9f),
+        Triple(lerp(color, Color.White, 0.55f), 3.4f, -2.6f),
+    ).let { if (compact) it.take(3) else it }
 
     Canvas(modifier) {
-        // Synthwave: square segments stacked into columns, a horizon line, and a
-        // reflection under it. No rounded caps anywhere - the hard edges are the
-        // whole look.
-        val horizonY = size.height * 0.74f
-        val columnH = horizonY
-        val gap = size.width / (bars * 3f)
-        val barW = (size.width - gap * (bars - 1)) / bars
-        val segH = max(2.dp.toPx(), columnH / 6f)
-        val segGap = segH * 0.45f
-        val step = segH + segGap
+        val midY = size.height / 2f
+        val steps = if (compact) 40 else 72
+        val stroke = Stroke(
+            width = if (compact) 1.6.dp.toPx() else 2.4.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        val reach = size.height * 0.42f * (0.06f + level * 0.94f) * (0.12f + active * 0.88f)
 
-        repeat(bars) { i ->
-            // Envelope: the middle of the row reacts most, so the shape reads as a
-            // voice rather than as a progress bar.
-            val fromCentre = kotlin.math.abs(i - (bars - 1) / 2f) / ((bars - 1) / 2f)
-            val envelope = 0.35f + 0.65f * (1f - fromCentre * fromCentre)
-            // Travelling wave: each bar lags the one before it.
-            val ripple = 0.55f + 0.45f * sin((phase - i * 0.09f) * 2f * PI.toFloat())
-            val reach = (level * envelope * ripple).coerceIn(0f, 1f)
-
-            val h = max(segH, columnH * (0.04f + reach * 0.96f) * (0.22f + active * 0.78f))
-            peaks[i] = max(peaks[i] * 0.93f, h)
-
-            val x = i * (barW + gap)
-            val lit = (h / step).toInt().coerceAtLeast(0)
-
-            // Glow: one faint wide copy of the column. A DrawScope cannot blur on
-            // every supported API level, and a second rectangle costs nothing.
-            drawRect(
-                color = color.copy(alpha = (0.05f + active * 0.10f) * (0.4f + reach)),
-                topLeft = Offset(x - barW * 0.4f, horizonY - h - segH),
-                size = Size(barW * 1.8f, h + segH * 2f),
-            )
-
-            repeat(lit + 1) { s ->
-                val segTop = horizonY - (s + 1) * step + segGap
-                if (segTop < horizonY - h - step) return@repeat
-                // Bottom of the column keeps the face colour, the top burns towards
-                // magenta - the gradient is what makes it read as synthwave rather
-                // than as a plain equaliser.
-                val t = ((s + 1) * step / columnH).coerceIn(0f, 1f)
-                val segColor = lerp(color, Color(0xFFFF2FB0), t)
-
-                drawRect(
-                    color = segColor.copy(alpha = 0.35f + active * 0.6f),
-                    topLeft = Offset(x, segTop),
-                    size = Size(barW, segH),
-                )
-                // Reflection below the horizon: shorter, dimmer, and it fades out
-                // with distance the way a wet-floor reflection does.
-                val mirrorTop = horizonY + (horizonY - segTop - segH) * 0.42f
-                if (mirrorTop < size.height) {
-                    drawRect(
-                        color = segColor.copy(alpha = (0.18f + active * 0.22f) * (1f - t * 0.7f)),
-                        topLeft = Offset(x, mirrorTop),
-                        size = Size(barW, segH * 0.6f),
-                    )
-                }
+        layers.forEachIndexed { index, (layerColor, frequency, speed) ->
+            val share = 1f - index * 0.16f
+            val path = Path()
+            for (i in 0..steps) {
+                val t = i / steps.toFloat()
+                val x = t * size.width
+                // Taper: a half sine across the width, squared so the ends die out
+                // rather than merely shrinking.
+                val taper = sin(t * PI.toFloat()).let { it * it }
+                val y = midY + sin(
+                    (t * frequency * 2f + phase * speed) * 2f * PI.toFloat()
+                ) * reach * share * taper
+                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
 
-            // Peak hold: a single bright segment riding the top of the column.
-            val peakTop = horizonY - peaks[i]
-            drawRect(
-                color = Color.White.copy(alpha = 0.25f + active * 0.5f),
-                topLeft = Offset(x, peakTop),
-                size = Size(barW, max(1f, segH * 0.35f)),
+            // A wider, fainter copy underneath reads as bloom. A DrawScope cannot
+            // blur on every supported API level, and a second stroke is free.
+            drawPath(
+                path = path,
+                color = layerColor.copy(alpha = (0.05f + active * 0.10f)),
+                style = Stroke(width = stroke.width * 3.5f, cap = StrokeCap.Round),
+            )
+            drawPath(
+                path = path,
+                color = layerColor.copy(alpha = (0.25f + active * 0.5f) * share),
+                style = stroke,
             )
         }
-
-        // The horizon itself.
-        drawRect(
-            color = color.copy(alpha = 0.25f + active * 0.35f),
-            topLeft = Offset(0f, horizonY),
-            size = Size(size.width, max(1f, size.height * 0.012f)),
-        )
     }
 }
