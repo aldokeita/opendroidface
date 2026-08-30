@@ -8,7 +8,12 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import java.util.Locale
 
-class SpeechRecognitionEngine(private val context: Context) {
+class SpeechRecognitionEngine(
+    private val context: Context,
+    // Optional so existing callers keep compiling and behave exactly as before; only
+    // callers that draw something from the microphone level need to pass one.
+    private val amplitude: VoiceAmplitude? = null,
+) {
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var recognizerIntent: Intent? = null
@@ -61,12 +66,23 @@ class SpeechRecognitionEngine(private val context: Context) {
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {}
             override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
+
+            override fun onRmsChanged(rmsdB: Float) {
+                if (sessionId != activeSessionId) return
+                amplitude?.publishRms(rmsdB)
+            }
+
             override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
+
+            override fun onEndOfSpeech() {
+                // The microphone is closed from here on; leaving the last level
+                // published would freeze the face mid-syllable.
+                amplitude?.reset()
+            }
 
             override fun onError(error: Int) {
                 if (sessionId != activeSessionId) return
+                amplitude?.reset()
                 val message = when (error) {
                     SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
                     SpeechRecognizer.ERROR_CLIENT -> "Client side error"
@@ -84,6 +100,7 @@ class SpeechRecognitionEngine(private val context: Context) {
 
             override fun onResults(results: Bundle?) {
                 if (sessionId != activeSessionId) return
+                amplitude?.reset()
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
                     onResult(matches[0])
@@ -118,6 +135,7 @@ class SpeechRecognitionEngine(private val context: Context) {
      */
     fun cancel() {
         activeSessionId += 1
+        amplitude?.reset()
         speechRecognizer?.cancel()
     }
 
@@ -126,6 +144,7 @@ class SpeechRecognitionEngine(private val context: Context) {
         // (e.g. deliver a result) after this engine - and the Composable that owns it - has
         // been disposed.
         activeSessionId += 1
+        amplitude?.reset()
         speechRecognizer?.destroy()
         speechRecognizer = null
     }

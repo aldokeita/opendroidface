@@ -64,6 +64,7 @@ import com.opendroid.ai.ui.face.AutoModeButton
 import com.opendroid.ai.ui.face.AutoModeHost
 import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.face.faceStateFor
+import com.opendroid.ai.ui.face.rememberVoiceAmplitude
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
@@ -166,7 +167,10 @@ fun ChatScreen(
         }
     }
 
-    val speechRecognizer = remember { SpeechRecognitionEngine(context) }
+    // Shared microphone level, so the face can react to the user's voice.
+    val voiceAmplitude = rememberVoiceAmplitude()
+    val amplitude by voiceAmplitude.level.collectAsState()
+    val speechRecognizer = remember { SpeechRecognitionEngine(context, voiceAmplitude) }
     
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -382,6 +386,7 @@ fun ChatScreen(
                 ) {
                     RobotFace(
                         state = faceStateFor(visibleAgentState, micOpen = isListening),
+                        amplitude = amplitude,
                         modifier = Modifier.fillMaxSize()
                     )
                     AutoModeButton(

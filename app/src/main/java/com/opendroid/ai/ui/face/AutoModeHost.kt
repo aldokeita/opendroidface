@@ -41,6 +41,7 @@ fun AutoModeHost(
 ) {
     val context = LocalContext.current
     val agentState by viewModel.visibleAgentState.collectAsState()
+    val amplitude by rememberVoiceAmplitude().level.collectAsState()
 
     var isListening by remember { mutableStateOf(false) }
     var transcript by remember { mutableStateOf("") }
@@ -124,6 +125,7 @@ fun AutoModeHost(
         AutoModeScreen(
             state = agentState,
             isListening = isListening,
+            amplitude = amplitude,
             transcript = transcript,
             errorMessage = voiceError,
             onToggleListening = {
