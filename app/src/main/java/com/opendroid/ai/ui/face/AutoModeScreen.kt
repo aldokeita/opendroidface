@@ -317,16 +317,17 @@ private fun TopControls(
 }
 
 
+
 /**
  * The microphone indicator, in place of a button.
  *
- * A Siri-style spectrum: several translucent waves of different colours running
- * across each other. Each layer has its own frequency, speed and hue, so where
- * they overlap the colour builds up — that echo is what makes the shape read as
- * a voice rather than as a meter.
+ * One line. It bends with the voice and lies flat when nothing is being said.
  *
- * The waves taper to nothing at both ends, so the band has no hard edges to
- * fight the black screen, and idle they flatten to a single quiet line.
+ * Everything else was tried here first — rounded bars, a segmented synthwave
+ * equaliser, four crossing colour waves — and each of them ended up competing
+ * with the face for attention, which is the one thing this screen cannot afford:
+ * the face IS the interface. A single stroke says the same thing (the microphone
+ * is open, it is hearing you) and then stops talking.
  */
 @Composable
 private fun VoiceMeter(
@@ -346,62 +347,43 @@ private fun VoiceMeter(
         animationSpec = tween(320),
         label = "meterActive",
     )
-    val motion = rememberInfiniteTransition(label = "spectrum")
-    // One slow clock. Layers derive their own speeds from it by multiplying, which
-    // keeps them from ever landing back in step and looking like a single wave.
+    val motion = rememberInfiniteTransition(label = "wave")
     val phase by motion.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(3600, easing = LinearEasing)),
-        label = "spectrumPhase",
+        animationSpec = infiniteRepeatable(tween(2600, easing = LinearEasing)),
+        label = "wavePhase",
     )
-
-    // Layer = colour, frequency, speed, amplitude share. The colours run from the
-    // face colour through violet to magenta; the user's choice stays the anchor so
-    // the meter still belongs to the face.
-    val layers = listOf(
-        Triple(color, 1.0f, 1.0f),
-        Triple(lerp(color, Color(0xFF8B5CF6), 0.75f), 1.7f, -1.45f),
-        Triple(lerp(color, Color(0xFFFF2FB0), 0.8f), 2.6f, 1.9f),
-        Triple(lerp(color, Color.White, 0.55f), 3.4f, -2.6f),
-    ).let { if (compact) it.take(3) else it }
 
     Canvas(modifier) {
         val midY = size.height / 2f
-        val steps = if (compact) 40 else 72
-        val stroke = Stroke(
-            width = if (compact) 1.6.dp.toPx() else 2.4.dp.toPx(),
-            cap = StrokeCap.Round,
-        )
-        val reach = size.height * 0.42f * (0.06f + level * 0.94f) * (0.12f + active * 0.88f)
+        val steps = if (compact) 44 else 80
+        val strokeWidth = if (compact) 1.4.dp.toPx() else 1.8.dp.toPx()
+        val reach = size.height * 0.44f * (0.02f + level * 0.98f) * (0.05f + active * 0.95f)
 
-        layers.forEachIndexed { index, (layerColor, frequency, speed) ->
-            val share = 1f - index * 0.16f
-            val path = Path()
-            for (i in 0..steps) {
-                val t = i / steps.toFloat()
-                val x = t * size.width
-                // Taper: a half sine across the width, squared so the ends die out
-                // rather than merely shrinking.
-                val taper = sin(t * PI.toFloat()).let { it * it }
-                val y = midY + sin(
-                    (t * frequency * 2f + phase * speed) * 2f * PI.toFloat()
-                ) * reach * share * taper
-                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        val path = Path()
+        for (i in 0..steps) {
+            val t = i / steps.toFloat()
+            val x = t * size.width
+            // Taper: a squared half-sine, so the line dies out at both ends instead
+            // of stopping at a hard edge.
+            val taper = sin(t * PI.toFloat()).let { it * it }
+            // Two components, one slow and wide, one quicker and shallower. A single
+            // sine reads as a test signal; two make it read as a voice.
+            val wave =
+                sin((t * 1.6f + phase) * 2f * PI.toFloat()) * 0.72f +
+                    sin((t * 3.1f - phase * 1.7f) * 2f * PI.toFloat()) * 0.28f
+            if (i == 0) {
+                path.moveTo(x, midY + wave * reach * taper)
+            } else {
+                path.lineTo(x, midY + wave * reach * taper)
             }
-
-            // A wider, fainter copy underneath reads as bloom. A DrawScope cannot
-            // blur on every supported API level, and a second stroke is free.
-            drawPath(
-                path = path,
-                color = layerColor.copy(alpha = (0.05f + active * 0.10f)),
-                style = Stroke(width = stroke.width * 3.5f, cap = StrokeCap.Round),
-            )
-            drawPath(
-                path = path,
-                color = layerColor.copy(alpha = (0.25f + active * 0.5f) * share),
-                style = stroke,
-            )
         }
+
+        drawPath(
+            path = path,
+            color = color.copy(alpha = 0.30f + active * 0.45f),
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
     }
 }
