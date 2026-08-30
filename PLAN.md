@@ -69,9 +69,13 @@ Gunakan warna dari `LocalOpenDroidColors.current` supaya ikut light/dark.
 Target: tombol **Auto** di Mode Chat membuka layar penuh berisi wajah + input suara saja.
 
 **File baru:**
-- `app/src/main/java/com/opendroid/ai/ui/face/AutoModeScreen.kt` — layar penuh:
-  `RobotFace` di tengah, label state satu baris di bawahnya, tombol tutup di pojok.
-  Tidak ada daftar pesan.
+- `app/src/main/java/com/opendroid/ai/ui/face/AutoModeScreen.kt` — layar penuh murni UI:
+  `RobotFace` di tengah, label state satu baris, transkrip, tombol mikrofon, tombol tutup.
+  Tanpa ketergantungan ke ViewModel supaya label statusnya bisa diuji.
+- `app/src/main/java/com/opendroid/ai/ui/face/AutoModeHost.kt` — perkabelan suara:
+  memegang state mendengar, meminta izin mikrofon, mengirim hasil final ke
+  `ChatViewModel.sendMessage`. Ditaruh di sini, bukan di `ChatScreen`, supaya file
+  upstream cukup tahu bahwa Mode Auto ada — bukan cara kerjanya.
 - `app/src/main/java/com/opendroid/ai/ui/face/AutoModeButton.kt` — tombol masuk mode Auto.
 
 **Sentuhan ke upstream:** tetap hanya `ui/screens/ChatScreen.kt` — menaruh `RobotFace`

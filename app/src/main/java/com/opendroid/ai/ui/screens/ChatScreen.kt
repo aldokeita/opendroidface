@@ -2,6 +2,7 @@ package com.opendroid.ai.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +61,8 @@ import com.opendroid.ai.data.models.effectiveGrantedActions
 import com.opendroid.ai.data.models.resolvedAutoMode
 import com.opendroid.ai.data.repository.ChatSession
 import com.opendroid.ai.ui.components.ContactPickerCard
+import com.opendroid.ai.ui.face.AutoModeButton
+import com.opendroid.ai.ui.face.AutoModeHost
 import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
@@ -103,6 +107,9 @@ fun ChatScreen(
     var renameText by remember { mutableStateOf("") }
     var editingMessageId by remember { mutableStateOf<String?>(null) }
     var textBeforeEdit by remember { mutableStateOf("") }
+    // Voice-only face mode. Kept in the composable rather than in ChatViewModel:
+    // it is a view concern and nothing outside this screen needs to know about it.
+    var autoModeActive by rememberSaveable { mutableStateOf(false) }
 
     // Merges a piece of dictated text into whatever the user already typed, so review/edit
     // never clobbers text entered before dictation started.
@@ -367,13 +374,32 @@ fun ChatScreen(
                     animationSpec = tween(300),
                     label = "faceHeight"
                 )
-                RobotFace(
-                    state = visibleAgentState,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(faceHeight)
                         .padding(top = 8.dp)
-                )
+                ) {
+                    RobotFace(
+                        state = visibleAgentState,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    AutoModeButton(
+                        onClick = {
+                            // Only one recognition session can be open at a time, so
+                            // hand the microphone over cleanly before Auto mode claims it.
+                            if (isListening) {
+                                speechRecognizer.cancel()
+                                isListening = false
+                                transcriptionText = ""
+                            }
+                            autoModeActive = true
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = 16.dp)
+                    )
+                }
 
                 // Messages List
                 LazyColumn(
@@ -619,6 +645,17 @@ fun ChatScreen(
                 }
             }
         }
+    }
+
+    // Auto mode covers the whole screen, including the top bar: the face is meant
+    // to be the only thing visible while the user is talking to it.
+    if (autoModeActive) {
+        AutoModeHost(
+            viewModel = viewModel,
+            recognizer = speechRecognizer,
+            onExit = { autoModeActive = false }
+        )
+        BackHandler { autoModeActive = false }
     }
 
     sessionPendingDelete?.let { session ->
