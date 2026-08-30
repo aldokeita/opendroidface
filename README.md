@@ -239,6 +239,7 @@ See [SECURITY.md](docs/SECURITY.md) for details.
 <a href="https://www.star-history.com/?repos=aldokeita%2Fopendroidface&type=date&legend=top-left">
   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left" />
 </a>
+
 ---
 
 ## 📜 License
