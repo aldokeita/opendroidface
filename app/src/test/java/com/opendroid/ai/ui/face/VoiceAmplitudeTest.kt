@@ -55,6 +55,20 @@ class VoiceAmplitudeTest {
     }
 
     @Test
+    fun `syllable pulses open and close the mouth`() {
+        // The local TTS path has no audio buffer, only word boundaries, so the mouth
+        // is driven by these two states alternating.
+        val a = amplitude()
+        repeat(6) { a.publishSyllablePulse(open = true) }
+        val open = a.level.value
+        repeat(6) { a.publishSyllablePulse(open = false) }
+        val closed = a.level.value
+
+        assertTrue("open=$open", open > 0.5f)
+        assertTrue("closed=$closed", closed < open / 2f)
+    }
+
+    @Test
     fun `reset silences immediately`() {
         val a = amplitude()
         repeat(20) { a.publishRms(10f) }

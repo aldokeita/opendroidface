@@ -12,6 +12,7 @@ import com.opendroid.ai.core.agent.AgentLoop
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
 import com.opendroid.ai.core.voice.TextToSpeechEngine
+import com.opendroid.ai.core.voice.VoiceAmplitude
 import com.opendroid.ai.core.voice.VoiceApprovalIntent
 import com.opendroid.ai.core.voice.VoiceApprovalParser
 import com.opendroid.ai.core.voice.WakeWordDetector
@@ -36,6 +37,9 @@ class OpenDroidService : Service() {
 
     @Inject
     lateinit var mcpServer: McpServer
+
+    @Inject
+    lateinit var voiceAmplitude: VoiceAmplitude
 
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var speechRecognitionEngine: SpeechRecognitionEngine
@@ -66,8 +70,11 @@ class OpenDroidService : Service() {
         
         // Initialize engines
         wakeWordDetector = WakeWordDetector(this)
-        speechRecognitionEngine = SpeechRecognitionEngine(this)
-        textToSpeechEngine = TextToSpeechEngine(this, settingsRepository)
+        speechRecognitionEngine = SpeechRecognitionEngine(this, voiceAmplitude)
+        // The robot face draws whatever voice is active, and speech spoken by the
+        // agent is produced here rather than by any screen - so this is the only
+        // place that can publish its level.
+        textToSpeechEngine = TextToSpeechEngine(this, settingsRepository, voiceAmplitude)
 
         // Bind Agent Loop TTS
         agentLoop.onSpeakCallback = { text ->
