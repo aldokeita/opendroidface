@@ -184,6 +184,26 @@ wajah "senang" saat `Error` akan terasa rusak.
 - **Wajah kustom** — muat animasi Lottie dari file eksternal supaya pengguna bisa ganti karakter
   (dikesampingkan oleh pemilik, 2026-08-31)
 
+## Perombakan UI (berjalan, ditetapkan pemilik 2026-08-31)
+
+Arah: setiap layar dibuat modern, bersih, minimalis — mengikuti layar Hands-free.
+Tipografi **hanya** tiga keluarga, perannya dikunci di `ui/theme/Type.kt`:
+Montserrat (display/wordmark), Poppins (judul), Plus Jakarta Sans (body, label,
+apa pun di bawah 15sp). Keluarga default juga disediakan sebagai ambient text
+style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamily`.
+
+- [x] **Chat** — wordmark diset wajar, status jadi titik 6dp + teks netral, chip mode
+      kehilangan garis tepi (hanya YOLO yang punya wadah), gelembung tanpa border,
+      Clear pindah ke menu chat, chat kosong membuka pada satu blok sapaan di tengah.
+      Sekalian: layar ini dulu memakai alias warna gelap statis (tema terang salah cat),
+      dan bar navigasi tersiram hijau karena `tonalElevation` menarik warna primary.
+- [ ] **Splash** — masih monospace + neon hijau; ini hal pertama yang dilihat orang
+- [ ] **Settings** — layar terpanjang, paling banyak menyimpan pola lama
+- [ ] Sisanya: Plan, Memory, Macros, Logs, Onboarding, Permissions
+
+Catatan: `README.md` masih membawa promosi token kripto milik pemilik upstream.
+Sunting dulu sebelum repo dijadikan publik.
+
 ## Risiko yang sudah diketahui
 
 | Risiko | Mitigasi |

@@ -1,0 +1,127 @@
+# Publishes an installable APK to GitHub Releases when a version tag is pushed.
+#
+# This exists so a release can be cut from a phone: push a tag, wait, download
+# the APK from the Releases page. Nothing here needs a laptop.
+#
+# It signs with the project's release keystore, held as repository secrets. That
+# matters more than it sounds: Android refuses to install an update whose
+# signature differs from the installed copy, and a debug build is signed with a
+# key the runner generates fresh each time. Every "update" would be an uninstall
+# and a reinstall, losing the app's data along with it.
+#
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   RELEASE_KEYSTORE_BASE64  the keystore file, base64-encoded
+#   RELEASE_STORE_PASSWORD   keystore password
+#   RELEASE_KEY_ALIAS        key alias inside the keystore
+#   RELEASE_KEY_PASSWORD     password for that key
+#
+# See SETUP.md section 9 for how to create the keystore and encode it.
+
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Lets a release be re-cut for an existing tag without moving the tag.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build and publish'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build signed APK and publish release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      # Fails here, with a readable message, rather than three minutes later
+      # inside Gradle with "Release signing is not configured".
+      - name: Check signing secrets are present
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$KEYSTORE" ] || missing="$missing RELEASE_KEYSTORE_BASE64"
+          [ -n "$STORE_PASSWORD" ] || missing="$missing RELEASE_STORE_PASSWORD"
+          [ -n "$KEY_ALIAS" ] || missing="$missing RELEASE_KEY_ALIAS"
+          [ -n "$KEY_PASSWORD" ] || missing="$missing RELEASE_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "Missing repository secrets:$missing"
+            echo "See SETUP.md section 9."
+            exit 1
+          fi
+
+      # Must match JavaVersion.VERSION_21 / jvmTarget '21' in app/build.gradle.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      # app/build.gradle expects the keystore at the project root under this
+      # exact name, and the credentials as ORG_GRADLE_PROJECT_* variables.
+      - name: Restore keystore
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE" | base64 -d > opendroid-release.keystore
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Build signed release APK
+        env:
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease --stacktrace
+
+      # The keystore is not needed past this point, and a leftover copy is one
+      # more thing that could end up in an artifact.
+      - name: Remove keystore
+        if: always()
+        run: rm -f opendroid-release.keystore
+
+      - name: Name the APK after the tag
+        id: apk
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          src=$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)
+          if [ -z "$src" ]; then
+            echo "No APK was produced."
+            exit 1
+          fi
+          out="opendroidface-${tag}.apk"
+          cp "$src" "$out"
+          echo "path=$out" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.apk.outputs.tag }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "${{ steps.apk.outputs.path }}" --clobber
+          else
+            gh release create "$tag" "${{ steps.apk.outputs.path }}" \
+              --title "$tag" \
+              --generate-notes
+          fi
