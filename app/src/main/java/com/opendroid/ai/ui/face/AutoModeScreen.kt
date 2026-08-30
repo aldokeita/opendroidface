@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +45,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Dock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -51,12 +53,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -75,6 +81,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.ui.theme.LocalOpenDroidColors
+import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.sin
@@ -114,6 +121,10 @@ fun AutoModeScreen(
     onCycleLanguage: (() -> Unit)? = null,
     faceColor: Color? = null,
     onCycleFaceColor: (() -> Unit)? = null,
+    /** Dock mode: no controls, screen kept awake, microphone re-arming itself. */
+    kiosk: Boolean = false,
+    onEnterKiosk: (() -> Unit)? = null,
+    onLeaveKiosk: (() -> Unit)? = null,
 ) {
     val colors = LocalOpenDroidColors.current
     val awaitingApproval = state is AgentState.PlanProposed
@@ -122,6 +133,34 @@ fun AutoModeScreen(
     if (showGallery) {
         FaceGallery(onClose = { showGallery = false }, modifier = modifier)
         return
+    }
+
+    // A docked phone is meant to be watched, not to fall asleep mid-sentence.
+    val view = LocalView.current
+    DisposableEffect(kiosk) {
+        view.keepScreenOn = kiosk
+        onDispose { view.keepScreenOn = false }
+    }
+
+    // Slow, wide travel across the panel so no pixel stays lit for hours. Only in
+    // the dock: it is the only mode a phone stays on this screen long enough to
+    // matter.
+    var driftX by remember { mutableFloatStateOf(0f) }
+    var driftY by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(kiosk) {
+        if (!kiosk) {
+            driftX = 0f
+            driftY = 0f
+            return@LaunchedEffect
+        }
+        var elapsed = 0L
+        while (true) {
+            val (x, y) = kioskDrift(elapsed)
+            driftX = x
+            driftY = y
+            delay(2_000)
+            elapsed += 2_000
+        }
     }
 
     BoxWithConstraints(
@@ -135,27 +174,36 @@ fun AutoModeScreen(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 enabled = !awaitingApproval,
-                onClick = onToggleListening,
-                onLongClick = { showGallery = true },
+                // In the dock the microphone runs itself, so a tap has nothing to
+                // toggle; a long press is the way out, since there are no controls
+                // left to aim at.
+                onClick = { if (!kiosk) onToggleListening() },
+                onLongClick = { if (kiosk) onLeaveKiosk?.invoke() else showGallery = true },
             )
     ) {
         val landscape = maxWidth > maxHeight
         // The face is bounded by BOTH sides. Sized from the width alone it grew
         // taller than a landscape screen and the eyes were cropped.
         val faceSize = minOf(maxWidth * 0.82f, maxHeight * (if (landscape) 0.5f else 0.86f))
-        TopControls(
-            languageLabel = languageLabel,
-            onCycleLanguage = onCycleLanguage,
-            faceColor = faceColor,
-            onCycleFaceColor = onCycleFaceColor,
-            onClose = onClose,
-            modifier = Modifier.align(Alignment.TopCenter),
-        )
+        // The dock shows the face and nothing else. Controls are what make a
+        // screen look like an app rather than an object on a shelf.
+        if (!kiosk) {
+            TopControls(
+                languageLabel = languageLabel,
+                onCycleLanguage = onCycleLanguage,
+                faceColor = faceColor,
+                onCycleFaceColor = onCycleFaceColor,
+                onClose = onClose,
+                onEnterKiosk = onEnterKiosk,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp),
+                .padding(horizontal = 28.dp)
+                .offset(x = maxWidth * driftX, y = maxHeight * driftY),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -276,6 +324,7 @@ private fun TopControls(
     faceColor: Color?,
     onCycleFaceColor: (() -> Unit)?,
     onClose: () -> Unit,
+    onEnterKiosk: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalOpenDroidColors.current
@@ -305,6 +354,15 @@ private fun TopControls(
                     .clickable(onClick = onCycleFaceColor)
             )
             Spacer(Modifier.width(14.dp))
+        }
+        if (onEnterKiosk != null) {
+            IconButton(onClick = onEnterKiosk) {
+                Icon(
+                    imageVector = Icons.Default.Dock,
+                    contentDescription = "Dock mode",
+                    tint = colors.textSecondary.copy(alpha = 0.7f),
+                )
+            }
         }
         IconButton(onClick = onClose) {
             Icon(

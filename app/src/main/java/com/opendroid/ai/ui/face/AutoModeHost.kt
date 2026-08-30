@@ -20,8 +20,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,6 +33,7 @@ import androidx.core.content.ContextCompat
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun AutoModeHost(
@@ -54,6 +57,11 @@ fun AutoModeHost(
     // agent has actually produced something. Restarting on every Idle would put
     // the microphone in a loop with its own recognition errors.
     var awaitingAnswer by remember { mutableStateOf(false) }
+    // Dock mode. rememberSaveable so a rotation on a stand does not drop out of it.
+    var kiosk by rememberSaveable { mutableStateOf(false) }
+    // Silent listens in a row, counted so a dock with a refused microphone stops
+    // re-arming instead of draining the battery overnight.
+    var silences by remember { mutableIntStateOf(0) }
 
     fun startListening() {
         if (isListening) return
@@ -64,6 +72,7 @@ fun AutoModeHost(
             onResult = { text ->
                 isListening = false
                 transcript = ""
+                silences = 0
                 if (text.isNotBlank()) {
                     awaitingAnswer = true
                     viewModel.sendMessage(text, context)
@@ -82,6 +91,7 @@ fun AutoModeHost(
                 isListening = false
                 transcript = ""
                 voiceError = null
+                silences += 1
             },
         )
     }
@@ -106,6 +116,16 @@ fun AutoModeHost(
     // Entering Auto mode opens the microphone straight away: the whole point of
     // the mode is that the user does not have to press anything first.
     LaunchedEffect(Unit) { requestListening() }
+
+    // Dock mode listens on its own: there is no one holding the phone to tap it.
+    // Only while the agent is idle, so it never records the assistant's own voice,
+    // and it gives up after enough silence to survive a night on a stand.
+    LaunchedEffect(kiosk, agentState, isListening, silences) {
+        if (shouldReopenMic(kiosk, agentState, isListening, silences)) {
+            delay(KIOSK_RETRY_DELAY_MILLIS)
+            requestListening()
+        }
+    }
 
     // Hands-free turn taking. The mic reopens only once the agent has gone quiet
     // after answering, so it never records the assistant's own speech.
@@ -166,6 +186,12 @@ fun AutoModeHost(
             },
             faceColor = faceColorFor(faceColorId).color,
             onCycleFaceColor = { faceColorStore.select(nextFaceColor(faceColorId)) },
+            kiosk = kiosk,
+            onEnterKiosk = {
+                silences = 0
+                kiosk = true
+            },
+            onLeaveKiosk = { kiosk = false },
             modifier = modifier,
         )
     }

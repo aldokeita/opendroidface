@@ -164,7 +164,10 @@ wajah "senang" saat `Error` akan terasa rusak.
 
 ## Backlog (setelah Fase 4)
 
-- **Mode kiosk/dock** — layar penuh berisi wajah saja, wake word aktif, cocok saat HP ditaruh di dudukan meja
+- ~~**Mode kiosk/dock**~~ — selesai. Tombol dok di layar Hands-free: kontrol disembunyikan,
+  layar dijaga tetap menyala, mikrofon menyalakan dirinya sendiri saat agent menganggur
+  (berhenti setelah 30 kali sunyi beruntun), dan seluruh wajah bergeser sangat lambat
+  untuk mencegah burn-in OLED. Keluar dengan tekan-lama. Lihat `ui/face/KioskMode.kt`.
 - **Desktop bridge terdokumentasi** — tulis `docs/desktop-mcp.md`: `adb forward tcp:8765 tcp:8765`,
   contoh konfigurasi MCP client, daftar tool yang diekspos `McpServer.tools()`
 - **MCP lewat jaringan** — ganti `LOOPBACK` → `0.0.0.0` **hanya setelah** ada token auth + pairing
