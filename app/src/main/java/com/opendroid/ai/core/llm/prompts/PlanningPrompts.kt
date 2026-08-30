@@ -85,8 +85,15 @@ PLAN JSON format:
       "canParallelize": false,
       "fallback": "Alternative action if this step fails"
     }
-  ]
-}"""
+  ],
+  "emotion": "neutral"
+}
+
+"emotion" is OPTIONAL and drives the assistant's on-screen face. Include it when
+the plan carries an obvious feeling; leave it out entirely when it does not.
+One of: neutral, happy, glee, curious, confused, worried, apologetic, surprised.
+Never let it change the plan itself - an omitted or unknown value is discarded,
+never an error."""
     }
 
     // Keep backward-compatible constant that delegates to the dynamic builder

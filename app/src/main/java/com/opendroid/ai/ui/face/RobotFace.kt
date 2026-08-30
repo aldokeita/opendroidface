@@ -43,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -114,7 +115,29 @@ fun RobotFace(
     }
     val emotion = declared ?: (state as? AgentState.Speaking)?.let { inferEmotionFromReply(it.text) }
 
-    val expression = expressionOverride ?: faceExpressionFor(state, emotion)
+    val stateExpression = expressionOverride ?: faceExpressionFor(state, emotion)
+
+    // Idle life. A face holding one expression perfectly still reads as a picture
+    // of a face, so while nothing is happening it glances around, tilts, and now
+    // and then wears a brief expression. It runs ONLY when the agent is resting
+    // and has no mood to show — anything the agent is actually doing outranks it.
+    val alive = expressionOverride == null && stateExpression == FaceExpression.NEUTRAL
+    var beat by remember { mutableStateOf(IdleBeat.RESTING) }
+    LaunchedEffect(alive) {
+        if (!alive) {
+            beat = IdleBeat.RESTING
+            return@LaunchedEffect
+        }
+        val random = Random.Default
+        var idleFor = 0L
+        while (true) {
+            delay(beat.holdMillis)
+            idleFor += beat.holdMillis
+            beat = nextIdleBeat(random, idleFor, beat)
+        }
+    }
+
+    val expression = if (alive) beat.expression ?: stateExpression else stateExpression
     val target = expression.params()
 
     val storedColorId by rememberFaceColorStore().colorId.collectAsState()
@@ -132,9 +155,24 @@ fun RobotFace(
     val eyeScale by animateFloatAsState(target.eyeScale, tween(TRANSITION_MS), label = "eyeScale")
     val lidAngle by animateFloatAsState(target.lidAngle, tween(TRANSITION_MS), label = "lidAngle")
     val mouthCurve by animateFloatAsState(target.mouthCurve, tween(TRANSITION_MS), label = "mouthCurve")
-    val headTilt by animateFloatAsState(target.headTilt, tween(TRANSITION_MS), label = "headTilt")
-    val gazeX by animateFloatAsState(target.gazeX, tween(TRANSITION_MS), label = "gazeX")
-    val gazeY by animateFloatAsState(target.gazeY, tween(TRANSITION_MS), label = "gazeY")
+    val headTilt by animateFloatAsState(
+        target.headTilt + beat.tilt, tween(TRANSITION_MS), label = "headTilt"
+    )
+    // The idle glance is added to the expression's own gaze, not substituted for
+    // it: a thinking face looks up and away, and an idle beat must never argue
+    // with that. Clamped because both are authored against the same -1..1 range.
+    val gazeX by animateFloatAsState(
+        (target.gazeX + beat.gazeX).coerceIn(-1f, 1f),
+        // Saccades are fast. Easing a glance over a third of a second reads as a
+        // camera pan, not as an eye.
+        tween(if (beat.gazeX != 0f) 180 else TRANSITION_MS),
+        label = "gazeX",
+    )
+    val gazeY by animateFloatAsState(
+        (target.gazeY + beat.gazeY).coerceIn(-1f, 1f),
+        tween(if (beat.gazeY != 0f) 180 else TRANSITION_MS),
+        label = "gazeY",
+    )
 
     // Mouth: follows amplitude while speaking/listening, otherwise the static target.
     val liveMouth = when {
