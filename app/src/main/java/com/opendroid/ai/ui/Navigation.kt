@@ -308,44 +308,52 @@ fun MainDashboard(
         Screen.Settings
     )
 
+    val colors = LocalOpenDroidColors.current
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = DarkSurface,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                tonalElevation = 8.dp
-            ) {
-                tabs.forEach { tab ->
-                    val isSelected = currentTab == tab
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = { currentTab = tab },
-                        icon = {
-                            Icon(
-                                imageVector = tab.icon,
-                                contentDescription = tab.title,
-                                tint = if (isSelected) AccentNeonGreen else TextSecondary
+            Column {
+                // A hairline instead of a rounded, outlined, floating slab. The bar
+                // is part of the screen, not a card sitting on top of it.
+                HorizontalDivider(color = colors.borderColor.copy(alpha = 0.4f))
+                NavigationBar(
+                    containerColor = colors.background,
+                    modifier = Modifier.fillMaxWidth(),
+                    // Material tints an elevated surface with the primary colour,
+                    // and this app's primary is neon green - which is why the bar
+                    // was washed green regardless of the container colour asked for.
+                    tonalElevation = 0.dp
+                ) {
+                    tabs.forEach { tab ->
+                        val isSelected = currentTab == tab
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = { currentTab = tab },
+                            icon = {
+                                Icon(
+                                    imageVector = tab.icon,
+                                    contentDescription = tab.title,
+                                    modifier = Modifier.size(21.dp),
+                                    tint = if (isSelected) colors.accentNeonGreen else colors.textSecondary
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = tab.title,
+                                    fontSize = 10.sp,
+                                    color = if (isSelected) colors.accentNeonGreen else colors.textSecondary,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = colors.accentNeonGreen.copy(alpha = 0.10f)
                             )
-                        },
-                        label = {
-                            Text(
-                                text = tab.title,
-                                fontSize = 10.sp,
-                                color = if (isSelected) AccentNeonGreen else TextSecondary,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = AccentNeonGreen.copy(alpha = 0.15f)
                         )
-                    )
+                    }
                 }
             }
         },
-        containerColor = DarkBackground
+        containerColor = colors.background
     ) { paddingValues ->
         Box(
             modifier = Modifier

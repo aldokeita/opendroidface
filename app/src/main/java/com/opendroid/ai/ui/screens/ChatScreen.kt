@@ -28,7 +28,7 @@ import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,6 +61,8 @@ import com.opendroid.ai.data.models.effectiveGrantedActions
 import com.opendroid.ai.data.models.resolvedAutoMode
 import com.opendroid.ai.data.repository.ChatSession
 import com.opendroid.ai.ui.components.ContactPickerCard
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.opendroid.ai.ui.bridge.DesktopBridgeScreen
@@ -87,6 +89,9 @@ fun ChatScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // The palette rather than the top-level dark aliases: this screen used the
+    // static dark values, which painted a dark-theme chat on a light background.
+    val colors = LocalOpenDroidColors.current
     val history by viewModel.conversationHistory.collectAsState()
     // Scoped to whichever chat is on screen right now - a task that's actually running
     // in a DIFFERENT chat (safe since the pinned-session fix: it keeps writing there,
@@ -220,13 +225,16 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Column {
+                        // The wordmark, set rather than shouted: neon monospace at
+                        // 2sp tracking read as a terminal banner, which is the one
+                        // thing a minimal chat screen should not open with.
                         Text(
-                            text = "OPENDROID",
-                            fontFamily = FontFamily.Monospace,
+                            text = "OpenDroid",
+                            fontFamily = Montserrat,
                             fontWeight = FontWeight.Bold,
-                            color = AccentNeonGreen,
-                            fontSize = 20.sp,
-                            letterSpacing = 2.sp
+                            color = colors.textPrimary,
+                            fontSize = 19.sp,
+                            letterSpacing = (-0.3).sp
                         )
                         AgentStatusSubtitle(visibleAgentState, runningElsewhere)
                     }
@@ -234,40 +242,44 @@ fun ChatScreen(
                 actions = {
                     val autoMode = llmConfig.resolvedAutoMode()
                     val chipColor = when (autoMode) {
-                        AutoMode.OFF -> TextSecondary
-                        AutoMode.AUTO -> AccentNeonGreen
-                        AutoMode.YOLO -> AccentRed
+                        AutoMode.OFF -> colors.textSecondary
+                        AutoMode.AUTO -> colors.accentNeonGreen
+                        AutoMode.YOLO -> colors.accentRed
                     }
-                    OutlinedButton(
-                        onClick = { viewModel.cycleAutoMode() },
-                        border = BorderStroke(1.dp, chipColor.copy(alpha = 0.6f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = chipColor),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-                        modifier = Modifier.height(28.dp)
-                    ) {
-                        Text(
-                            text = when (autoMode) {
-                                AutoMode.OFF -> "MANUAL"
-                                AutoMode.AUTO -> "AUTO"
-                                AutoMode.YOLO -> "YOLO"
-                            },
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    // A tinted label, not an outlined button. The approval mode is
+                    // a state to glance at; only YOLO earns a visible container,
+                    // because that one changes what a tap can do to the phone.
+                    Text(
+                        text = when (autoMode) {
+                            AutoMode.OFF -> "MANUAL"
+                            AutoMode.AUTO -> "AUTO"
+                            AutoMode.YOLO -> "YOLO"
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp,
+                        color = chipColor,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (autoMode == AutoMode.YOLO) chipColor.copy(alpha = 0.14f)
+                                else Color.Transparent
+                            )
+                            .clickable { viewModel.cycleAutoMode() }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
                     IconButton(onClick = { showDesktopBridge = true }) {
                         Icon(
                             imageVector = Icons.Default.Computer,
                             contentDescription = "Desktop bridge",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                     IconButton(onClick = { viewModel.newChat() }) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "New chat",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                     Box {
@@ -275,13 +287,13 @@ fun ChatScreen(
                             Icon(
                                 imageVector = Icons.Default.Forum,
                                 contentDescription = "Chats",
-                                tint = TextSecondary
+                                tint = colors.textSecondary
                             )
                         }
                         DropdownMenu(
                             expanded = showChatMenu,
                             onDismissRequest = { showChatMenu = false },
-                            modifier = Modifier.background(DarkSurface)
+                            modifier = Modifier.background(colors.surface)
                         ) {
                             if (sessions.isEmpty()) {
                                 DropdownMenuItem(
@@ -365,16 +377,33 @@ fun ChatScreen(
                                     }
                                 )
                             }
+                            // Clearing the conversation lived in the top bar as a
+                            // fifth control competing with four others. It belongs
+                            // with the rest of the chat management, one tap deeper.
+                            HorizontalDivider(color = colors.borderColor.copy(alpha = 0.5f))
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Clear this conversation",
+                                        color = colors.accentRed,
+                                        fontSize = 13.sp,
+                                    )
+                                },
+                                onClick = {
+                                    showChatMenu = false
+                                    viewModel.clearChat()
+                                }
+                            )
                         }
                     }
-                    TextButton(onClick = { viewModel.clearChat() }) {
-                        Text("Clear", color = TextSecondary, fontSize = 12.sp)
-                    }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colors.background,
+                    titleContentColor = colors.textPrimary,
+                )
             )
         },
-        containerColor = DarkBackground,
+        containerColor = colors.background,
         modifier = modifier
     ) { padding ->
         Box(
@@ -389,39 +418,39 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(bottom = 80.dp)
             ) {
-                // Robot face header. It shrinks once the conversation starts so the
-                // messages keep the screen; on an empty chat it is the whole greeting.
-                val faceHeight by animateDpAsState(
-                    targetValue = if (history.isEmpty()) 200.dp else 96.dp,
-                    animationSpec = tween(300),
-                    label = "faceHeight"
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(faceHeight)
-                        .padding(top = 8.dp)
-                ) {
-                    RobotFace(
-                        state = faceStateFor(visibleAgentState, micOpen = isListening),
-                        amplitude = amplitude,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    AutoModeButton(
-                        onClick = {
-                            // Only one recognition session can be open at a time, so
-                            // hand the microphone over cleanly before Auto mode claims it.
-                            if (isListening) {
-                                speechRecognizer.cancel()
-                                isListening = false
-                                transcriptionText = ""
-                            }
-                            autoModeActive = true
-                        },
+                // Only one recognition session can be open at a time, so the
+                // microphone is handed over cleanly before Auto mode claims it.
+                val enterHandsFree = {
+                    if (isListening) {
+                        speechRecognizer.cancel()
+                        isListening = false
+                        transcriptionText = ""
+                    }
+                    autoModeActive = true
+                }
+
+                // Once a conversation exists the face becomes a small header and
+                // the messages get the screen. An empty chat has no header at all:
+                // the greeting below fills it instead, so the screen opens on one
+                // centred thing rather than on a band of face above a void.
+                if (history.isNotEmpty()) {
+                    // A header ROW, not a band with a face floating in the middle
+                    // of it: at this size the face is an avatar, and an avatar
+                    // belongs at the edge next to the control it shares a line with.
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(end = 16.dp)
-                    )
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RobotFace(
+                            state = faceStateFor(visibleAgentState, micOpen = isListening),
+                            amplitude = amplitude,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        AutoModeButton(onClick = enterHandsFree)
+                    }
                 }
 
                 // Messages List
@@ -431,9 +460,20 @@ fun ChatScreen(
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)
                 ) {
+                    if (history.isEmpty()) {
+                        item {
+                            EmptyChatHero(
+                                state = faceStateFor(visibleAgentState, micOpen = isListening),
+                                amplitude = amplitude,
+                                onHandsFree = enterHandsFree,
+                                modifier = Modifier.fillParentMaxHeight(0.92f)
+                            )
+                        }
+                    }
+
                     items(history) { msg ->
                         ChatBubble(
                             message = msg,
@@ -508,14 +548,16 @@ fun ChatScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    // A scrim rather than a hard edge: messages fade out under the
+                    // composer instead of being cut off by a band of background.
                     .background(
                         brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, DarkBackground),
+                            colors = listOf(Color.Transparent, colors.background),
                             startY = 0f,
-                            endY = 50f
+                            endY = 90f
                         )
                     )
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     if (editingMessageId != null) {
@@ -611,11 +653,10 @@ fun ChatScreen(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .heightIn(min = 56.dp, max = 120.dp)
-                                .clip(RoundedCornerShape(28.dp))
-                                .background(CardBackground)
-                                .border(1.dp, BorderColor, RoundedCornerShape(28.dp))
-                                .padding(horizontal = 16.dp),
+                                .heightIn(min = 52.dp, max = 120.dp)
+                                .clip(RoundedCornerShape(26.dp))
+                                .background(colors.cardBackground)
+                                .padding(horizontal = 14.dp),
                             contentAlignment = Alignment.CenterStart
                         ) {
                             if (isListening) {
@@ -630,15 +671,23 @@ fun ChatScreen(
                                 TextField(
                                     value = inputQuery,
                                     onValueChange = { inputQuery = it; voiceError = null },
-                                    placeholder = { Text("Ask OpenDroid to run an autonomous task...", color = TextSecondary, fontSize = 14.sp) },
+                                    placeholder = {
+                                        Text(
+                                            "Message OpenDroid",
+                                            color = colors.textSecondary,
+                                            fontSize = 15.sp,
+                                        )
+                                    },
+                                    textStyle = LocalTextStyle.current.copy(fontSize = 15.sp),
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
                                         unfocusedContainerColor = Color.Transparent,
                                         disabledContainerColor = Color.Transparent,
                                         focusedIndicatorColor = Color.Transparent,
                                         unfocusedIndicatorColor = Color.Transparent,
-                                        focusedTextColor = TextPrimary,
-                                        unfocusedTextColor = TextPrimary
+                                        focusedTextColor = colors.textPrimary,
+                                        unfocusedTextColor = colors.textPrimary,
+                                        cursorColor = colors.accentNeonGreen,
                                     ),
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -653,14 +702,15 @@ fun ChatScreen(
                             IconButton(
                                 onClick = { submitInput() },
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .size(52.dp)
                                     .clip(CircleShape)
-                                    .background(AccentNeonGreen)
+                                    .background(colors.accentGreenButton)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Send,
+                                    imageVector = Icons.AutoMirrored.Filled.Send,
                                     contentDescription = "Send",
-                                    tint = DarkBackground
+                                    tint = colors.background,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -756,6 +806,59 @@ fun ChatScreen(
     }
 }
 
+/**
+ * What an empty chat opens on: the face, a greeting, and the one control worth
+ * offering before anything has been said.
+ *
+ * It fills the message list rather than sitting above it, so the whole thing is
+ * optically centred instead of stacked under the top bar with the rest of the
+ * screen left blank.
+ */
+@Composable
+private fun EmptyChatHero(
+    state: AgentState,
+    amplitude: Float,
+    onHandsFree: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalOpenDroidColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        RobotFace(
+            state = state,
+            amplitude = amplitude,
+            // The face draws inside the middle of whatever box it is given, so a
+            // 200dp box put a hand's width of nothing between the eyes and the
+            // greeting they belong to.
+            modifier = Modifier.size(150.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Hi, I'm OpenDroid",
+            fontFamily = Montserrat,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 23.sp,
+            letterSpacing = (-0.3).sp,
+            color = colors.textPrimary,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Ask me to run something on this phone, or just talk.",
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            color = colors.textSecondary,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(28.dp))
+        AutoModeButton(onClick = onHandsFree)
+    }
+}
+
 @Composable
 fun AgentStatusSubtitle(state: AgentState, runningElsewhere: Boolean = false) {
     // runningElsewhere means [state] has already been forced to Idle because the real
@@ -776,26 +879,40 @@ fun AgentStatusSubtitle(state: AgentState, runningElsewhere: Boolean = false) {
         }
     }
 
+    val colors = LocalOpenDroidColors.current
     val color = if (runningElsewhere) {
-        AccentPurple
+        colors.accentPurple
     } else {
         when (state) {
-            is AgentState.Idle -> AccentNeonGreen
-            is AgentState.Listening -> AccentRed
-            is AgentState.Thinking -> AccentPurple
-            is AgentState.PlanProposed -> AccentCyan
-            is AgentState.ExecutingPlan -> AccentNeonGreen
-            is AgentState.Speaking -> AccentCyan
-            is AgentState.Error -> AccentRed
+            is AgentState.Idle -> colors.accentNeonGreen
+            is AgentState.Listening -> colors.accentRed
+            is AgentState.Thinking -> colors.accentPurple
+            is AgentState.PlanProposed -> colors.accentCyan
+            is AgentState.ExecutingPlan -> colors.accentNeonGreen
+            is AgentState.Speaking -> colors.accentCyan
+            is AgentState.Error -> colors.accentRed
         }
     }
 
-    Text(
-        text = text,
-        fontSize = 11.sp,
-        color = color,
-        fontFamily = FontFamily.SansSerif
-    )
+    // The colour moves to a 6dp dot and the words stay neutral. A whole line of
+    // neon green under the wordmark was the loudest thing on the screen, and it
+    // said "idle".
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            color = colors.textSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 @Composable
@@ -805,11 +922,21 @@ fun ChatBubble(
     context: android.content.Context? = null,
     onEditRequested: ((ChatMessage) -> Unit)? = null
 ) {
+    val colors = LocalOpenDroidColors.current
     val isAgent = message.sender == ChatMessage.Sender.AGENT
     val alignment = if (isAgent) Alignment.Start else Alignment.End
-    val bubbleColor = if (isAgent) CardBackground else AccentPurple.copy(alpha = 0.25f)
-    val textColor = TextPrimary
+    // Two flat fills and no outlines. Every bubble used to carry a 1dp border, so
+    // a screen of six messages drew twelve competing rectangles; the fill alone
+    // separates them, and the purple tint is enough to say who is speaking.
+    val bubbleColor = if (isAgent) colors.cardBackground else colors.accentPurple.copy(alpha = 0.18f)
+    val textColor = colors.textPrimary
     val timeFormat = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
+    val bubbleShape = RoundedCornerShape(
+        topStart = 20.dp,
+        topEnd = 20.dp,
+        bottomStart = if (isAgent) 6.dp else 20.dp,
+        bottomEnd = if (isAgent) 20.dp else 6.dp,
+    )
 
     // If this is a contact picker message, render the ContactPickerCard instead
     if (isAgent && message.contactPickerData != null) {
@@ -848,27 +975,10 @@ fun ChatBubble(
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 290.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = if (isAgent) 4.dp else 16.dp,
-                            bottomEnd = if (isAgent) 16.dp else 4.dp
-                        )
-                    )
+                    .widthIn(max = 300.dp)
+                    .clip(bubbleShape)
                     .background(bubbleColor)
-                    .border(
-                        1.dp,
-                        if (isAgent) BorderColor else AccentPurple.copy(alpha = 0.5f),
-                        RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 16.dp,
-                            bottomStart = if (isAgent) 4.dp else 16.dp,
-                            bottomEnd = if (isAgent) 16.dp else 4.dp
-                        )
-                    )
-                    .padding(14.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 if (isAgent && message.modelBadge != null) {
                     val displayName = when (message.modelBadge) {
@@ -879,22 +989,22 @@ fun ChatBubble(
                     }
                     Text(
                         text = displayName,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AccentCyan,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 1.sp,
+                        color = colors.accentCyan.copy(alpha = 0.85f),
+                        modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
 
                 Text(
                     text = message.text,
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     color = textColor,
-                    lineHeight = 20.sp
+                    lineHeight = 23.sp
                 )
-                
-                Spacer(modifier = Modifier.height(4.dp))
+
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
                     modifier = Modifier.align(Alignment.End),
@@ -908,7 +1018,7 @@ fun ChatBubble(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit message",
-                            tint = TextSecondary,
+                            tint = colors.textSecondary.copy(alpha = 0.7f),
                             modifier = Modifier
                                 .size(13.dp)
                                 .clickable { onEditRequested(message) }
@@ -916,8 +1026,8 @@ fun ChatBubble(
                     }
                     Text(
                         text = timeFormat.format(Date(message.timestamp)),
-                        fontSize = 9.sp,
-                        color = TextSecondary
+                        fontSize = 10.sp,
+                        color = colors.textSecondary.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -927,16 +1037,8 @@ fun ChatBubble(
 
 @Composable
 fun ThinkingBubble() {
+    val colors = LocalOpenDroidColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "thinking")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
 
     Row(
         modifier = Modifier
@@ -944,18 +1046,32 @@ fun ThinkingBubble() {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.Start
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 16.dp))
-                .background(CardBackground)
-                .border(1.dp, BorderColor, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 16.dp))
-                .padding(14.dp)
-                .graphicsLayer(alpha = alpha)
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 6.dp, bottomEnd = 20.dp))
+                .background(colors.cardBackground)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(AccentNeonGreen))
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(AccentNeonGreen))
-                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(AccentNeonGreen))
+            // Three dots that rise in sequence, instead of one block fading in and
+            // out as a unit. A whole bubble pulsing reads as a rendering fault; a
+            // travelling wave reads as waiting.
+            repeat(3) { index ->
+                val alpha by infiniteTransition.animateFloat(
+                    initialValue = 0.25f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(600, delayMillis = index * 180, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "dot$index"
+                )
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(colors.textSecondary.copy(alpha = alpha))
+                )
             }
         }
     }

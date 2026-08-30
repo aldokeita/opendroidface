@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -87,7 +88,15 @@ fun OpenDroidTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,
-            content = content
-        )
+        ) {
+            // Most screens call Text with a size and a colour but no family, which
+            // would leave them on the platform sans-serif no matter what the type
+            // scale says. Providing the family as the ambient text style covers
+            // them all: an explicit fontSize still wins, the family comes from here.
+            CompositionLocalProvider(
+                LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = PlusJakartaSans),
+                content = content,
+            )
+        }
     }
 }
