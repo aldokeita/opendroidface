@@ -11,8 +11,8 @@ Dua mode, satu aplikasi:
 
 1. **Mode Chat (default saat aplikasi dibuka)** — UI modern minimalis: ruang kosong lega,
    satu warna aksen, tanpa ornamen. Riwayat chat + input teks + tombol mikrofon,
-   ditambah satu tombol **Auto** yang menonjol.
-2. **Mode Auto** — layar penuh berisi wajah robot saja. Pengguna hanya bicara; tidak ada
+   ditambah satu tombol **Hands-free** yang menonjol.
+2. **Mode Auto (label di layar: "Hands-free")** — layar penuh berisi wajah robot saja. Pengguna hanya bicara; tidak ada
    input teks, tidak ada gelembung chat. Wajah adalah satu-satunya umpan balik:
    mendengar → berpikir → mengeksekusi → bicara. Keluar lewat satu tombol tutup.
 
@@ -66,7 +66,12 @@ Gunakan warna dari `LocalOpenDroidColors.current` supaya ikut light/dark.
 
 ## Fase 1b — Mode Auto & pembersihan UI (1–2 hari)
 
-Target: tombol **Auto** di Mode Chat membuka layar penuh berisi wajah + input suara saja.
+Target: tombol **Hands-free** di Mode Chat membuka layar penuh berisi wajah + input suara saja.
+
+Catatan nama: di kode mode ini bernama *Auto* (`AutoModeScreen`, `AutoModeHost`), tapi
+labelnya di layar **"Hands-free"** — upstream sudah punya chip `Auto` yang artinya
+persetujuan rencana otomatis, dan dua kontrol bernama "Auto" akan terbaca sebagai
+setelan yang sama.
 
 **File baru:**
 - `app/src/main/java/com/opendroid/ai/ui/face/AutoModeScreen.kt` — layar penuh murni UI:
@@ -86,7 +91,7 @@ bukan di `ChatViewModel`, supaya `ChatViewModel` tidak tersentuh.
 Mode Auto memakai jalur suara yang sudah ada (`SpeechRecognitionEngine` yang sama
 dengan tombol mikrofon Mode Chat) — tidak ada mesin suara baru.
 
-**Selesai kalau:** tekan Auto → layar wajah penuh; bicara → wajah bereaksi dan agent
+**Selesai kalau:** tekan Hands-free → layar wajah penuh; bicara → wajah bereaksi dan agent
 menjawab dengan suara; tekan tutup → kembali ke chat dengan riwayat utuh.
 
 ---

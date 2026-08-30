@@ -97,7 +97,7 @@ fun AutoModeScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Leave Auto mode",
+                contentDescription = "Leave hands-free mode",
                 tint = colors.textSecondary
             )
         }

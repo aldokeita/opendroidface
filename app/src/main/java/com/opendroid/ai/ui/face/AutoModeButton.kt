@@ -1,4 +1,8 @@
-// The one prominent control on the chat screen: enter Auto mode.
+// The one prominent control on the chat screen: enter hands-free mode.
+//
+// The label says "Hands-free", not "Auto": the top bar already has an "Auto"
+// chip that means automatic plan approval, and two controls named Auto on one
+// screen would read as the same setting.
 
 package com.opendroid.ai.ui.face
 
@@ -43,7 +47,7 @@ fun AutoModeButton(
             )
             Spacer(Modifier.width(6.dp))
             Text(
-                text = "Auto",
+                text = "Hands-free",
                 color = colors.accentCyan,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold

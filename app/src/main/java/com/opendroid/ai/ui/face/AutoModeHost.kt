@@ -1,5 +1,9 @@
 // Wiring for Auto mode: microphone in, agent out.
 //
+// "Auto mode" is the internal name throughout this package; the user-facing
+// label is "Hands-free", because upstream's Auto chip already means automatic
+// plan approval.
+//
 // This lives in ui/face rather than in ChatScreen so the upstream file only has
 // to know that Auto mode exists, not how it works. It reuses the recognizer
 // ChatScreen already owns — Android allows one recognition session at a time,
@@ -73,7 +77,7 @@ fun AutoModeHost(
         if (granted) {
             startListening()
         } else {
-            voiceError = "Microphone permission is required for Auto mode"
+            voiceError = "Microphone permission is required for hands-free mode"
         }
     }
 
