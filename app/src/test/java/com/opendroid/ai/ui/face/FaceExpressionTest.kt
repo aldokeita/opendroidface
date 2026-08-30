@@ -46,15 +46,30 @@ class FaceExpressionTest {
     }
 
     @Test
-    fun `error is the only expression using the red accent`() {
-        val red = FaceExpression.entries.filter { it.params().accent == FaceAccent.RED }
-        assertEquals(listOf(FaceExpression.SAD), red)
+    fun `a failure is signalled by shape and icon, not by colour`() {
+        // The face keeps the colour the user picked in every state, so it reads as
+        // one character. What went wrong is said by the downcast, half-lidded eyes,
+        // the frown, and the alert icon.
+        val sad = FaceExpression.SAD.params()
+        assertEquals(FaceIcon.ALERT, sad.icon)
+        assertTrue("eyes should be half-lidded", sad.eyeSquint > 0.3f)
+        assertTrue("gaze should fall", sad.gazeY > 0f)
+        assertTrue("mouth should frown", sad.mouthCurve < 0f)
     }
 
     @Test
     fun `sad face frowns and neutral face does not`() {
         assertTrue(FaceExpression.SAD.params().mouthCurve < 0f)
         assertTrue(FaceExpression.NEUTRAL.params().mouthCurve >= 0f)
+    }
+
+    @Test
+    fun `a tilted head never rotates straight-line eyes far`() {
+        // Head tilt rotates everything, including eyes drawn as straight lines. A
+        // sleepy face at eight degrees reads as broken, not as sleepy.
+        FaceExpression.entries
+            .filter { it.params().eyeStyle == EyeStyle.LINE }
+            .forEach { assertTrue("$it", kotlin.math.abs(it.params().headTilt) <= 3f) }
     }
 
     @Test

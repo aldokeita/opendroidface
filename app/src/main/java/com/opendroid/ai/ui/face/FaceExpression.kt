@@ -156,7 +156,6 @@ enum class FaceIcon {
  * @param gazeX           -1f..1f, arah pandang horizontal
  * @param gazeY           -1f..1f, arah pandang vertikal (negatif = ke atas)
  * @param icon            ikon pendukung di sudut panel
- * @param accent          pilihan warna aksen, lihat [FaceAccent]
  */
 data class FaceParams(
     val eyeStyle: EyeStyle = EyeStyle.ROUND,
@@ -171,10 +170,7 @@ data class FaceParams(
     val gazeX: Float = 0f,
     val gazeY: Float = 0f,
     val icon: FaceIcon = FaceIcon.NONE,
-    val accent: FaceAccent = FaceAccent.PRIMARY,
 )
-
-enum class FaceAccent { PRIMARY, RED }
 
 /** Target statis tiap ekspresi. Animasi = interpolasi menuju nilai ini. */
 fun FaceExpression.params(): FaceParams = when (this) {
@@ -223,15 +219,16 @@ fun FaceExpression.params(): FaceParams = when (this) {
         mouthCurve = 0.25f,
     )
 
+    // Sedih/gagal: mata tetap bulat tapi sayu — kelopak turun, pandangan jatuh.
+    // Mata lengkung ke bawah terbaca sebagai alis besar, bukan mata yang sayu.
     FaceExpression.SAD -> FaceParams(
-        eyeStyle = EyeStyle.ARC_DOWN,
-        eyeScale = 0.95f,
+        eyeScale = 0.92f,
+        eyeSquint = 0.5f,
         mouth = MouthShape.CURVE,
-        mouthCurve = -0.55f,
-        headTilt = -6f,
-        gazeY = 0.3f,
+        mouthCurve = -0.5f,
+        headTilt = -4f,
+        gazeY = 0.45f,
         icon = FaceIcon.ALERT,
-        accent = FaceAccent.RED,
     )
 
     FaceExpression.HAPPY -> FaceParams(
@@ -250,12 +247,15 @@ fun FaceExpression.params(): FaceParams = when (this) {
         icon = FaceIcon.QUESTION,
     )
 
+    // Mengantuk: garis mata mendatar. Kepala hampir tidak dimiringkan — kemiringan
+    // ikut memutar garis matanya, dan garis miring terbaca sebagai wajah rusak.
     FaceExpression.SLEEPY -> FaceParams(
         eyeStyle = EyeStyle.LINE,
         eyeOpen = 0.5f,
         eyeSquint = 0.6f,
+        eyeScale = 0.9f,
         mouth = MouthShape.LINE,
-        headTilt = -8f,
+        headTilt = -1.5f,
         icon = FaceIcon.SLEEP,
     )
 

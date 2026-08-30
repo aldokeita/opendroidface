@@ -23,6 +23,7 @@ interface FaceEntryPoint {
     fun voiceAmplitude(): VoiceAmplitude
     fun voiceLanguageStore(): VoiceLanguageStore
     fun faceColorStore(): FaceColorStore
+    fun faceStyleStore(): FaceStyleStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -51,4 +52,11 @@ fun rememberVoiceLanguageStore(): VoiceLanguageStore {
 fun rememberFaceColorStore(): FaceColorStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).faceColorStore() }
+}
+
+/** The process-wide face style selection. */
+@Composable
+fun rememberFaceStyleStore(): FaceStyleStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).faceStyleStore() }
 }
