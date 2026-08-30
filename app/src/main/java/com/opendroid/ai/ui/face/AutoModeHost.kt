@@ -42,6 +42,8 @@ fun AutoModeHost(
     val context = LocalContext.current
     val agentState by viewModel.visibleAgentState.collectAsState()
     val amplitude by rememberVoiceAmplitude().level.collectAsState()
+    val languageStore = rememberVoiceLanguageStore()
+    val languageTag by languageStore.tag.collectAsState()
 
     var isListening by remember { mutableStateOf(false) }
     var transcript by remember { mutableStateOf("") }
@@ -140,6 +142,18 @@ fun AutoModeHost(
             onClose = onExit,
             onApprovePlan = { viewModel.approvePlan(context) },
             onRejectPlan = { viewModel.rejectPlan() },
+            languageLabel = voiceLanguageLabel(languageTag),
+            onCycleLanguage = {
+                // The recognizer reads languageTag when it builds the next session,
+                // so an in-flight one is cancelled rather than left on the old
+                // language.
+                if (isListening) {
+                    recognizer.cancel()
+                    isListening = false
+                    transcript = ""
+                }
+                languageStore.select(nextVoiceLanguage(languageTag))
+            },
             modifier = modifier,
         )
     }

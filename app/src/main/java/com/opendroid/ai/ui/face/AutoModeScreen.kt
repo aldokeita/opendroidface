@@ -24,10 +24,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
@@ -80,6 +82,8 @@ fun AutoModeScreen(
     amplitude: Float = 0f,
     onApprovePlan: (() -> Unit)? = null,
     onRejectPlan: (() -> Unit)? = null,
+    languageLabel: String? = null,
+    onCycleLanguage: (() -> Unit)? = null,
 ) {
     val colors = LocalOpenDroidColors.current
     val awaitingApproval = state is AgentState.PlanProposed
@@ -89,6 +93,30 @@ fun AutoModeScreen(
             .fillMaxSize()
             .background(colors.background)
     ) {
+        // Which language the microphone is listening in. It sits here because
+        // getting it wrong is only discovered by talking, and this is where the
+        // user is when they find out.
+        if (languageLabel != null && onCycleLanguage != null) {
+            OutlinedButton(
+                onClick = onCycleLanguage,
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, colors.borderColor),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 16.dp, top = 12.dp)
+                    .height(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Language,
+                    contentDescription = null,
+                    tint = colors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(languageLabel, color = colors.textSecondary, fontSize = 13.sp)
+            }
+        }
+
         IconButton(
             onClick = onClose,
             modifier = Modifier

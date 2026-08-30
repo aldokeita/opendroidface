@@ -21,7 +21,11 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 interface FaceEntryPoint {
     fun voiceAmplitude(): VoiceAmplitude
+    fun voiceLanguageStore(): VoiceLanguageStore
 }
+
+private fun entryPoint(context: Context): FaceEntryPoint =
+    EntryPointAccessors.fromApplication(context.applicationContext, FaceEntryPoint::class.java)
 
 /**
  * The process-wide [VoiceAmplitude]. It has to be the same instance everywhere:
@@ -31,7 +35,12 @@ interface FaceEntryPoint {
 @Composable
 fun rememberVoiceAmplitude(): VoiceAmplitude {
     val context: Context = LocalContext.current.applicationContext
-    return remember(context) {
-        EntryPointAccessors.fromApplication(context, FaceEntryPoint::class.java).voiceAmplitude()
-    }
+    return remember(context) { entryPoint(context).voiceAmplitude() }
+}
+
+/** The process-wide voice language selection. */
+@Composable
+fun rememberVoiceLanguageStore(): VoiceLanguageStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).voiceLanguageStore() }
 }

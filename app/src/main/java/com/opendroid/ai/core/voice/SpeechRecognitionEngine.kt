@@ -16,7 +16,14 @@ class SpeechRecognitionEngine(
 ) {
 
     private var speechRecognizer: SpeechRecognizer? = null
-    private var recognizerIntent: Intent? = null
+
+    /**
+     * Language tag used for the next session, e.g. "id-ID". Null follows the device
+     * language. Recognition happens in one language at a time: a phone set to
+     * English transcribes Indonesian speech as English-sounding nonsense, which is
+     * why this is settable rather than always taken from the system.
+     */
+    var languageTag: String? = null
 
     // Identifies the currently active recognition session. Every startListening() call mints a
     // new token and each RecognitionListener callback closure captures the token it was created
@@ -34,16 +41,28 @@ class SpeechRecognitionEngine(
     private fun initializeRecognizer() {
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
-            recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-                // Prolong listening limits to avoid early cut-offs
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L)
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
-            }
+        }
+    }
+
+    /**
+     * Built per session rather than once, so a language change takes effect on the
+     * next utterance instead of after an app restart.
+     */
+    private fun buildRecognizerIntent(): Intent {
+        // EXTRA_LANGUAGE is documented as an IETF tag string ("id-ID"). Passing a
+        // Locale object here - as this did - is silently ignored by the recognizer,
+        // which then falls back to the device language.
+        val tag = languageTag?.takeIf { it.isNotBlank() } ?: Locale.getDefault().toLanguageTag()
+        return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, tag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, tag)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            // Prolong listening limits to avoid early cut-offs
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
         }
     }
 
@@ -120,7 +139,7 @@ class SpeechRecognitionEngine(
             override fun onEvent(eventType: Int, params: Bundle?) {}
         })
 
-        speechRecognizer?.startListening(recognizerIntent)
+        speechRecognizer?.startListening(buildRecognizerIntent())
     }
 
     fun stopListening() {

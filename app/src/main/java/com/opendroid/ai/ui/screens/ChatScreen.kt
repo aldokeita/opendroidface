@@ -65,6 +65,7 @@ import com.opendroid.ai.ui.face.AutoModeHost
 import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.face.faceStateFor
 import com.opendroid.ai.ui.face.rememberVoiceAmplitude
+import com.opendroid.ai.ui.face.rememberVoiceLanguageStore
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
@@ -171,6 +172,9 @@ fun ChatScreen(
     val voiceAmplitude = rememberVoiceAmplitude()
     val amplitude by voiceAmplitude.level.collectAsState()
     val speechRecognizer = remember { SpeechRecognitionEngine(context, voiceAmplitude) }
+    // Recognition language, shared with hands-free mode; null follows the device.
+    val voiceLanguageTag by rememberVoiceLanguageStore().tag.collectAsState()
+    LaunchedEffect(voiceLanguageTag) { speechRecognizer.languageTag = voiceLanguageTag }
     
     val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()

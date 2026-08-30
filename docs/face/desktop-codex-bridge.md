@@ -1,0 +1,120 @@
+# Menghubungkan OpenDroidFace ke GPT lewat Codex CLI
+
+Ringkasnya: PC menjalankan jembatan kecil yang bicara protokol OpenAI (`POST /v1/chat/completions`)
+dan meneruskan tiap permintaan ke `codex exec`. HP memakai provider **Custom OpenAI Compatible**
+dan menunjuk ke IP LAN PC. Tidak butuh API key OpenAI — memakai akun ChatGPT yang sudah
+login di Codex CLI.
+
+## Peringatan sebelum mulai
+
+- **Ini memakai langganan ChatGPT Anda lewat jalur yang bukan API resmi.** Kemungkinan besar
+  melanggar ketentuan layanan OpenAI. Anda sudah memilih jalur ini secara sadar; catatan ini
+  ada supaya tidak terlupa.
+- Jembatan mendengarkan di **seluruh antarmuka jaringan** (`0.0.0.0`) supaya HP bisa
+  menjangkaunya. Karena itu **token wajib** — tanpa token, siapa pun di Wi-Fi yang sama bisa
+  memakai akun ChatGPT Anda. Token diperiksa dengan perbandingan waktu-konstan.
+- Codex dijalankan dengan `--sandbox read-only`. Permintaan dari HP bisa **membaca** PC ini,
+  tidak bisa menulis. Jangan longgarkan tanpa alasan kuat.
+- Jangan jalankan di Wi-Fi publik.
+
+## 1. Syarat
+
+| Yang dibutuhkan | Cek |
+|---|---|
+| Node.js | `node --version` |
+| Codex CLI sudah login | `codex --version`, lalu `codex exec "hi"` harus menjawab |
+| HP dan PC di jaringan yang sama | atau pakai `adb reverse`, lihat bagian 5 |
+
+## 2. Jalankan jembatan
+
+```powershell
+.\tools\codex-bridge\start.ps1
+```
+
+Kali pertama, skrip membuat token acak, mencetaknya, dan menyimpannya di
+`tools/codex-bridge/.codex-bridge-token` (sudah masuk `.gitignore`). Salin token itu —
+di aplikasi, token inilah yang diisi sebagai **API key**.
+
+Keluarannya juga mencetak alamat yang bisa dipakai HP, misalnya:
+
+```
+codex-bridge listening on http://0.0.0.0:8787
+  reachable from this machine's LAN at http://192.168.1.5:8787/v1
+```
+
+Pilih alamat yang satu subnet dengan HP (biasanya `192.168.x.x`).
+
+## 3. Izinkan lewat Windows Firewall
+
+Sekali saja, di PowerShell **sebagai Administrator**:
+
+```powershell
+New-NetFirewallRule -DisplayName "Codex bridge 8787" -Direction Inbound -LocalPort 8787 -Protocol TCP -Action Allow -Profile Private
+```
+
+`-Profile Private` menahan aturan ini hanya untuk jaringan yang ditandai privat.
+
+## 4. Setel di aplikasi
+
+Di HP: **Settings → provider → Custom OpenAI Compatible**, lalu isi:
+
+| Kolom | Nilai |
+|---|---|
+| Endpoint / Base URL | `http://192.168.1.5:8787/v1` (ganti dengan IP PC Anda) |
+| API key | token dari langkah 2 |
+| Model | `codex` (nama bebas; jembatan mengabaikannya kecuali `CODEX_MODEL` diisi) |
+
+Uji cepat dari PC dulu:
+
+```powershell
+curl.exe -s http://127.0.0.1:8787/health
+```
+
+## 5. Kalau tidak satu Wi-Fi
+
+Lewat USB, tanpa jaringan sama sekali:
+
+```powershell
+adb reverse tcp:8787 tcp:8787
+```
+
+Lalu di aplikasi pakai `http://127.0.0.1:8787/v1`. HP akan menembus ke PC lewat kabel.
+Perlu diulang tiap kali kabel dicabut.
+
+## 6. Setelan lain
+
+Semua lewat environment variable:
+
+| Variabel | Default | Guna |
+|---|---|---|
+| `CODEX_BRIDGE_TOKEN` | — (wajib, min 16 karakter) | Token bersama |
+| `CODEX_BRIDGE_PORT` | `8787` | Port |
+| `CODEX_BRIDGE_HOST` | `0.0.0.0` | Isi `127.0.0.1` kalau hanya dipakai lewat `adb reverse` |
+| `CODEX_BIN` | `codex` | Path ke binary Codex |
+| `CODEX_MODEL` | kosong | Paksa model tertentu, mis. `gpt-5` |
+| `CODEX_TIMEOUT_MS` | `180000` | Batas waktu satu permintaan |
+
+## Cara kerjanya
+
+1. Aplikasi mengirim `POST /v1/chat/completions` berisi `messages`.
+2. Jembatan memeriksa token, meratakan pesan jadi satu prompt, menambah instruksi
+   "jawab langsung, jangan ubah berkas, jangan jalankan perintah".
+3. Kalau aplikasi meminta `response_format: json_object`, jembatan menambah instruksi JSON
+   dan **mengekstrak objek JSON terluar** dari jawaban. Ini penting: `AgentLoop` menolak
+   respons yang dibungkus prosa atau pagar markdown, dan Codex sering menambahkannya.
+4. Codex dijalankan sebagai `codex exec` dengan `-o <file>`, dan isi file itu jadi jawaban.
+5. Jawaban dikembalikan dalam bentuk `chat.completion` ala OpenAI. Jumlah token selalu 0 —
+   Codex tidak melaporkannya, dan aplikasi hanya mencatatnya.
+
+Permintaan **diantrikan**, satu per satu. Codex adalah proses berat; menjalankan beberapa
+sekaligus hanya menghasilkan timeout.
+
+## Kalau bermasalah
+
+| Gejala | Sebab yang paling sering |
+|---|---|
+| `401` dari jembatan | Token di aplikasi tidak sama dengan yang dicetak skrip |
+| HP timeout, PC diam | Firewall memblokir, atau IP yang dipakai bukan subnet HP |
+| `Could not start "codex"` | Codex tidak ada di PATH proses ini; isi `CODEX_BIN` dengan path lengkap |
+| Jawaban lama sekali | Wajar: satu putaran Codex bisa puluhan detik. Naikkan `CODEX_TIMEOUT_MS` |
+| Agent bilang gagal parsing rencana | Model membalas prosa, bukan JSON. Lihat log jembatan untuk jawaban mentahnya |
