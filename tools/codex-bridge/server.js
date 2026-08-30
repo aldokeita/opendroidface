@@ -37,6 +37,10 @@ const MODEL = process.env.CODEX_MODEL || ''
 const TIMEOUT_MS = Number(process.env.CODEX_TIMEOUT_MS || 180000)
 const MAX_BODY_BYTES = 1024 * 1024
 
+// Comfortably inside OkHttp's 15s read timeout, with room for a slow first write.
+const HEARTBEAT_AFTER_MS = 8000
+const HEARTBEAT_EVERY_MS = 5000
+
 if (!TOKEN || TOKEN.length < 16) {
   console.error(
     'CODEX_BRIDGE_TOKEN must be set to at least 16 characters.\n' +
@@ -271,6 +275,33 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
+  let heartbeat = null
+  let responseStarted = false
+
+  // OpenDroid's OkHttp client uses a 15s read timeout, and one Codex turn often
+  // takes longer than that - the app reports it as "Can't reach ...". Once the
+  // wait passes HEARTBEAT_AFTER_MS the response is opened and a space is written
+  // every few seconds: each write resets the client's read timer, and leading
+  // whitespace in front of a JSON object is ignored by any JSON parser.
+  function startHeartbeat() {
+    if (responseStarted) return
+    responseStarted = true
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    heartbeat = setInterval(() => res.write(' '), HEARTBEAT_EVERY_MS)
+  }
+
+  function finish(status, payload) {
+    if (heartbeat) clearInterval(heartbeat)
+    if (!responseStarted) {
+      sendJson(res, status, payload)
+      return
+    }
+    // The status line is already sent, so a late failure cannot be an HTTP error
+    // any more. It is delivered as the assistant's answer instead, which at least
+    // puts the reason on screen rather than a generic network error.
+    res.end(JSON.stringify(payload))
+  }
+
   try {
     const raw = await readBody(req)
     const body = JSON.parse(raw || '{}')
@@ -279,10 +310,16 @@ const server = http.createServer(async (req, res) => {
     const started = Date.now()
 
     console.log(`[${new Date().toISOString()}] request: ${prompt.length} chars, json=${wantsJson}`)
-    const content = await serialize(() => runCodex(prompt, wantsJson))
+    const heartbeatTimer = setTimeout(startHeartbeat, HEARTBEAT_AFTER_MS)
+    let content
+    try {
+      content = await serialize(() => runCodex(prompt, wantsJson))
+    } finally {
+      clearTimeout(heartbeatTimer)
+    }
     console.log(`  answered in ${Date.now() - started}ms, ${content.length} chars`)
 
-    sendJson(res, 200, {
+    finish(200, {
       id: `chatcmpl-${crypto.randomUUID()}`,
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
@@ -298,7 +335,20 @@ const server = http.createServer(async (req, res) => {
   } catch (err) {
     const status = err.status || 500
     console.error(`  failed (${status}): ${err.message}`)
-    sendJson(res, status, { error: { message: err.message, type: 'codex_bridge_error' } })
+    finish(status, responseStarted
+      ? {
+          id: `chatcmpl-${crypto.randomUUID()}`,
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: 'codex',
+          choices: [{
+            index: 0,
+            message: { role: 'assistant', content: `Codex bridge error: ${err.message}` },
+            finish_reason: 'stop',
+          }],
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        }
+      : { error: { message: err.message, type: 'codex_bridge_error' } })
   }
 })
 

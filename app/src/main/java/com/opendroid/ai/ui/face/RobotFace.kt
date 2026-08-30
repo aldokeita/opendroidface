@@ -58,6 +58,9 @@ private const val TRANSITION_MS = 320
 /** One full turn of every ambient decoration (rings, dots, progress sweep). */
 private const val AMBIENT_CYCLE_MS = 2400
 
+/** Below this, an amplitude reading is treated as "nothing is publishing". */
+private const val AMPLITUDE_FLOOR = 0.03f
+
 @Composable
 fun RobotFace(
     state: AgentState,
@@ -86,6 +89,12 @@ fun RobotFace(
         is AgentState.Listening -> amplitude * 0.35f
         else -> target.mouthOpen
     }
+    // Nothing publishes amplitude while the assistant talks yet - that is phase 3 -
+    // so a speaking face would sit with its mouth shut. Until then the mouth is
+    // driven by the ambient clock: wrong in detail, but it reads as talking, which
+    // a motionless mouth does not.
+    val talkFallback = if (state is AgentState.Speaking && amplitude < AMPLITUDE_FLOOR) 1f else 0f
+    val talkAmount by animateFloatAsState(talkFallback, tween(TRANSITION_MS), label = "talkAmount")
     val mouthOpen by animateFloatAsState(liveMouth, tween(60, easing = LinearEasing), label = "mouthOpen")
 
     // Decorations fade in and out instead of appearing abruptly, so a state change
@@ -160,6 +169,10 @@ fun RobotFace(
                 amplitude = amplitude,
             )
 
+            // Three mouth movements per ambient cycle: slow enough not to look like
+            // a rattle, fast enough to read as speech.
+            val talk = talkAmount * (0.35f + 0.35f * sin(phase * 2f * PI.toFloat() * 3f))
+
             translate(top = drift) {
                 rotate(degrees = headTilt, pivot = center) {
                     drawFace(
@@ -170,7 +183,7 @@ fun RobotFace(
                         eyeSquint = eyeSquint,
                         browAngle = browAngle,
                         browRaise = browRaise,
-                        mouthOpen = mouthOpen,
+                        mouthOpen = max(mouthOpen, talk),
                         mouthCurve = mouthCurve,
                         pupilX = pupilX,
                         pupilY = pupilY,

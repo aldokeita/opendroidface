@@ -124,6 +124,26 @@ Semua lewat environment variable:
 Permintaan **diantrikan**, satu per satu. Codex adalah proses berat; menjalankan beberapa
 sekaligus hanya menghasilkan timeout.
 
+### Kenapa ada "detak" di tengah jawaban
+
+OkHttp di aplikasi memakai `readTimeout` **15 detik** (`di/AppModule.kt`), sedangkan satu
+putaran Codex sering 30–45 detik. Aplikasi akan menyerah dan menampilkan
+**"Can't reach Custom OpenAI Compatible"** padahal Codex masih bekerja.
+
+Karena `di/` adalah wilayah upstream yang tidak boleh kita sentuh sembarangan, jembatanlah
+yang menyesuaikan: kalau jawaban belum siap dalam 8 detik, jembatan membuka respons lebih
+dulu lalu menulis satu spasi tiap 5 detik. Tiap penulisan mereset timer baca di sisi klien,
+dan spasi di depan objek JSON diabaikan parser mana pun. Setelah Codex selesai, badan JSON
+yang sebenarnya menyusul.
+
+Efek samping yang perlu diketahui: begitu respons dibuka, status HTTP sudah terkirim, jadi
+kegagalan yang terjadi **sesudah** itu tidak bisa lagi jadi error HTTP. Kegagalan seperti itu
+dikirim sebagai jawaban asisten berisi `Codex bridge error: ...` — supaya alasannya tetap
+terbaca di layar, bukan berubah jadi "network error" yang tak menjelaskan apa-apa.
+
+Kalau suatu saat Anda memang ingin menaikkan timeout di aplikasi, itu satu baris di
+`di/AppModule.kt` — tapi menyentuh file upstream berarti menambah risiko konflik saat rebase.
+
 ## Kalau bermasalah
 
 | Gejala | Sebab yang paling sering |
@@ -133,4 +153,6 @@ sekaligus hanya menghasilkan timeout.
 | HP timeout, PC diam | Firewall memblokir, atau IP yang dipakai bukan subnet HP |
 | `Could not start "codex"` | Codex tidak ada di PATH proses ini; isi `CODEX_BIN` dengan path lengkap |
 | Jawaban lama sekali | Wajar: satu putaran Codex bisa puluhan detik. Naikkan `CODEX_TIMEOUT_MS` |
+| "Can't reach Custom OpenAI Compatible" | Timeout baca 15 detik di aplikasi. Sudah ditangani oleh detak keep-alive — kalau muncul lagi, pastikan jembatan yang jalan adalah versi terbaru |
+| Ganti token tapi tetap `401` | Server membaca token **sekali saat start**. Matikan server dulu, baru `start.ps1` |
 | Agent bilang gagal parsing rencana | Model membalas prosa, bukan JSON. Lihat log jembatan untuk jawaban mentahnya |
