@@ -12,20 +12,13 @@
   <em>Your phone. Your rules. Your AI.</em>
 </p>
 
-<p align="center">
-  <code>CA: 4AonAtnT2WpjD25s1JJbNuxS1DNq9WBe7dTME2jWpump</code>
-</p>
 
 <p align="center">
-  <a href="https://github.com/yashab-cyber/opendroid/releases"><img src="https://img.shields.io/github/v/release/yashab-cyber/opendroid?style=for-the-badge&color=00FF88&labelColor=0D1117&logo=android&logoColor=white" alt="Release"></a>
-  <a href="https://github.com/yashab-cyber/opendroid/stargazers"><img src="https://img.shields.io/github/stars/yashab-cyber/opendroid?style=for-the-badge&color=FFD700&labelColor=0D1117&logo=github&logoColor=white" alt="Stars"></a>
-  <a href="https://github.com/yashab-cyber/opendroid/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yashab-cyber/opendroid?style=for-the-badge&color=00BFFF&labelColor=0D1117" alt="License"></a>
-  <a href="https://discord.gg/knRMyFmvpp"><img src="https://img.shields.io/badge/Discord-Join%20Us-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=0D1117" alt="Discord"></a>
+  <a href="https://github.com/aldokeita/opendroidface/releases"><img src="https://img.shields.io/github/v/release/aldokeita/opendroidface?style=for-the-badge&color=00FF88&labelColor=0D1117&logo=android&logoColor=white" alt="Release"></a>
+  <a href="https://github.com/aldokeita/opendroidface/stargazers"><img src="https://img.shields.io/github/stars/aldokeita/opendroidface?style=for-the-badge&color=FFD700&labelColor=0D1117&logo=github&logoColor=white" alt="Stars"></a>
+  <a href="https://github.com/aldokeita/opendroidface/blob/main/LICENSE"><img src="https://img.shields.io/github/license/aldokeita/opendroidface?style=for-the-badge&color=00BFFF&labelColor=0D1117" alt="License"></a>
 </p>
 
-<p align="center">
-  <a href="https://www.producthunt.com/products/opendroid?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-opendroid" target="_blank" rel="noopener noreferrer"><img alt="Opendroid  - Autonomous A.I agent for Android. | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1205420&amp;theme=light&amp;t=1784972318707"></a>
-</p>
 
 <p align="center">
   <a href="#-features">Features</a> •
@@ -203,8 +196,8 @@ OpenDroid supports **12 LLM providers** with automatic failover:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yashab-cyber/opendroid.git
-cd opendroid
+git clone https://github.com/aldokeita/opendroidface.git
+cd opendroidface
 
 # Build debug APK
 ./gradlew assembleDebug
@@ -244,11 +237,11 @@ See [SECURITY.md](docs/SECURITY.md) for details.
 ## ⭐ Star History
 
 
-<a href="https://www.star-history.com/?repos=yashab-cyber%2Fopendroid&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=aldokeita%2Fopendroid&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=yashab-cyber/opendroid&type=date&theme=dark&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=yashab-cyber/opendroid&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=yashab-cyber/opendroid&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&theme=dark&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
  </picture>
 </a>
  
@@ -278,9 +271,9 @@ limitations under the License.
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/yashab-cyber"><strong>Yashab Alam</strong></a>
+  Maintained by <a href="https://github.com/aldokeita"><strong>aldokeita</strong></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/yashab-cyber/opendroid">⭐ Star this repo</a> if OpenDroid has helped you!
+  <a href="https://github.com/aldokeita/opendroidface">⭐ Star this repo</a> if OpenDroid has helped you!
 </p>
