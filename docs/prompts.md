@@ -142,6 +142,40 @@ PLAN JSON format:
 }
 ```
 
+#### Optional `emotion` field (robot face)
+
+A plan response may carry one extra top-level field:
+
+```json
+{
+  "goal": "…",
+  "steps": [ … ],
+  "emotion": "neutral"
+}
+```
+
+Accepted values: `neutral`, `happy`, `glee`, `love`, `curious`, `confused`,
+`worried`, `apologetic`, `surprised`, `unimpressed`, `annoyed`. Near-synonyms are
+accepted too (`sorry`, `excited`, `proud`, `unsure`, …) — see
+`core/face/FaceEmotion.parse`.
+
+The field is **optional and ignored when absent or unrecognised**. Small
+on-device models routinely drop fields they were asked for, and a missing feeling
+must never cost the user their plan. It is read in
+`AgentLoop.publishEmotionIfPresent`, published to `core/face/FaceMood`, and drawn
+by the robot face.
+
+The emotion only ever *modulates*: `AgentState` decides the base expression, and
+the mood is allowed to replace it only while the agent is idle or speaking. A
+delighted face during an error would read as broken, so thinking, executing,
+listening, awaiting approval, and error keep their own faces
+(`ui/face/faceExpressionFor`).
+
+Note: the planning prompt itself does not yet ask for this field — adding it
+means editing `core/llm/prompts/`, which this fork leaves alone. Until then the
+face falls back to guessing the feeling from the words of a plain-text reply
+(`ui/face/inferEmotionFromReply`), which is biased towards no emotion at all.
+
 ### 2.2. Safety & Security Critic Prompt (`CRITIC_SYSTEM_PROMPT`)
 Performs pre-execution security audits on proposed plans.
 

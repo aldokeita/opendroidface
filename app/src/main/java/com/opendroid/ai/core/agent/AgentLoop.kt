@@ -86,7 +86,9 @@ class AgentLoop @Inject constructor(
     private val memoryManager: MemoryManager,
     private val conversationRepository: ConversationRepository,
     private val settingsRepository: com.opendroid.ai.data.repository.SettingsRepository,
-    private val reEvalEngine: dagger.Lazy<ReEvaluationEngine>
+    private val reEvalEngine: dagger.Lazy<ReEvaluationEngine>,
+    // Optional emotion the model declares alongside a plan; drawn by the robot face.
+    private val faceMood: com.opendroid.ai.core.face.FaceMood
 ) {
     private val scope = CoroutineScope(Dispatchers.Default)
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true; isLenient = true }
@@ -220,6 +222,10 @@ class AgentLoop @Inject constructor(
      * prompt is currently pending, and otherwise falls back to resolving "current".
      */
     fun processQuery(query: String, context: Context, explicitSessionId: String? = null) {
+        // The previous answer's mood belonged to the previous answer. Left in place
+        // the face would greet a new request still wearing its reaction to the last.
+        faceMood.clear()
+
         // processQuery is also the delivery path for a reply to a pending
         // awaitUserResponse() prompt (see below). That's ONLY true when this message comes
         // from the SAME session the waiting task is pinned to (waitingSessionId) - a
@@ -1574,6 +1580,7 @@ class AgentLoop @Inject constructor(
 
     private fun parsePlanFromLlmResponse(raw: String, userGoal: String): Plan {
         val stripped = stripMarkdownFences(raw)
+        publishEmotionIfPresent(stripped)
 
         // Prefer wrapper action before unwrapping plan — handles {"action":"...","plan":null}.
         try {
@@ -1624,6 +1631,24 @@ class AgentLoop @Inject constructor(
         }
 
         throw IllegalArgumentException("Could not parse a valid plan from LLM response")
+    }
+
+    /**
+     * Reads the optional "emotion" field and hands it to the face.
+     *
+     * Silently ignored when absent or unparseable: small on-device models drop
+     * fields they were asked for, and a missing feeling must never cost the user
+     * their plan.
+     */
+    private fun publishEmotionIfPresent(planJson: String) {
+        try {
+            val root = json.parseToJsonElement(planJson) as? JsonObject ?: return
+            val declared = root["emotion"]?.jsonPrimitive?.contentOrNull
+                ?: (root["plan"] as? JsonObject)?.get("emotion")?.jsonPrimitive?.contentOrNull
+            faceMood.publish(com.opendroid.ai.core.face.FaceEmotion.parse(declared))
+        } catch (_: Exception) {
+            // Not JSON, or the field is not a string. Either way there is no emotion.
+        }
     }
 
     private fun stripMarkdownFences(raw: String): String {

@@ -11,6 +11,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import com.opendroid.ai.core.face.FaceMood
 import com.opendroid.ai.core.voice.VoiceAmplitude
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -24,6 +25,7 @@ interface FaceEntryPoint {
     fun voiceLanguageStore(): VoiceLanguageStore
     fun faceColorStore(): FaceColorStore
     fun faceStyleStore(): FaceStyleStore
+    fun faceMood(): FaceMood
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -59,4 +61,11 @@ fun rememberFaceColorStore(): FaceColorStore {
 fun rememberFaceStyleStore(): FaceStyleStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).faceStyleStore() }
+}
+
+/** The process-wide mood, published by the agent. */
+@Composable
+fun rememberFaceMood(): FaceMood {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).faceMood() }
 }

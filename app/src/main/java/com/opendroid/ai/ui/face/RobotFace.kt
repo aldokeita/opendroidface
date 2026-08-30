@@ -95,7 +95,26 @@ fun RobotFace(
     backgroundColor: Color? = null,
 ) {
     val colors = LocalOpenDroidColors.current
-    val expression = expressionOverride ?: state.toExpression()
+
+    // Emotion declared by the model, or guessed from the words it is speaking when
+    // it declared nothing. It only ever modulates: faceExpressionFor keeps the
+    // agent's own state whenever that state is something the user needs to see.
+    val mood = rememberFaceMood()
+    val declared by mood.emotion.collectAsState()
+    LaunchedEffect(state) {
+        if (state is AgentState.Speaking) {
+            // Guessed from the reply and then REMEMBERED. Speaking lasts as long as
+            // the sentence does; without publishing it, the reaction vanished with
+            // the last syllable and the face was blank by the time the user looked
+            // up. FaceMood.publish ignores null, so a plain answer changes nothing.
+            mood.publish(inferEmotionFromReply(state.text))
+        } else {
+            mood.expireIfStale()
+        }
+    }
+    val emotion = declared ?: (state as? AgentState.Speaking)?.let { inferEmotionFromReply(it.text) }
+
+    val expression = expressionOverride ?: faceExpressionFor(state, emotion)
     val target = expression.params()
 
     val storedColorId by rememberFaceColorStore().colorId.collectAsState()
@@ -173,7 +192,14 @@ fun RobotFace(
         label = "phase",
     )
 
-    val description = expression.contentDescription()
+    // The mood's own wording when the mood is what is on screen: one expression can
+    // mean two things, and "something went wrong" after a polite refusal would
+    // report a failure that never happened.
+    val description = when {
+        expressionOverride != null -> expression.contentDescription()
+        emotion != null && expression != state.toExpression() -> emotion.contentDescription()
+        else -> expression.contentDescription()
+    }
     // Whatever is behind the face. The style-1 eyelid is drawn in this colour to
     // cut into the eye, so it has to match the surface exactly or the lid shows
     // up as a grey slab.
