@@ -22,6 +22,7 @@ import dagger.hilt.components.SingletonComponent
 interface FaceEntryPoint {
     fun voiceAmplitude(): VoiceAmplitude
     fun voiceLanguageStore(): VoiceLanguageStore
+    fun faceColorStore(): FaceColorStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -43,4 +44,11 @@ fun rememberVoiceAmplitude(): VoiceAmplitude {
 fun rememberVoiceLanguageStore(): VoiceLanguageStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).voiceLanguageStore() }
+}
+
+/** The process-wide face colour selection. */
+@Composable
+fun rememberFaceColorStore(): FaceColorStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).faceColorStore() }
 }

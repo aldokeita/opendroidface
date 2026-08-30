@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -84,6 +85,8 @@ fun AutoModeScreen(
     onRejectPlan: (() -> Unit)? = null,
     languageLabel: String? = null,
     onCycleLanguage: (() -> Unit)? = null,
+    faceColor: Color? = null,
+    onCycleFaceColor: (() -> Unit)? = null,
 ) {
     val colors = LocalOpenDroidColors.current
     val awaitingApproval = state is AgentState.PlanProposed
@@ -115,6 +118,21 @@ fun AutoModeScreen(
                 Spacer(Modifier.width(6.dp))
                 Text(languageLabel, color = colors.textSecondary, fontSize = 13.sp)
             }
+        }
+
+        // Face colour. A swatch rather than a label: the colour is the setting, so
+        // showing the name of it would say less than showing it.
+        if (faceColor != null && onCycleFaceColor != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 64.dp, top = 18.dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(faceColor)
+                    .border(1.dp, colors.borderColor, CircleShape)
+                    .clickable(onClick = onCycleFaceColor)
+            )
         }
 
         IconButton(

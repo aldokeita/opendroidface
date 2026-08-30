@@ -44,6 +44,8 @@ fun AutoModeHost(
     val amplitude by rememberVoiceAmplitude().level.collectAsState()
     val languageStore = rememberVoiceLanguageStore()
     val languageTag by languageStore.tag.collectAsState()
+    val faceColorStore = rememberFaceColorStore()
+    val faceColorId by faceColorStore.colorId.collectAsState()
 
     var isListening by remember { mutableStateOf(false) }
     var transcript by remember { mutableStateOf("") }
@@ -154,6 +156,8 @@ fun AutoModeHost(
                 }
                 languageStore.select(nextVoiceLanguage(languageTag))
             },
+            faceColor = faceColorFor(faceColorId).color,
+            onCycleFaceColor = { faceColorStore.select(nextFaceColor(faceColorId)) },
             modifier = modifier,
         )
     }
