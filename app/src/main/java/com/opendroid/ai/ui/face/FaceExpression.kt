@@ -34,6 +34,26 @@ fun AgentState.toExpression(): FaceExpression = when (this) {
 }
 
 /**
+ * The state the face should show, which is not always the agent's own state.
+ *
+ * The microphone opens before the agent knows anything about it: the recognizer
+ * is already recording while [AgentState] is still Idle. Without this the face
+ * sits there neutral through the entire time the user is talking, which is
+ * exactly the moment it most needs to look like it is listening.
+ *
+ * Only the two resting states are overridden. Idle is obvious; Error is included
+ * because it never clears on its own — after a failed request the agent stays in
+ * Error, so a face that kept it would sit there looking sad through the user's
+ * next sentence while the status line says "Listening…". Thinking, executing and
+ * speaking are live states and must never be masked by the microphone.
+ */
+fun faceStateFor(agentState: AgentState, micOpen: Boolean): AgentState = when {
+    !micOpen -> agentState
+    agentState is AgentState.Idle || agentState is AgentState.Error -> AgentState.Listening
+    else -> agentState
+}
+
+/**
  * Text equivalent of the expression, for TalkBack. The face is the only status
  * indicator in Auto mode, so without this a screen reader user gets nothing.
  */

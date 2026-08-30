@@ -113,7 +113,7 @@ fun AutoModeScreen(
             // component itself scales, so nothing here is a magic dp.
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 RobotFace(
-                    state = state,
+                    state = faceStateFor(state, micOpen = isListening),
                     amplitude = amplitude,
                     modifier = Modifier
                         .fillMaxWidth()

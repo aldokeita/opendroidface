@@ -2,7 +2,6 @@ package com.opendroid.ai.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
@@ -64,6 +63,7 @@ import com.opendroid.ai.ui.components.ContactPickerCard
 import com.opendroid.ai.ui.face.AutoModeButton
 import com.opendroid.ai.ui.face.AutoModeHost
 import com.opendroid.ai.ui.face.RobotFace
+import com.opendroid.ai.ui.face.faceStateFor
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.ChatViewModel
 import kotlinx.coroutines.delay
@@ -381,7 +381,7 @@ fun ChatScreen(
                         .padding(top = 8.dp)
                 ) {
                     RobotFace(
-                        state = visibleAgentState,
+                        state = faceStateFor(visibleAgentState, micOpen = isListening),
                         modifier = Modifier.fillMaxSize()
                     )
                     AutoModeButton(
@@ -647,15 +647,14 @@ fun ChatScreen(
         }
     }
 
-    // Auto mode covers the whole screen, including the top bar: the face is meant
-    // to be the only thing visible while the user is talking to it.
+    // Hands-free mode covers the whole screen, bottom navigation included; it
+    // hosts itself in a Dialog, so Back is handled there too.
     if (autoModeActive) {
         AutoModeHost(
             viewModel = viewModel,
             recognizer = speechRecognizer,
             onExit = { autoModeActive = false }
         )
-        BackHandler { autoModeActive = false }
     }
 
     sessionPendingDelete?.let { session ->

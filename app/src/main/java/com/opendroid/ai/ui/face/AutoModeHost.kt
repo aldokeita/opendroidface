@@ -25,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
@@ -109,23 +111,34 @@ fun AutoModeHost(
         }
     }
 
-    AutoModeScreen(
-        state = agentState,
-        isListening = isListening,
-        transcript = transcript,
-        errorMessage = voiceError,
-        onToggleListening = {
-            if (isListening) {
-                recognizer.cancel()
-                isListening = false
-                transcript = ""
-            } else {
-                requestListening()
-            }
-        },
-        onClose = onExit,
-        onApprovePlan = { viewModel.approvePlan(context) },
-        onRejectPlan = { viewModel.rejectPlan() },
-        modifier = modifier,
-    )
+    // A Dialog, not an inline overlay: the chat screen sits inside the app's
+    // Scaffold, so anything drawn there stops short of the bottom navigation bar.
+    // Hands-free mode is supposed to be the only thing on screen.
+    Dialog(
+        onDismissRequest = onExit,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnClickOutside = false,
+        )
+    ) {
+        AutoModeScreen(
+            state = agentState,
+            isListening = isListening,
+            transcript = transcript,
+            errorMessage = voiceError,
+            onToggleListening = {
+                if (isListening) {
+                    recognizer.cancel()
+                    isListening = false
+                    transcript = ""
+                } else {
+                    requestListening()
+                }
+            },
+            onClose = onExit,
+            onApprovePlan = { viewModel.approvePlan(context) },
+            onRejectPlan = { viewModel.rejectPlan() },
+            modifier = modifier,
+        )
+    }
 }

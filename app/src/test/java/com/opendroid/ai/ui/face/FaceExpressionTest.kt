@@ -84,6 +84,36 @@ class FaceExpressionTest {
     }
 
     @Test
+    fun `an open microphone makes an idle face listen`() {
+        assertEquals(AgentState.Listening, faceStateFor(AgentState.Idle, micOpen = true))
+        assertEquals(AgentState.Idle, faceStateFor(AgentState.Idle, micOpen = false))
+    }
+
+    @Test
+    fun `an open microphone clears a stale error`() {
+        // Error never clears by itself, so without this the face stays sad while
+        // the user is already speaking their next request.
+        assertEquals(AgentState.Listening, faceStateFor(AgentState.Error("boom"), micOpen = true))
+        assertEquals(
+            AgentState.Error("boom"),
+            faceStateFor(AgentState.Error("boom"), micOpen = false)
+        )
+    }
+
+    @Test
+    fun `an open microphone never masks what the agent is doing`() {
+        val busy = listOf(
+            AgentState.Thinking,
+            AgentState.ExecutingPlan("tap"),
+            AgentState.Speaking("hello"),
+            AgentState.PlanProposed(plan()),
+        )
+        busy.forEach { state ->
+            assertEquals(state, faceStateFor(state, micOpen = true))
+        }
+    }
+
+    @Test
     fun `each expression has its own content description for TalkBack`() {
         val descriptions = FaceExpression.entries.map { it.contentDescription() }
         assertEquals(descriptions.size, descriptions.toSet().size)
