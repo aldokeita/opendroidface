@@ -246,6 +246,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (!tokenMatches(req.headers.authorization)) {
+    // Logged because the usual cause is a mistyped key, and without this the
+    // client just sees "key rejected" with no way to tell whether the request
+    // even arrived. The token itself is never printed - only its length.
+    const supplied = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+    console.log(
+      `[${new Date().toISOString()}] 401 ${req.method} ${url.pathname} ` +
+        `from ${req.socket.remoteAddress}, key length ${supplied.length} (expected ${TOKEN.length})`
+    )
     sendJson(res, 401, { error: { message: 'Invalid or missing bearer token', type: 'auth_error' } })
     return
   }

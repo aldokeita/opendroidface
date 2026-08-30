@@ -23,7 +23,8 @@ login di Codex CLI.
 |---|---|
 | Node.js | `node --version` |
 | Codex CLI sudah login | `codex --version`, lalu `codex exec "hi"` harus menjawab |
-| HP dan PC di jaringan yang sama | atau pakai `adb reverse`, lihat bagian 5 |
+| HP dan PC di jaringan yang sama | atau pakai `adb reverse`, lihat bagian 6 |
+| APK debug (bukan release) | wajib — alasannya di bagian 5 |
 
 ## 2. Jalankan jembatan
 
@@ -70,7 +71,21 @@ Uji cepat dari PC dulu:
 curl.exe -s http://127.0.0.1:8787/health
 ```
 
-## 5. Kalau tidak satu Wi-Fi
+## 5. Kenapa harus build debug
+
+`network_security_config.xml` bawaan upstream melarang HTTP polos kecuali ke
+`localhost`, `127.0.0.1`, dan `10.0.2.2`. Alamat LAN seperti `192.168.1.5` diblokir,
+dan aplikasi melaporkannya sebagai **"Network error"** — bukan masalah key.
+
+Build **debug** memakai `app/src/debug/res/xml/network_security_config.xml` yang
+mengizinkan cleartext ke mana saja. Build **release** tidak pernah memakainya.
+Artinya jembatan ini hanya jalan di build debug, dan itu memang tepat: jembatan
+memang alat pengembangan.
+
+Kalau suatu saat butuh di build release, jangan longgarkan confignya — pakai
+`adb reverse` di bawah, yang tetap masuk lewat `127.0.0.1`.
+
+## 6. Kalau tidak satu Wi-Fi
 
 Lewat USB, tanpa jaringan sama sekali:
 
@@ -81,7 +96,7 @@ adb reverse tcp:8787 tcp:8787
 Lalu di aplikasi pakai `http://127.0.0.1:8787/v1`. HP akan menembus ke PC lewat kabel.
 Perlu diulang tiap kali kabel dicabut.
 
-## 6. Setelan lain
+## 7. Setelan lain
 
 Semua lewat environment variable:
 
@@ -113,7 +128,8 @@ sekaligus hanya menghasilkan timeout.
 
 | Gejala | Sebab yang paling sering |
 |---|---|
-| `401` dari jembatan | Token di aplikasi tidak sama dengan yang dicetak skrip |
+| "Network error" di layar tes | Build release, atau HTTP polos ke IP LAN diblokir — lihat bagian 5 |
+| `401` dari jembatan | Token di aplikasi tidak sama dengan yang dicetak skrip. Log jembatan mencetak panjang key yang diterima (bukan isinya) |
 | HP timeout, PC diam | Firewall memblokir, atau IP yang dipakai bukan subnet HP |
 | `Could not start "codex"` | Codex tidak ada di PATH proses ini; isi `CODEX_BIN` dengan path lengkap |
 | Jawaban lama sekali | Wajar: satu putaran Codex bisa puluhan detik. Naikkan `CODEX_TIMEOUT_MS` |

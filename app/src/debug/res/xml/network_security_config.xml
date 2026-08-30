@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug-only override of the main network security config.
+
+    The release config permits cleartext to localhost, 127.0.0.1 and 10.0.2.2 only,
+    which is right for a shipped app but blocks every local dev server reached by
+    LAN address: an Ollama box, or the Codex bridge on a laptop at 192.168.x.x.
+    Android's network security config cannot express an IP range, so a debug-wide
+    relaxation is the only way to allow them without hardcoding one machine's
+    address into the repository.
+
+    This file is in src/debug, so it applies to debug builds and NEVER to release.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true"/>
+</network-security-config>
