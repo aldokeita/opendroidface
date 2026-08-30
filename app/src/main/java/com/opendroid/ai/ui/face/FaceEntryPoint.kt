@@ -26,6 +26,7 @@ interface FaceEntryPoint {
     fun faceColorStore(): FaceColorStore
     fun faceStyleStore(): FaceStyleStore
     fun faceMood(): FaceMood
+    fun motionStore(): MotionStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -61,6 +62,13 @@ fun rememberFaceColorStore(): FaceColorStore {
 fun rememberFaceStyleStore(): FaceStyleStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).faceStyleStore() }
+}
+
+/** The process-wide motion preference. */
+@Composable
+fun rememberMotionStore(): MotionStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).motionStore() }
 }
 
 /** The process-wide mood, published by the agent. */

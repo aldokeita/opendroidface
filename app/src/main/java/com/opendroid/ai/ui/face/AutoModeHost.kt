@@ -49,6 +49,8 @@ fun AutoModeHost(
     val languageTag by languageStore.tag.collectAsState()
     val faceColorStore = rememberFaceColorStore()
     val faceColorId by faceColorStore.colorId.collectAsState()
+    val motionStore = rememberMotionStore()
+    val motionSetting by motionStore.setting.collectAsState()
 
     var isListening by remember { mutableStateOf(false) }
     var transcript by remember { mutableStateOf("") }
@@ -186,6 +188,8 @@ fun AutoModeHost(
             },
             faceColor = faceColorFor(faceColorId).color,
             onCycleFaceColor = { faceColorStore.select(nextFaceColor(faceColorId)) },
+            motionLabel = motionLabel(motionSetting),
+            onCycleMotion = { motionStore.select(nextMotionSetting(motionSetting)) },
             kiosk = kiosk,
             onEnterKiosk = {
                 silences = 0

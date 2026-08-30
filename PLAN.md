@@ -171,9 +171,13 @@ wajah "senang" saat `Error` akan terasa rusak.
 - **Desktop bridge terdokumentasi** — tulis `docs/desktop-mcp.md`: `adb forward tcp:8765 tcp:8765`,
   contoh konfigurasi MCP client, daftar tool yang diekspos `McpServer.tools()`
 - **MCP lewat jaringan** — ganti `LOOPBACK` → `0.0.0.0` **hanya setelah** ada token auth + pairing
+- ~~**Aksesibilitas**~~ — selesai. Wajah berhenti bergerak saat perangkat mematikan animasi
+  (`Settings.Global.ANIMATOR_DURATION_SCALE` = 0), diawasi lewat `ContentObserver` sehingga
+  berlaku langsung tanpa keluar layar. Chip **MOTION** di layar Hands-free memutar
+  AUTO → ON → OFF untuk menimpa setelan perangkat ke dua arah. Padanan teks tiap ekspresi
+  sudah ada sejak awal (`FaceExpression.contentDescription()`). Lihat `ui/face/ReducedMotion.kt`.
 - **Wajah kustom** — muat animasi Lottie dari file eksternal supaya pengguna bisa ganti karakter
-- **Aksesibilitas** — sediakan opsi matikan animasi (`Settings.Global.ANIMATOR_DURATION_SCALE`)
-  dan padanan teks untuk tiap ekspresi bagi pengguna TalkBack
+  (dikesampingkan oleh pemilik, 2026-08-31)
 
 ## Risiko yang sudah diketahui
 

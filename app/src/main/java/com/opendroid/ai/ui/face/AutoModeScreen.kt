@@ -121,6 +121,8 @@ fun AutoModeScreen(
     onCycleLanguage: (() -> Unit)? = null,
     faceColor: Color? = null,
     onCycleFaceColor: (() -> Unit)? = null,
+    motionLabel: String? = null,
+    onCycleMotion: (() -> Unit)? = null,
     /** Dock mode: no controls, screen kept awake, microphone re-arming itself. */
     kiosk: Boolean = false,
     onEnterKiosk: (() -> Unit)? = null,
@@ -129,6 +131,7 @@ fun AutoModeScreen(
     val colors = LocalOpenDroidColors.current
     val awaitingApproval = state is AgentState.PlanProposed
     var showGallery by remember { mutableStateOf(false) }
+    val reduceMotion = rememberReduceMotion()
 
     if (showGallery) {
         FaceGallery(onClose = { showGallery = false }, modifier = modifier)
@@ -193,6 +196,8 @@ fun AutoModeScreen(
                 onCycleLanguage = onCycleLanguage,
                 faceColor = faceColor,
                 onCycleFaceColor = onCycleFaceColor,
+                motionLabel = motionLabel,
+                onCycleMotion = onCycleMotion,
                 onClose = onClose,
                 onEnterKiosk = onEnterKiosk,
                 modifier = Modifier.align(Alignment.TopCenter),
@@ -298,6 +303,7 @@ fun AutoModeScreen(
                 amplitude = amplitude,
                 color = faceColor ?: colors.accentCyan,
                 compact = landscape,
+                reduceMotion = reduceMotion,
                 modifier = if (landscape) {
                     Modifier
                         .align(Alignment.BottomEnd)
@@ -323,6 +329,8 @@ private fun TopControls(
     onCycleLanguage: (() -> Unit)?,
     faceColor: Color?,
     onCycleFaceColor: (() -> Unit)?,
+    motionLabel: String?,
+    onCycleMotion: (() -> Unit)?,
     onClose: () -> Unit,
     onEnterKiosk: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -341,6 +349,16 @@ private fun TopControls(
                 fontSize = 11.sp,
                 letterSpacing = 1.5.sp,
                 modifier = Modifier.clickable(onClick = onCycleLanguage),
+            )
+        }
+        if (motionLabel != null && onCycleMotion != null) {
+            Spacer(Modifier.width(16.dp))
+            Text(
+                text = motionLabel.uppercase(),
+                color = colors.textSecondary.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                letterSpacing = 1.5.sp,
+                modifier = Modifier.clickable(onClick = onCycleMotion),
             )
         }
         Spacer(Modifier.weight(1f))
@@ -394,19 +412,20 @@ private fun VoiceMeter(
     color: Color,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    reduceMotion: Boolean = false,
 ) {
     val level by animateFloatAsState(
         targetValue = if (isListening) amplitude else 0f,
-        animationSpec = tween(110),
+        animationSpec = tween(if (reduceMotion) 0 else 110),
         label = "meterLevel",
     )
     val active by animateFloatAsState(
         targetValue = if (isListening) 1f else 0f,
-        animationSpec = tween(320),
+        animationSpec = tween(if (reduceMotion) 0 else 320),
         label = "meterActive",
     )
     val motion = rememberInfiniteTransition(label = "wave")
-    val phase by motion.animateFloat(
+    val wavePhase by motion.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(2600, easing = LinearEasing)),
@@ -414,6 +433,11 @@ private fun VoiceMeter(
     )
 
     Canvas(modifier) {
+        // Reduced motion keeps the meter but drops the movement: a straight line
+        // that brightens while the microphone is open still says what the meter is
+        // for, and reading the phase behind this branch means the wave clock never
+        // invalidates the drawing at all.
+        val phase = if (reduceMotion) 0f else wavePhase
         val midY = size.height / 2f
         val steps = if (compact) 44 else 80
         val strokeWidth = if (compact) 1.4.dp.toPx() else 1.8.dp.toPx()
@@ -428,9 +452,12 @@ private fun VoiceMeter(
             val taper = sin(t * PI.toFloat()).let { it * it }
             // Two components, one slow and wide, one quicker and shallower. A single
             // sine reads as a test signal; two make it read as a voice.
-            val wave =
+            val wave = if (reduceMotion) {
+                0f
+            } else {
                 sin((t * 1.6f + phase) * 2f * PI.toFloat()) * 0.72f +
                     sin((t * 3.1f - phase * 1.7f) * 2f * PI.toFloat()) * 0.28f
+            }
             if (i == 0) {
                 path.moveTo(x, midY + wave * reach * taper)
             } else {

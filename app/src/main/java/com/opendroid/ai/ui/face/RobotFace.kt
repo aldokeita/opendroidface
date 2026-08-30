@@ -94,8 +94,17 @@ fun RobotFace(
     styleOverride: FaceStyle? = null,
     /** The surface the face is drawn on. Defaults to the app background. */
     backgroundColor: Color? = null,
+    /** Overrides the user's motion preference; used by previews and tests. */
+    reduceMotion: Boolean? = null,
 ) {
     val colors = LocalOpenDroidColors.current
+
+    // A still face for anyone who asked for one, in the app or device-wide. The
+    // expression still changes — that is information, not decoration — it simply
+    // arrives without the blinking, drifting and glancing around.
+    val preferReduced = rememberReduceMotion()
+    val reduce = reduceMotion ?: preferReduced
+    val transitionMs = if (reduce) 0 else TRANSITION_MS
 
     // Emotion declared by the model, or guessed from the words it is speaking when
     // it declared nothing. It only ever modulates: faceExpressionFor keeps the
@@ -121,7 +130,9 @@ fun RobotFace(
     // of a face, so while nothing is happening it glances around, tilts, and now
     // and then wears a brief expression. It runs ONLY when the agent is resting
     // and has no mood to show — anything the agent is actually doing outranks it.
-    val alive = expressionOverride == null && stateExpression == FaceExpression.NEUTRAL
+    // Idle life is the first thing to go when motion is reduced: it is motion for
+    // its own sake, with nothing to report.
+    val alive = expressionOverride == null && stateExpression == FaceExpression.NEUTRAL && !reduce
     var beat by remember { mutableStateOf(IdleBeat.RESTING) }
     LaunchedEffect(alive) {
         if (!alive) {
@@ -146,17 +157,17 @@ fun RobotFace(
     // Colour is constant across states on purpose: the face is a character, not a
     // status light. What it is doing is said by shape and by the corner icon.
     val chosen = faceColor ?: faceColorFor(storedColorId).color
-    val eyeColor by animateColorAsState(chosen, tween(TRANSITION_MS), label = "eyeColor")
+    val eyeColor by animateColorAsState(chosen, tween(transitionMs), label = "eyeColor")
 
     // Each parameter animates on its own so a change of expression reads as the
     // face moving, not as one drawing being swapped for another.
-    val eyeOpen by animateFloatAsState(target.eyeOpen, tween(TRANSITION_MS), label = "eyeOpen")
-    val eyeSquint by animateFloatAsState(target.eyeSquint, tween(TRANSITION_MS), label = "eyeSquint")
-    val eyeScale by animateFloatAsState(target.eyeScale, tween(TRANSITION_MS), label = "eyeScale")
-    val lidAngle by animateFloatAsState(target.lidAngle, tween(TRANSITION_MS), label = "lidAngle")
-    val mouthCurve by animateFloatAsState(target.mouthCurve, tween(TRANSITION_MS), label = "mouthCurve")
+    val eyeOpen by animateFloatAsState(target.eyeOpen, tween(transitionMs), label = "eyeOpen")
+    val eyeSquint by animateFloatAsState(target.eyeSquint, tween(transitionMs), label = "eyeSquint")
+    val eyeScale by animateFloatAsState(target.eyeScale, tween(transitionMs), label = "eyeScale")
+    val lidAngle by animateFloatAsState(target.lidAngle, tween(transitionMs), label = "lidAngle")
+    val mouthCurve by animateFloatAsState(target.mouthCurve, tween(transitionMs), label = "mouthCurve")
     val headTilt by animateFloatAsState(
-        target.headTilt + beat.tilt, tween(TRANSITION_MS), label = "headTilt"
+        target.headTilt + beat.tilt, tween(transitionMs), label = "headTilt"
     )
     // The idle glance is added to the expression's own gaze, not substituted for
     // it: a thinking face looks up and away, and an idle beat must never argue
@@ -165,12 +176,12 @@ fun RobotFace(
         (target.gazeX + beat.gazeX).coerceIn(-1f, 1f),
         // Saccades are fast. Easing a glance over a third of a second reads as a
         // camera pan, not as an eye.
-        tween(if (beat.gazeX != 0f) 180 else TRANSITION_MS),
+        tween(if (beat.gazeX != 0f) 180 else transitionMs),
         label = "gazeX",
     )
     val gazeY by animateFloatAsState(
         (target.gazeY + beat.gazeY).coerceIn(-1f, 1f),
-        tween(if (beat.gazeY != 0f) 180 else TRANSITION_MS),
+        tween(if (beat.gazeY != 0f) 180 else transitionMs),
         label = "gazeY",
     )
 
@@ -187,30 +198,36 @@ fun RobotFace(
     // never pops a ring into existence mid-frame.
     val ringAmount by animateFloatAsState(
         if (expression == FaceExpression.LISTENING) 1f else 0f,
-        tween(TRANSITION_MS), label = "ringAmount"
+        tween(transitionMs), label = "ringAmount"
     )
     val progressAmount by animateFloatAsState(
         if (expression == FaceExpression.FOCUSED) 1f else 0f,
-        tween(TRANSITION_MS), label = "progressAmount"
+        tween(transitionMs), label = "progressAmount"
     )
     // Idle drift is the only motion in the resting state; it stops as soon as the
     // agent is doing something, otherwise it fights with the real animations.
     val driftAmount by animateFloatAsState(
         if (expression == FaceExpression.NEUTRAL) 1f else 0f,
-        tween(TRANSITION_MS), label = "driftAmount"
+        tween(transitionMs), label = "driftAmount"
     )
     // Nothing publishes amplitude while the assistant talks on the local TTS path
     // before a word boundary arrives, so a speaking face falls back to the ambient
     // clock rather than sitting with its mouth shut.
     val talkFallback =
-        if (expressionOverride == null && state is AgentState.Speaking && amplitude < AMPLITUDE_FLOOR) 1f else 0f
-    val talkAmount by animateFloatAsState(talkFallback, tween(TRANSITION_MS), label = "talkAmount")
+        if (!reduce && expressionOverride == null && state is AgentState.Speaking && amplitude < AMPLITUDE_FLOOR) 1f else 0f
+    val talkAmount by animateFloatAsState(talkFallback, tween(transitionMs), label = "talkAmount")
 
     // Random blink. Kept out of the ambient transition because the whole point is
     // that its timing is irregular. Shape-changed eyes (an arc, a heart) are not
     // blinked: closing a smile would read as a glitch, not a blink.
     var blink by remember { mutableFloatStateOf(1f) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(reduce) {
+        if (reduce) {
+            // Eyes open, and left that way. A blink is the one motion nobody asked
+            // for that also hides the face for a moment.
+            blink = 1f
+            return@LaunchedEffect
+        }
         while (true) {
             delay(Random.nextLong(3000, 6500))
             blink = 0f
@@ -223,7 +240,7 @@ fun RobotFace(
     // A single ambient clock drives every repeating decoration. One infinite
     // transition is cheaper than four, and it keeps the decorations in phase.
     val ambient = rememberInfiniteTransition(label = "ambient")
-    val phase by ambient.animateFloat(
+    val ambientPhase by ambient.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(AMBIENT_CYCLE_MS, easing = LinearEasing)),
@@ -248,6 +265,10 @@ fun RobotFace(
         // a state read in the draw phase invalidates only the drawing, so the
         // ambient clock never triggers recomposition at 60fps.
         Canvas(Modifier.fillMaxSize()) {
+            // Held at zero when motion is reduced, and — because the read is behind
+            // the branch — the ambient clock is never subscribed to at all, so it
+            // stops invalidating this drawing sixty times a second.
+            val phase = if (reduce) 0f else ambientPhase
             val face = size.minDimension
             val center = Offset(size.width / 2f, size.height / 2f)
             val drift = sin(phase * 2f * PI.toFloat()) * face * 0.010f * driftAmount
