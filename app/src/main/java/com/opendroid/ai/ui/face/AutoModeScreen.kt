@@ -15,7 +15,11 @@
 
 package com.opendroid.ai.ui.face
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -61,12 +65,15 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.ui.theme.LocalOpenDroidColors
+import kotlin.math.PI
 import kotlin.math.max
+import kotlin.math.sin
 
 /**
  * One short line telling the user what is happening. In Auto mode this is the
@@ -113,7 +120,7 @@ fun AutoModeScreen(
         return
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
@@ -128,6 +135,10 @@ fun AutoModeScreen(
                 onLongClick = { showGallery = true },
             )
     ) {
+        val landscape = maxWidth > maxHeight
+        // The face is bounded by BOTH sides. Sized from the width alone it grew
+        // taller than a landscape screen and the eyes were cropped.
+        val faceSize = minOf(maxWidth * 0.82f, maxHeight * (if (landscape) 0.5f else 0.86f))
         TopControls(
             languageLabel = languageLabel,
             onCycleLanguage = onCycleLanguage,
@@ -144,21 +155,14 @@ fun AutoModeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                RobotFace(
-                    state = faceStateFor(state, micOpen = isListening),
-                    amplitude = amplitude,
-                    backgroundColor = Color.Black,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // Shorter than it is wide: a square box leaves a band of
-                        // empty screen under the eyes and pushes the status line
-                        // away from the face it belongs to.
-                        .height(maxWidth * 0.82f)
-                )
-            }
+            RobotFace(
+                state = faceStateFor(state, micOpen = isListening),
+                amplitude = amplitude,
+                backgroundColor = Color.Black,
+                modifier = Modifier.size(faceSize)
+            )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(if (landscape) 6.dp else 12.dp))
 
             Text(
                 text = autoModeStatusLabel(state, isListening).uppercase(),
@@ -181,16 +185,20 @@ fun AutoModeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 84.dp)
-                    .padding(top = 14.dp),
+                    // Landscape has no vertical room to reserve for text that is
+                    // usually absent; there the box collapses to the line itself.
+                    .heightIn(min = if (landscape) 30.dp else 84.dp)
+                    .padding(top = if (landscape) 8.dp else 14.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
                 Text(
                     text = subtitle,
                     color = if (errorMessage != null) colors.accentRed else colors.textPrimary,
-                    fontSize = 20.sp,
+                    fontSize = if (landscape) 15.sp else 20.sp,
                     fontWeight = FontWeight.Light,
                     textAlign = TextAlign.Center,
+                    maxLines = if (landscape) 1 else 3,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.alpha(subtitleAlpha),
                 )
             }
@@ -230,15 +238,27 @@ fun AutoModeScreen(
                 }
             }
         } else {
+            // Landscape puts the meter in the corner and shrinks it. Centred and
+            // full width it cut the screen in half and drew more attention than
+            // the face; there is also barely any vertical room to give it.
             VoiceMeter(
                 isListening = isListening,
                 amplitude = amplitude,
                 color = faceColor ?: colors.accentCyan,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 56.dp)
-                    .fillMaxWidth(0.5f)
-                    .height(36.dp),
+                compact = landscape,
+                modifier = if (landscape) {
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 24.dp, bottom = 18.dp)
+                        .width(96.dp)
+                        .height(18.dp)
+                } else {
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 56.dp)
+                        .fillMaxWidth(0.46f)
+                        .height(34.dp)
+                },
             )
         }
     }
@@ -295,10 +315,14 @@ private fun TopControls(
 /**
  * The microphone indicator, in place of a button.
  *
- * Seven bars that rise with the voice. It shows the same thing a mic button did —
- * whether the microphone is open — without claiming the bottom of the screen as
- * a control, and it doubles as proof the microphone is actually hearing
- * something, which a static icon never gave.
+ * Bars that rise with the voice, with a wave travelling through them so the
+ * meter looks alive between syllables instead of freezing at a level. It shows
+ * what a mic button showed — whether the microphone is open — without claiming
+ * the bottom of the screen as a control, and it proves the microphone is
+ * actually hearing something, which a static icon never did.
+ *
+ * Idle it settles into a row of dots: still visible, no longer asking for
+ * attention.
  */
 @Composable
 private fun VoiceMeter(
@@ -306,6 +330,7 @@ private fun VoiceMeter(
     amplitude: Float,
     color: Color,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     val level by animateFloatAsState(
         targetValue = if (isListening) amplitude else 0f,
@@ -317,24 +342,45 @@ private fun VoiceMeter(
         animationSpec = tween(280),
         label = "meterActive",
     )
+    val wave = rememberInfiniteTransition(label = "meterWave")
+    val phase by wave.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
+        label = "meterPhase",
+    )
+
+    val bars = if (compact) 5 else 9
 
     Canvas(modifier) {
-        val bars = 7
-        val gap = size.width / (bars * 2.2f)
+        val gap = size.width / (bars * 3.4f)
         val barW = (size.width - gap * (bars - 1)) / bars
-        // Middle bars react most, so the meter reads as a voice rather than a
-        // level bar. Idle leaves a row of dots, which is quieter than an icon.
-        val shape = listOf(0.35f, 0.6f, 0.85f, 1f, 0.85f, 0.6f, 0.35f)
+        val minH = barW
 
         repeat(bars) { i ->
-            val h = max(
-                barW * 0.55f,
-                size.height * (0.10f + level * shape[i] * 0.9f) * (0.35f + active * 0.65f),
-            )
+            // Envelope: the middle of the row reacts most, so the shape reads as a
+            // voice rather than as a progress bar.
+            val fromCentre = kotlin.math.abs(i - (bars - 1) / 2f) / ((bars - 1) / 2f)
+            val envelope = 0.35f + 0.65f * (1f - fromCentre * fromCentre)
+            // Travelling wave: each bar lags the one before it.
+            val ripple = 0.55f + 0.45f * sin((phase - i * 0.11f) * 2f * PI.toFloat())
+            val reach = level * envelope * ripple
+
+            val h = max(minH, size.height * (0.06f + reach * 0.94f) * (0.28f + active * 0.72f))
             val x = i * (barW + gap)
+            val top = size.height / 2f - h / 2f
+
+            // A faint wide copy behind each bar reads as glow without a blur,
+            // which a DrawScope cannot do on every supported API level.
             drawRoundRect(
-                color = color.copy(alpha = 0.35f + active * 0.55f),
-                topLeft = Offset(x, size.height / 2f - h / 2f),
+                color = color.copy(alpha = (0.06f + active * 0.14f) * (0.4f + reach)),
+                topLeft = Offset(x - barW * 0.45f, top - barW * 0.45f),
+                size = Size(barW * 1.9f, h + barW * 0.9f),
+                cornerRadius = CornerRadius(barW, barW),
+            )
+            drawRoundRect(
+                color = color.copy(alpha = 0.30f + active * 0.60f),
+                topLeft = Offset(x, top),
                 size = Size(barW, h),
                 cornerRadius = CornerRadius(barW / 2f, barW / 2f),
             )
