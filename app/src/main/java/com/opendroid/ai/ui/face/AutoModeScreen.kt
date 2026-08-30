@@ -63,6 +63,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -250,14 +251,14 @@ fun AutoModeScreen(
                     Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 24.dp, bottom = 18.dp)
-                        .width(96.dp)
-                        .height(18.dp)
+                        .width(118.dp)
+                        .height(30.dp)
                 } else {
                     Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 56.dp)
-                        .fillMaxWidth(0.46f)
-                        .height(34.dp)
+                        .fillMaxWidth(0.5f)
+                        .height(62.dp)
                 },
             )
         }
@@ -350,12 +351,23 @@ private fun VoiceMeter(
         label = "meterPhase",
     )
 
-    val bars = if (compact) 5 else 9
+    val bars = if (compact) 7 else 13
+    // Peaks fall on their own, the way a hardware meter's hold marker does. Kept
+    // outside the draw lambda so the fall is continuous rather than restarting
+    // with every recomposition.
+    val peaks = remember(bars) { FloatArray(bars) }
 
     Canvas(modifier) {
-        val gap = size.width / (bars * 3.4f)
+        // Synthwave: square segments stacked into columns, a horizon line, and a
+        // reflection under it. No rounded caps anywhere - the hard edges are the
+        // whole look.
+        val horizonY = size.height * 0.74f
+        val columnH = horizonY
+        val gap = size.width / (bars * 3f)
         val barW = (size.width - gap * (bars - 1)) / bars
-        val minH = barW
+        val segH = max(2.dp.toPx(), columnH / 6f)
+        val segGap = segH * 0.45f
+        val step = segH + segGap
 
         repeat(bars) { i ->
             // Envelope: the middle of the row reacts most, so the shape reads as a
@@ -363,27 +375,63 @@ private fun VoiceMeter(
             val fromCentre = kotlin.math.abs(i - (bars - 1) / 2f) / ((bars - 1) / 2f)
             val envelope = 0.35f + 0.65f * (1f - fromCentre * fromCentre)
             // Travelling wave: each bar lags the one before it.
-            val ripple = 0.55f + 0.45f * sin((phase - i * 0.11f) * 2f * PI.toFloat())
-            val reach = level * envelope * ripple
+            val ripple = 0.55f + 0.45f * sin((phase - i * 0.09f) * 2f * PI.toFloat())
+            val reach = (level * envelope * ripple).coerceIn(0f, 1f)
 
-            val h = max(minH, size.height * (0.06f + reach * 0.94f) * (0.28f + active * 0.72f))
+            val h = max(segH, columnH * (0.04f + reach * 0.96f) * (0.22f + active * 0.78f))
+            peaks[i] = max(peaks[i] * 0.93f, h)
+
             val x = i * (barW + gap)
-            val top = size.height / 2f - h / 2f
+            val lit = (h / step).toInt().coerceAtLeast(0)
 
-            // A faint wide copy behind each bar reads as glow without a blur,
-            // which a DrawScope cannot do on every supported API level.
-            drawRoundRect(
-                color = color.copy(alpha = (0.06f + active * 0.14f) * (0.4f + reach)),
-                topLeft = Offset(x - barW * 0.45f, top - barW * 0.45f),
-                size = Size(barW * 1.9f, h + barW * 0.9f),
-                cornerRadius = CornerRadius(barW, barW),
+            // Glow: one faint wide copy of the column. A DrawScope cannot blur on
+            // every supported API level, and a second rectangle costs nothing.
+            drawRect(
+                color = color.copy(alpha = (0.05f + active * 0.10f) * (0.4f + reach)),
+                topLeft = Offset(x - barW * 0.4f, horizonY - h - segH),
+                size = Size(barW * 1.8f, h + segH * 2f),
             )
-            drawRoundRect(
-                color = color.copy(alpha = 0.30f + active * 0.60f),
-                topLeft = Offset(x, top),
-                size = Size(barW, h),
-                cornerRadius = CornerRadius(barW / 2f, barW / 2f),
+
+            repeat(lit + 1) { s ->
+                val segTop = horizonY - (s + 1) * step + segGap
+                if (segTop < horizonY - h - step) return@repeat
+                // Bottom of the column keeps the face colour, the top burns towards
+                // magenta - the gradient is what makes it read as synthwave rather
+                // than as a plain equaliser.
+                val t = ((s + 1) * step / columnH).coerceIn(0f, 1f)
+                val segColor = lerp(color, Color(0xFFFF2FB0), t)
+
+                drawRect(
+                    color = segColor.copy(alpha = 0.35f + active * 0.6f),
+                    topLeft = Offset(x, segTop),
+                    size = Size(barW, segH),
+                )
+                // Reflection below the horizon: shorter, dimmer, and it fades out
+                // with distance the way a wet-floor reflection does.
+                val mirrorTop = horizonY + (horizonY - segTop - segH) * 0.42f
+                if (mirrorTop < size.height) {
+                    drawRect(
+                        color = segColor.copy(alpha = (0.18f + active * 0.22f) * (1f - t * 0.7f)),
+                        topLeft = Offset(x, mirrorTop),
+                        size = Size(barW, segH * 0.6f),
+                    )
+                }
+            }
+
+            // Peak hold: a single bright segment riding the top of the column.
+            val peakTop = horizonY - peaks[i]
+            drawRect(
+                color = Color.White.copy(alpha = 0.25f + active * 0.5f),
+                topLeft = Offset(x, peakTop),
+                size = Size(barW, max(1f, segH * 0.35f)),
             )
         }
+
+        // The horizon itself.
+        drawRect(
+            color = color.copy(alpha = 0.25f + active * 0.35f),
+            topLeft = Offset(0f, horizonY),
+            size = Size(size.width, max(1f, size.height * 0.012f)),
+        )
     }
 }
