@@ -236,16 +236,9 @@ See [SECURITY.md](docs/SECURITY.md) for details.
 
 ## ⭐ Star History
 
-
-<a href="https://www.star-history.com/?repos=aldokeita%2Fopendroid&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&theme=dark&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left&sealed_token=_Y78t8Ar-D4NNqkSXt6ARVN22DZYznwQAD5wzR40TUgqtwjvMk5dU9wruh4XFvB5MkstKgAkNa1imj3B_TFGFcZkSEuKdTVmDTeay8Tnp2cYn3H4gDp_3A" />
- </picture>
+<a href="https://www.star-history.com/?repos=aldokeita%2Fopendroidface&type=date&legend=top-left">
+  <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aldokeita/opendroidface&type=date&legend=top-left" />
 </a>
- 
-
 ---
 
 ## 📜 License
