@@ -59,9 +59,10 @@ class FaceExpressionTest {
 
     @Test
     fun `listening widens the eyes and focusing narrows them`() {
-        val neutral = FaceExpression.NEUTRAL.params().eyeOpen
-        assertTrue(FaceExpression.LISTENING.params().eyeOpen > neutral)
-        assertTrue(FaceExpression.FOCUSED.params().eyeOpen < neutral)
+        // Size is carried by eyeScale; eyeOpen is the lid, which the blink drives.
+        val neutral = FaceExpression.NEUTRAL.params().eyeScale
+        assertTrue(FaceExpression.LISTENING.params().eyeScale > neutral)
+        assertTrue(FaceExpression.FOCUSED.params().eyeScale < neutral)
         assertTrue(FaceExpression.FOCUSED.params().eyeSquint > 0f)
     }
 
@@ -73,14 +74,57 @@ class FaceExpressionTest {
             val p = expression.params()
             assertTrue("$expression eyeOpen", p.eyeOpen in 0f..2f)
             assertTrue("$expression eyeSquint", p.eyeSquint in 0f..1f)
-            assertTrue("$expression browRaise", p.browRaise in 0f..1f)
-            assertTrue("$expression browAngle", p.browAngle in -45f..45f)
+            assertTrue("$expression eyeScale", p.eyeScale in 0.5f..2f)
+            assertTrue("$expression lidAngle", p.lidAngle in -45f..45f)
             assertTrue("$expression mouthOpen", p.mouthOpen in 0f..1f)
             assertTrue("$expression mouthCurve", p.mouthCurve in -1f..1f)
             assertTrue("$expression headTilt", p.headTilt in -30f..30f)
-            assertTrue("$expression pupilOffsetX", p.pupilOffsetX in -1f..1f)
-            assertTrue("$expression pupilOffsetY", p.pupilOffsetY in -1f..1f)
+            assertTrue("$expression gazeX", p.gazeX in -1f..1f)
+            assertTrue("$expression gazeY", p.gazeY in -1f..1f)
         }
+    }
+
+    @Test
+    fun `thinking does not use an angry lid`() {
+        // A tilted eyelid is the only way this face can look angry. Thinking used
+        // one and read as irritation; it now looks up and away instead.
+        val thinking = FaceExpression.THINKING.params()
+        assertEquals(0f, thinking.lidAngle, 0f)
+        assertTrue("gaze should leave centre", thinking.gazeX != 0f || thinking.gazeY != 0f)
+        assertEquals(FaceIcon.DOTS, thinking.icon)
+    }
+
+    @Test
+    fun `no expression tilts a lid without meaning to look angry`() {
+        // Guards the redesign: if a future expression wants a slanted lid it has to
+        // be a deliberate choice made here, not inherited by accident.
+        FaceExpression.entries.forEach { expression ->
+            assertEquals("$expression", 0f, expression.params().lidAngle, 0f)
+        }
+    }
+
+    @Test
+    fun `expressions are visually distinct from one another`() {
+        // Two expressions that produce identical geometry are indistinguishable on
+        // screen, which makes one of them a lie.
+        val shapes = FaceExpression.entries.map { it.params() }
+        assertEquals(shapes.size, shapes.toSet().size)
+    }
+
+    @Test
+    fun `only shape-changed eyes skip the blink`() {
+        // RobotFace blinks a ROUND eye only; an arc or a heart has no lid to close.
+        // Every state reachable from AgentState keeps a blinking eye, so the face
+        // never looks frozen during normal use.
+        val reachable = listOf(
+            FaceExpression.NEUTRAL,
+            FaceExpression.LISTENING,
+            FaceExpression.THINKING,
+            FaceExpression.CURIOUS,
+            FaceExpression.FOCUSED,
+            FaceExpression.SPEAKING,
+        )
+        reachable.forEach { assertEquals("$it", EyeStyle.ROUND, it.params().eyeStyle) }
     }
 
     @Test

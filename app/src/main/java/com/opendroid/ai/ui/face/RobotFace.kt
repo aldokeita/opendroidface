@@ -7,11 +7,13 @@
 // blend between the two. `lottie-compose` stays reserved for the "custom face"
 // backlog item, where the user supplies their own character.
 //
-// The look follows the EMO/Cozmo family of robot faces: a dark panel, two large
-// glossy eyes carrying almost all of the expression, eyelids that tilt for mood,
-// and a small mouth. Expression comes from SHAPE, not colour — the face keeps
-// the colour the user chose so it reads as one character, and only an error
-// turns it red.
+// The look follows screen-faced robots (EMO, Cozmo, and the flat vector robots
+// that use kaomoji eyes): a dark panel, two large eyes that CHANGE SHAPE per
+// emotion, a small mouth, and a support icon in the corner for what a face
+// cannot say by itself.
+//
+// Expression comes from shape, not colour — the face keeps the colour the user
+// chose so it reads as one character, and only an error turns it red.
 //
 // Usage in ui/screens/ChatScreen.kt:
 //
@@ -80,11 +82,13 @@ fun RobotFace(
     modifier: Modifier = Modifier,
     /** Voice amplitude 0f..1f. Phases 2-3 feed this from VoiceAmplitude.level. */
     amplitude: Float = 0f,
-    /** Overrides the user's stored colour; used by previews and tests. */
+    /** Overrides the expression derived from [state]; used by the gallery and by phase 4. */
+    expressionOverride: FaceExpression? = null,
+    /** Overrides the user's stored colour; used by previews and the gallery. */
     faceColor: Color? = null,
 ) {
     val colors = LocalOpenDroidColors.current
-    val expression = state.toExpression()
+    val expression = expressionOverride ?: state.toExpression()
     val target = expression.params()
 
     val storedColorId by rememberFaceColorStore().colorId.collectAsState()
@@ -98,30 +102,27 @@ fun RobotFace(
     // face moving, not as one drawing being swapped for another.
     val eyeOpen by animateFloatAsState(target.eyeOpen, tween(TRANSITION_MS), label = "eyeOpen")
     val eyeSquint by animateFloatAsState(target.eyeSquint, tween(TRANSITION_MS), label = "eyeSquint")
-    val browAngle by animateFloatAsState(target.browAngle, tween(TRANSITION_MS), label = "browAngle")
-    val browRaise by animateFloatAsState(target.browRaise, tween(TRANSITION_MS), label = "browRaise")
+    val eyeScale by animateFloatAsState(target.eyeScale, tween(TRANSITION_MS), label = "eyeScale")
+    val lidAngle by animateFloatAsState(target.lidAngle, tween(TRANSITION_MS), label = "lidAngle")
     val mouthCurve by animateFloatAsState(target.mouthCurve, tween(TRANSITION_MS), label = "mouthCurve")
     val headTilt by animateFloatAsState(target.headTilt, tween(TRANSITION_MS), label = "headTilt")
-    val pupilX by animateFloatAsState(target.pupilOffsetX, tween(TRANSITION_MS), label = "pupilX")
-    val pupilY by animateFloatAsState(target.pupilOffsetY, tween(TRANSITION_MS), label = "pupilY")
+    val gazeX by animateFloatAsState(target.gazeX, tween(TRANSITION_MS), label = "gazeX")
+    val gazeY by animateFloatAsState(target.gazeY, tween(TRANSITION_MS), label = "gazeY")
 
     // Mouth: follows amplitude while speaking/listening, otherwise the static target.
-    val liveMouth = when (state) {
-        is AgentState.Speaking -> amplitude
-        is AgentState.Listening -> amplitude * 0.35f
+    val liveMouth = when {
+        expressionOverride != null -> target.mouthOpen
+        state is AgentState.Speaking -> amplitude
+        state is AgentState.Listening -> amplitude * 0.35f
         else -> target.mouthOpen
     }
     val mouthOpen by animateFloatAsState(liveMouth, tween(60, easing = LinearEasing), label = "mouthOpen")
 
     // Decorations fade in and out instead of appearing abruptly, so a state change
-    // never pops a ring or a row of dots into existence mid-frame.
+    // never pops a ring into existence mid-frame.
     val ringAmount by animateFloatAsState(
         if (expression == FaceExpression.LISTENING) 1f else 0f,
         tween(TRANSITION_MS), label = "ringAmount"
-    )
-    val dotsAmount by animateFloatAsState(
-        if (expression == FaceExpression.THINKING) 1f else 0f,
-        tween(TRANSITION_MS), label = "dotsAmount"
     )
     val progressAmount by animateFloatAsState(
         if (expression == FaceExpression.FOCUSED) 1f else 0f,
@@ -136,11 +137,13 @@ fun RobotFace(
     // Nothing publishes amplitude while the assistant talks on the local TTS path
     // before a word boundary arrives, so a speaking face falls back to the ambient
     // clock rather than sitting with its mouth shut.
-    val talkFallback = if (state is AgentState.Speaking && amplitude < AMPLITUDE_FLOOR) 1f else 0f
+    val talkFallback =
+        if (expressionOverride == null && state is AgentState.Speaking && amplitude < AMPLITUDE_FLOOR) 1f else 0f
     val talkAmount by animateFloatAsState(talkFallback, tween(TRANSITION_MS), label = "talkAmount")
 
     // Random blink. Kept out of the ambient transition because the whole point is
-    // that its timing is irregular.
+    // that its timing is irregular. Shape-changed eyes (an arc, a heart) are not
+    // blinked: closing a smile would read as a glitch, not a blink.
     var blink by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -178,22 +181,21 @@ fun RobotFace(
         Canvas(Modifier.fillMaxSize()) {
             val face = size.minDimension
             val unit = face / 10f
-            val cx = size.width / 2f
-            val cy = size.height / 2f
+            val center = Offset(size.width / 2f, size.height / 2f)
             val drift = sin(phase * 2f * PI.toFloat()) * unit * 0.10f * driftAmount
             // Three mouth movements per ambient cycle: slow enough not to look like
             // a rattle, fast enough to read as speech.
             val talk = talkAmount * (0.30f + 0.30f * sin(phase * 2f * PI.toFloat() * 3f))
+            // Only a round eye blinks; an arc or a heart has no lid to close.
+            val blinkFactor = if (target.eyeStyle == EyeStyle.ROUND) blinkAnim else 1f
 
-            drawPanel(panelColor, face, Offset(cx, cy))
-
+            drawPanel(panelColor, face, center)
             drawDecorations(
                 accent = eyeColor,
                 unit = unit,
-                center = Offset(cx, cy),
+                center = center,
                 phase = phase,
                 ringAmount = ringAmount,
-                dotsAmount = dotsAmount,
                 progressAmount = progressAmount,
                 amplitude = amplitude,
             )
@@ -201,21 +203,25 @@ fun RobotFace(
             translate(top = drift) {
                 rotate(degrees = headTilt, pivot = center) {
                     drawFace(
+                        style = target.eyeStyle,
+                        mouthShape = target.mouth,
                         eyeColor = eyeColor,
                         panelColor = panelColor,
                         unit = unit,
-                        center = Offset(cx, cy),
-                        eyeOpen = eyeOpen * blinkAnim,
+                        center = center,
+                        eyeOpen = eyeOpen * blinkFactor,
                         eyeSquint = eyeSquint,
-                        lidAngle = browAngle,
-                        browRaise = browRaise,
+                        eyeScale = eyeScale,
+                        lidAngle = lidAngle,
                         mouthOpen = max(mouthOpen, talk),
                         mouthCurve = mouthCurve,
-                        gazeX = pupilX,
-                        gazeY = pupilY,
+                        gazeX = gazeX,
+                        gazeY = gazeY,
                     )
                 }
             }
+
+            drawIcon(target.icon, eyeColor, unit, center, face, phase)
         }
     }
 }
@@ -240,14 +246,16 @@ private fun DrawScope.drawPanel(panelColor: Color, face: Float, center: Offset) 
 }
 
 private fun DrawScope.drawFace(
+    style: EyeStyle,
+    mouthShape: MouthShape,
     eyeColor: Color,
     panelColor: Color,
     unit: Float,
     center: Offset,
     eyeOpen: Float,
     eyeSquint: Float,
+    eyeScale: Float,
     lidAngle: Float,
-    browRaise: Float,
     mouthOpen: Float,
     mouthCurve: Float,
     gazeX: Float,
@@ -256,8 +264,8 @@ private fun DrawScope.drawFace(
     val cx = center.x
     val cy = center.y - unit * 0.35f
 
-    val eyeW = unit * 1.85f * (1f + browRaise * 0.06f)
-    val eyeHFull = unit * 2.05f * (1f + browRaise * 0.08f)
+    val eyeW = unit * 1.85f * eyeScale
+    val eyeHFull = unit * 2.05f * eyeScale
     // A closed eye is a line, not a disappearance: keeping a sliver means a blink
     // reads as a blink instead of the eyes vanishing for two frames.
     val eyeH = max(unit * 0.16f, eyeHFull * eyeOpen)
@@ -266,29 +274,28 @@ private fun DrawScope.drawFace(
     val eyeDx = unit * 1.75f
 
     listOf(-1f, 1f).forEach { side ->
-        val eyeCenter = Offset(cx + side * eyeDx + gazeX * unit * 0.18f, cy + gazeY * unit * 0.14f)
-        drawEye(
-            center = eyeCenter,
-            width = eyeW,
-            height = eyeH,
-            color = eyeColor,
-            unit = unit,
-            gazeX = gazeX,
-            gazeY = gazeY,
-        )
-        drawLid(
-            center = eyeCenter,
-            width = eyeW,
-            height = eyeH,
-            panelColor = panelColor,
-            // Mirrored so both lids slope inward or outward together; a single
-            // direction would make the face look like it is tilting, not feeling.
-            angle = lidAngle * side * -1f,
-            drop = eyeSquint,
-        )
+        val eyeCenter = Offset(cx + side * eyeDx + gazeX * unit * 0.22f, cy + gazeY * unit * 0.2f)
+        when (style) {
+            EyeStyle.ROUND -> {
+                drawGlossyEye(eyeCenter, eyeW, eyeH, eyeColor, unit, gazeX, gazeY)
+                drawLid(eyeCenter, eyeW, eyeH, panelColor, lidAngle * side * -1f, eyeSquint)
+            }
+            EyeStyle.ARC_UP -> drawArcEye(eyeCenter, eyeW, unit, eyeColor, up = true)
+            EyeStyle.ARC_DOWN -> drawArcEye(eyeCenter, eyeW, unit, eyeColor, up = false)
+            EyeStyle.LINE -> drawLine(
+                color = eyeColor,
+                start = Offset(eyeCenter.x - eyeW * 0.5f, eyeCenter.y),
+                end = Offset(eyeCenter.x + eyeW * 0.5f, eyeCenter.y),
+                strokeWidth = unit * 0.26f,
+                cap = StrokeCap.Round,
+            )
+            EyeStyle.CROSS -> drawCrossEye(eyeCenter, eyeW, unit, eyeColor)
+            EyeStyle.HEART -> drawHeartEye(eyeCenter, eyeW, eyeColor)
+        }
     }
 
     drawMouth(
+        shape = mouthShape,
         center = Offset(cx, cy + unit * 2.55f),
         unit = unit,
         color = eyeColor,
@@ -302,7 +309,7 @@ private fun DrawScope.drawFace(
  * and two specular highlights. The highlights are what make it read as a lens
  * rather than a coloured box, so they move with the gaze.
  */
-private fun DrawScope.drawEye(
+private fun DrawScope.drawGlossyEye(
     center: Offset,
     width: Float,
     height: Float,
@@ -366,8 +373,8 @@ private fun DrawScope.drawEye(
 /**
  * The upper eyelid, drawn in the panel colour so it cuts into the eye.
  *
- * This is where nearly all of the mood lives: angle it down toward the nose for
- * anger or focus, up for sadness, drop it for tiredness.
+ * Angling it is the only way this face can look angry, so expressions use it
+ * sparingly: a tilted lid on a thinking face reads as irritation, not thought.
  */
 private fun DrawScope.drawLid(
     center: Offset,
@@ -378,7 +385,7 @@ private fun DrawScope.drawLid(
     drop: Float,
 ) {
     if (drop <= 0.01f && angle == 0f) return
-    val coverage = height * (0.14f + drop * 0.5f)
+    val coverage = height * (0.10f + drop * 0.5f)
     // Oversized so the rotated corners never expose the eye behind them.
     val lidW = width * 2f
     val lidH = height * 1.4f
@@ -393,44 +400,231 @@ private fun DrawScope.drawLid(
     }
 }
 
+/** A smiling (or downcast) eye: the kaomoji `^` and `v`. */
+private fun DrawScope.drawArcEye(
+    center: Offset,
+    width: Float,
+    unit: Float,
+    color: Color,
+    up: Boolean,
+) {
+    val half = width * 0.62f
+    val rise = width * (if (up) 0.55f else -0.55f)
+    val path = Path().apply {
+        moveTo(center.x - half, center.y + rise * 0.45f)
+        quadraticTo(center.x, center.y - rise * 0.75f, center.x + half, center.y + rise * 0.45f)
+    }
+    drawPath(path, color, style = Stroke(width = unit * 0.30f, cap = StrokeCap.Round))
+}
+
+/** Dizzy eyes. Reserved for a hard failure. */
+private fun DrawScope.drawCrossEye(center: Offset, width: Float, unit: Float, color: Color) {
+    val r = width * 0.42f
+    val stroke = Stroke(width = unit * 0.26f, cap = StrokeCap.Round)
+    drawPath(
+        Path().apply {
+            moveTo(center.x - r, center.y - r); lineTo(center.x + r, center.y + r)
+            moveTo(center.x + r, center.y - r); lineTo(center.x - r, center.y + r)
+        },
+        color, style = stroke,
+    )
+}
+
+private fun DrawScope.drawHeartEye(center: Offset, width: Float, color: Color) {
+    val w = width * 1.05f
+    val h = width * 0.95f
+    val path = Path().apply {
+        moveTo(center.x, center.y + h * 0.45f)
+        cubicTo(
+            center.x - w * 0.75f, center.y + h * 0.02f,
+            center.x - w * 0.42f, center.y - h * 0.62f,
+            center.x, center.y - h * 0.2f,
+        )
+        cubicTo(
+            center.x + w * 0.42f, center.y - h * 0.62f,
+            center.x + w * 0.75f, center.y + h * 0.02f,
+            center.x, center.y + h * 0.45f,
+        )
+        close()
+    }
+    drawPath(path, color)
+}
+
 /**
  * The mouth. Closed it is a curved stroke whose bend carries the mood; open it
  * becomes a filled shape driven by the voice.
  */
 private fun DrawScope.drawMouth(
+    shape: MouthShape,
     center: Offset,
     unit: Float,
     color: Color,
     open: Float,
     curve: Float,
 ) {
+    if (shape == MouthShape.NONE) return
     val width = unit * 1.75f
-    if (open > 0.12f) {
-        val height = unit * 1.6f * open
+    val stroke = Stroke(width = unit * 0.22f, cap = StrokeCap.Round)
+
+    if (open > 0.12f || shape == MouthShape.ROUND) {
+        val height = unit * 1.6f * max(open, if (shape == MouthShape.ROUND) 0.45f else 0f)
+        val w = if (shape == MouthShape.ROUND) height else width
         drawRoundRect(
             color = color,
-            topLeft = Offset(center.x - width / 2f, center.y - height / 2f),
-            size = Size(width, height),
-            cornerRadius = CornerRadius(width * 0.45f, width * 0.45f),
+            topLeft = Offset(center.x - w / 2f, center.y - height / 2f),
+            size = Size(w, height),
+            cornerRadius = CornerRadius(w * 0.45f, height * 0.45f),
         )
         return
     }
 
-    val bend = curve * unit * 0.75f
-    val path = Path().apply {
-        moveTo(center.x - width / 2f, center.y - bend * 0.35f)
-        quadraticTo(center.x, center.y + bend, center.x + width / 2f, center.y - bend * 0.35f)
+    when (shape) {
+        MouthShape.LINE -> drawLine(
+            color = color,
+            start = Offset(center.x - width * 0.45f, center.y),
+            end = Offset(center.x + width * 0.45f, center.y),
+            strokeWidth = unit * 0.22f,
+            cap = StrokeCap.Round,
+        )
+
+        MouthShape.WAVY -> {
+            // Two opposed bends: the shape people read as a hesitant mouth.
+            val q = width * 0.5f
+            drawPath(
+                Path().apply {
+                    moveTo(center.x - width * 0.5f, center.y)
+                    quadraticTo(center.x - q * 0.5f, center.y - unit * 0.35f, center.x, center.y)
+                    quadraticTo(center.x + q * 0.5f, center.y + unit * 0.35f, center.x + width * 0.5f, center.y)
+                },
+                color, style = stroke,
+            )
+        }
+
+        else -> {
+            val bend = curve * unit * 0.75f
+            drawPath(
+                Path().apply {
+                    moveTo(center.x - width / 2f, center.y - bend * 0.35f)
+                    quadraticTo(center.x, center.y + bend, center.x + width / 2f, center.y - bend * 0.35f)
+                },
+                color, style = stroke,
+            )
+        }
     }
+}
+
+/**
+ * The support icon in the panel's top-right corner.
+ *
+ * It says what a face cannot: that the agent is waiting on the user rather than
+ * merely thinking, or that the last request failed. Kept small and in the corner
+ * so it never competes with the eyes.
+ */
+private fun DrawScope.drawIcon(
+    icon: FaceIcon,
+    color: Color,
+    unit: Float,
+    center: Offset,
+    face: Float,
+    phase: Float,
+) {
+    if (icon == FaceIcon.NONE) return
+    val anchor = Offset(center.x + face * 0.29f, center.y - face * 0.30f)
+    val stroke = Stroke(width = unit * 0.16f, cap = StrokeCap.Round)
+
+    when (icon) {
+        FaceIcon.DOTS -> repeat(3) { i ->
+            // Each dot peaks a third of a cycle after the previous one.
+            val p = (phase - i * 0.33f + 1f) % 1f
+            val glow = (sin(p * PI.toFloat()) * 0.9f + 0.1f).coerceIn(0f, 1f)
+            drawCircle(
+                color = color.copy(alpha = glow),
+                radius = unit * 0.15f,
+                center = Offset(anchor.x + (i - 1) * unit * 0.5f, anchor.y),
+            )
+        }
+
+        FaceIcon.QUESTION -> {
+            val r = unit * 0.34f
+            drawPath(
+                Path().apply {
+                    moveTo(anchor.x - r * 0.85f, anchor.y - r * 0.55f)
+                    quadraticTo(anchor.x + r * 1.5f, anchor.y - r * 1.8f, anchor.x + r * 0.1f, anchor.y + r * 0.15f)
+                    lineTo(anchor.x + r * 0.05f, anchor.y + r * 0.6f)
+                },
+                color, style = stroke,
+            )
+            drawCircle(color, radius = unit * 0.11f, center = Offset(anchor.x + r * 0.05f, anchor.y + r * 1.25f))
+        }
+
+        FaceIcon.ALERT -> {
+            drawLine(
+                color = color,
+                start = Offset(anchor.x, anchor.y - unit * 0.45f),
+                end = Offset(anchor.x, anchor.y + unit * 0.18f),
+                strokeWidth = unit * 0.18f,
+                cap = StrokeCap.Round,
+            )
+            drawCircle(color, radius = unit * 0.11f, center = Offset(anchor.x, anchor.y + unit * 0.5f))
+        }
+
+        FaceIcon.SPARKLE -> listOf(
+            Triple(0f, 0f, 1f),
+            Triple(-0.75f, 0.55f, 0.6f),
+            Triple(0.7f, 0.62f, 0.45f),
+        ).forEach { (dx, dy, scale) ->
+            drawSparkle(
+                Offset(anchor.x + dx * unit, anchor.y + dy * unit),
+                unit * 0.42f * scale,
+                // Sparkles breathe out of phase with each other so the group
+                // twinkles instead of pulsing as one block.
+                color.copy(alpha = (0.55f + 0.45f * sin((phase + dx) * 2f * PI.toFloat())).coerceIn(0f, 1f)),
+            )
+        }
+
+        FaceIcon.HEART -> drawHeartEye(anchor, unit * 0.75f, color)
+
+        FaceIcon.SLEEP -> listOf(0.9f to 0.7f, 0.0f to 1.0f, -0.75f to 1.35f).forEachIndexed { i, (dx, scale) ->
+            drawZ(
+                Offset(anchor.x + dx * unit, anchor.y - i * unit * 0.55f),
+                unit * 0.34f * scale,
+                color.copy(alpha = 1f - i * 0.28f),
+                stroke,
+            )
+        }
+
+        FaceIcon.NONE -> Unit
+    }
+}
+
+private fun DrawScope.drawSparkle(center: Offset, radius: Float, color: Color) {
+    // A four-pointed star with concave sides, drawn as two mirrored curves per
+    // quadrant: the shape reads as a glint where a plain cross reads as a plus.
+    val path = Path().apply {
+        moveTo(center.x, center.y - radius)
+        quadraticTo(center.x + radius * 0.18f, center.y - radius * 0.18f, center.x + radius, center.y)
+        quadraticTo(center.x + radius * 0.18f, center.y + radius * 0.18f, center.x, center.y + radius)
+        quadraticTo(center.x - radius * 0.18f, center.y + radius * 0.18f, center.x - radius, center.y)
+        quadraticTo(center.x - radius * 0.18f, center.y - radius * 0.18f, center.x, center.y - radius)
+        close()
+    }
+    drawPath(path, color)
+}
+
+private fun DrawScope.drawZ(center: Offset, size: Float, color: Color, stroke: Stroke) {
     drawPath(
-        path = path,
-        color = color,
-        style = Stroke(width = unit * 0.22f, cap = StrokeCap.Round),
+        Path().apply {
+            moveTo(center.x - size / 2f, center.y - size / 2f)
+            lineTo(center.x + size / 2f, center.y - size / 2f)
+            lineTo(center.x - size / 2f, center.y + size / 2f)
+            lineTo(center.x + size / 2f, center.y + size / 2f)
+        },
+        color, style = stroke,
     )
 }
 
 /**
- * Rings, dots and the progress sweep. These sit behind the face and are drawn
- * before it so the face itself is never occluded.
+ * Rings and the progress sweep, behind the face.
  *
  * [phase] runs 0f..1f once per ambient cycle; each decoration derives its own
  * timing from it rather than owning a separate animation.
@@ -441,13 +635,9 @@ private fun DrawScope.drawDecorations(
     center: Offset,
     phase: Float,
     ringAmount: Float,
-    dotsAmount: Float,
     progressAmount: Float,
     amplitude: Float,
 ) {
-    val cx = center.x
-    val cy = center.y
-
     // ── Listening: rings expanding outward from the face ──
     if (ringAmount > 0.01f) {
         val baseRadius = unit * 4.4f
@@ -455,41 +645,24 @@ private fun DrawScope.drawDecorations(
         // a single pulse that restarts.
         listOf(0f, 0.5f).forEach { offset ->
             val p = (phase + offset) % 1f
-            val radius = baseRadius + p * unit * (2.0f + amplitude * 2.2f)
             drawCircle(
                 color = accent.copy(alpha = (1f - p) * 0.30f * ringAmount),
-                radius = radius,
-                center = Offset(cx, cy),
+                radius = baseRadius + p * unit * (2.0f + amplitude * 2.2f),
+                center = center,
                 style = Stroke(width = unit * 0.08f),
-            )
-        }
-    }
-
-    // ── Thinking: three dots below the face, lighting up in turn ──
-    if (dotsAmount > 0.01f) {
-        val dotY = cy + unit * 5.4f
-        val spacing = unit * 0.75f
-        repeat(3) { i ->
-            // Each dot peaks a third of a cycle after the previous one.
-            val p = (phase - i * 0.33f + 1f) % 1f
-            val glow = (sin(p * PI.toFloat()) * 0.9f + 0.1f).coerceIn(0f, 1f)
-            drawCircle(
-                color = accent.copy(alpha = glow * dotsAmount),
-                radius = unit * 0.17f,
-                center = Offset(cx + (i - 1) * spacing, dotY),
             )
         }
     }
 
     // ── Executing: a thin progress bar sweeping under the face ──
     if (progressAmount > 0.01f) {
-        val barY = cy + unit * 5.4f
+        val barY = center.y + unit * 5.4f
         val halfW = unit * 2.6f
         val thickness = unit * 0.08f
         drawLine(
             color = accent.copy(alpha = 0.18f * progressAmount),
-            start = Offset(cx - halfW, barY),
-            end = Offset(cx + halfW, barY),
+            start = Offset(center.x - halfW, barY),
+            end = Offset(center.x + halfW, barY),
             strokeWidth = thickness,
             cap = StrokeCap.Round,
         )
@@ -499,8 +672,8 @@ private fun DrawScope.drawDecorations(
         val headStart = -halfW + phase * (halfW * 2f + headLen) - headLen
         drawLine(
             color = accent.copy(alpha = 0.9f * progressAmount),
-            start = Offset(cx + headStart.coerceAtLeast(-halfW), barY),
-            end = Offset(cx + (headStart + headLen).coerceAtMost(halfW), barY),
+            start = Offset(center.x + headStart.coerceAtLeast(-halfW), barY),
+            end = Offset(center.x + (headStart + headLen).coerceAtMost(halfW), barY),
             strokeWidth = thickness,
             cap = StrokeCap.Round,
         )

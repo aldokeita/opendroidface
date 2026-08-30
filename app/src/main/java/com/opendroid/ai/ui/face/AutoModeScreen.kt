@@ -11,7 +11,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -40,6 +42,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,6 +76,7 @@ fun autoModeStatusLabel(state: AgentState, isListening: Boolean): String = when 
     else -> "Tap to speak"
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AutoModeScreen(
     state: AgentState,
@@ -90,6 +96,12 @@ fun AutoModeScreen(
 ) {
     val colors = LocalOpenDroidColors.current
     val awaitingApproval = state is AgentState.PlanProposed
+    var showGallery by remember { mutableStateOf(false) }
+
+    if (showGallery) {
+        FaceGallery(onClose = { showGallery = false }, modifier = modifier)
+        return
+    }
 
     Box(
         modifier = modifier
@@ -164,6 +176,14 @@ fun AutoModeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(maxWidth)
+                        // Long-press opens the gallery of every expression. Most of
+                        // them last a second in real use, and the phase 4 vocabulary
+                        // has no trigger yet, so this is the only way to review the
+                        // drawing as a set.
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = { showGallery = true },
+                        )
                 )
             }
 
