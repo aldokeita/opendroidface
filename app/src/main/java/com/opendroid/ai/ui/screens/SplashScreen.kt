@@ -51,9 +51,15 @@ data class SplashTiming(
  * which reads as a glitch rather than as a launch.
  */
 fun splashTiming(reduceMotion: Boolean): SplashTiming = if (reduceMotion) {
-    SplashTiming(fadeInMillis = 0, holdMillis = 420, fadeOutMillis = 0)
+    SplashTiming(fadeInMillis = 0, holdMillis = 280, fadeOutMillis = 0)
 } else {
-    SplashTiming(fadeInMillis = 340, holdMillis = 300, fadeOutMillis = 220)
+    // Deliberately short. The platform splash has already held for the whole of
+    // a two-second cold start by the time this composable draws its first frame,
+    // so anything generous here is a second logo screen after the first one -
+    // measured on a Pixel 8a, the old 860ms showed the icon, then this, then the
+    // app. Now the window colour, the platform splash and this screen are the
+    // same black, so it reads as the face arriving on a screen already there.
+    SplashTiming(fadeInMillis = 220, holdMillis = 80, fadeOutMillis = 120)
 }
 
 @Composable

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The window theme, which is what the system draws BEFORE any of this app's
+  Compose code runs.
+
+  Cold start on this app is around two seconds - Hilt, Room and the LiteRT
+  native libraries all load first - and every one of those milliseconds is the
+  platform splash. It was the untouched DeviceDefault background, a different
+  near-black from the app's, so launching flashed one dark grey, then the icon,
+  then a second dark grey as the app finally drew. Matching the colour is what
+  turns those two seconds from a stack of screens into one screen the app fades
+  into.
+-->
+<resources>
+    <style name="Theme.OpenDroid" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <!-- DarkPalette.background. Kept literal because the palette lives in
+             Kotlin, where the window theme cannot reach it. -->
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

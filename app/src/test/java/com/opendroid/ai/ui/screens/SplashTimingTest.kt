@@ -30,6 +30,14 @@ class SplashTimingTest {
     }
 
     @Test
+    fun `the animated splash stays shorter than half a second`() {
+        // The platform splash covers the whole cold start before this composable
+        // draws anything, so a generous animation here is a second logo screen
+        // played after the first one has finished.
+        assertTrue(splashTiming(reduceMotion = false).totalMillis <= 500)
+    }
+
+    @Test
     fun `neither path delays the app for as much as a second`() {
         // The startup route is resolved off the main thread while the splash
         // runs; anything past a second here is the splash making the user wait,
