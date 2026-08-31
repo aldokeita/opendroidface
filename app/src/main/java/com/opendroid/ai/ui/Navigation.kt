@@ -4,9 +4,17 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -488,6 +496,20 @@ private fun OpenDroidNavBar(
         label = "navIndicator",
     )
 
+    // A slow breath on the red. Read inside the draw lambda like everything else,
+    // so the pulse costs a redraw and nothing more. Long and shallow on purpose:
+    // a bar that blinks at you is a bar you stop being able to ignore, and this
+    // one sits on screen the whole time the app is open.
+    val breath = rememberInfiniteTransition(label = "navGlow").animateFloat(
+        initialValue = 0.45f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "navGlowValue",
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -556,18 +578,61 @@ private fun OpenDroidNavBar(
                 }
                 drawPath(path = fill, color = colors.background)
 
-                // The stroke is what has to read now, so it is thicker and does
-                // not fade to nothing at the ends - it fades to a dim red instead,
-                // which keeps the outline continuous around the whole bar rather
-                // than stopping short of the corners.
+                val pulse = breath.value
+
+                // The outline around the bar itself. The crest line only ever ran
+                // across the middle, so the pill had no edge of its own and its
+                // bottom in particular disappeared into the page behind it.
+                // Inset by half the stroke, or the clip takes the outer half.
+                val borderWidth = with(density) { 1.5f.dp.toPx() }
+                drawRoundRect(
+                    color = accent.copy(alpha = 0.10f + 0.22f * pulse),
+                    topLeft = Offset(borderWidth / 2f, borderWidth / 2f),
+                    size = Size(size.width - borderWidth, size.height - borderWidth),
+                    cornerRadius = CornerRadius(
+                        with(density) { 50.dp.toPx() },
+                        with(density) { 50.dp.toPx() },
+                    ),
+                    style = Stroke(width = borderWidth),
+                )
+
+                // The crest, drawn three times: two wide faint passes for the glow
+                // and one solid pass on top. Compose cannot blur inside a draw
+                // scope on every version this app runs on, so the falloff is built
+                // out of overlapping strokes - few enough to stay cheap, enough
+                // that the edge does not band.
+                // All the way out to nothing at both ends. Holding them at a dim
+                // red kept the line alive right up to the pill's corner, where it
+                // has nothing left to do - the pill's own outline is what carries
+                // the edge there now, so this one can leave.
+                val strokeBrush = Brush.horizontalGradient(
+                    0.00f to Color.Transparent,
+                    0.06f to accent.copy(alpha = 0.15f),
+                    0.20f to accent,
+                    0.80f to accent,
+                    0.94f to accent.copy(alpha = 0.15f),
+                    1.00f to Color.Transparent,
+                )
+                // Four passes rather than two, and much wider. A thin halo reads as
+                // light escaping inward from the line; the point of a glow is that
+                // it falls off over a distance, and two narrow passes gave it
+                // nowhere to fall off over.
+                listOf(
+                    24.dp to 0.030f * pulse,
+                    16.dp to 0.045f * pulse,
+                    10.dp to 0.065f * pulse,
+                    6.dp to 0.090f * pulse,
+                ).forEach { (width, alpha) ->
+                    drawPath(
+                        path = path,
+                        brush = strokeBrush,
+                        alpha = alpha,
+                        style = Stroke(width = with(density) { width.toPx() }, cap = StrokeCap.Round),
+                    )
+                }
                 drawPath(
                     path = path,
-                    brush = Brush.horizontalGradient(
-                        0.00f to accent.copy(alpha = 0.35f),
-                        0.12f to accent,
-                        0.88f to accent,
-                        1.00f to accent.copy(alpha = 0.35f),
-                    ),
+                    brush = strokeBrush,
                     style = Stroke(width = with(density) { 2.5f.dp.toPx() }, cap = StrokeCap.Round),
                 )
             }
