@@ -11,6 +11,13 @@
 
     This file is in src/debug, so it applies to debug builds and NEVER to release.
 -->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true"/>
+<network-security-config xmlns:tools="http://schemas.android.com/tools">
+    <!--
+        tools:ignore, not a lint baseline: the relaxation is deliberate and the
+        reasoning above belongs next to it, where the next person to read this
+        file will see it. A baseline entry would only hide the warning.
+    -->
+    <base-config
+        cleartextTrafficPermitted="true"
+        tools:ignore="InsecureBaseConfiguration"/>
 </network-security-config>
