@@ -58,6 +58,17 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      # The job already builds this APK; keeping it means a branch can be
+      # installed on a phone without a PC, which is how this repo is worked on.
+      # Debug-signed, so it never collides with a release install.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
+
   lint:
     name: Android Lint
     runs-on: ubuntu-latest
