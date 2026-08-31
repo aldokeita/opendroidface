@@ -2,6 +2,14 @@ package com.opendroid.ai.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
@@ -405,7 +413,33 @@ fun MainDashboard(
                 .padding(paddingValues)
                 .consumeWindowInsets(paddingValues)
         ) {
-            when (currentTab) {
+            // The screen travels the same way the pocket does. Cutting between
+            // tabs left the bar as the only thing that moved, so the bar looked
+            // like an animation playing over a screen that had already changed;
+            // a short slide in the direction of travel makes the two one gesture.
+            // Small distance and heavy on the fade - a full-width slide on a
+            // screen this dense reads as the page being dragged.
+            AnimatedContent(
+                targetState = currentTab,
+                transitionSpec = {
+                    val forward = tabs.indexOf(targetState) > tabs.indexOf(initialState)
+                    val shift = { full: Int -> full / 12 }
+                    val move = tween<IntOffset>(NAV_TRANSITION_MS, easing = FastOutSlowInEasing)
+                    (
+                        slideInHorizontally(move) { if (forward) shift(it) else -shift(it) } +
+                            fadeIn(tween(NAV_TRANSITION_MS, easing = FastOutSlowInEasing))
+                    ) togetherWith (
+                        slideOutHorizontally(move) { if (forward) -shift(it) else shift(it) } +
+                            // The outgoing screen leaves sooner than the incoming
+                            // one arrives, so the two are never both at half
+                            // opacity over the same pixels - which is what makes a
+                            // cross-fade look like a smear.
+                            fadeOut(tween(NAV_TRANSITION_MS / 2, easing = FastOutSlowInEasing))
+                    ) using SizeTransform(clip = false)
+                },
+                label = "tabContent",
+            ) { tab ->
+            when (tab) {
                 Screen.Chat -> ChatScreen(viewModel = chatViewModel)
                 Screen.Memory -> MemoryScreen(viewModel = memoryViewModel)
                 Screen.Settings -> SettingsScreen(
@@ -426,9 +460,18 @@ fun MainDashboard(
                     onNavigateToLogs = onNavigateToLogs
                 )
             }
+            }
         }
     }
 }
+
+/**
+ * How long a tab change takes, for the bar and the screen alike.
+ *
+ * One number, used by both, because two animations of nearly the same length are
+ * exactly what a mismatch looks like.
+ */
+private const val NAV_TRANSITION_MS = 340
 
 /**
  * How high the line stands where a tab is selected, as a fraction of the
@@ -490,9 +533,14 @@ private fun OpenDroidNavBar(
     // rather than a recomposition. Read here in composition instead, the whole
     // row - three icons, three labels, their text layout - was rebuilt sixty
     // times a second, which is what stopped it feeling like sixty frames.
+    // A tween, not a spring, and the same one the screen behind it uses. A spring
+    // has an asymptotic tail - it is nearly there long before it is there - so
+    // the pocket was still creeping into place after the screen had finished
+    // changing. One duration and one easing shared with the content is what makes
+    // the bar and the screen read as a single movement rather than two.
     val indicator = animateFloatAsState(
         targetValue = selectedIndex.toFloat(),
-        animationSpec = spring(dampingRatio = 0.95f, stiffness = 260f),
+        animationSpec = tween(NAV_TRANSITION_MS, easing = FastOutSlowInEasing),
         label = "navIndicator",
     )
 
@@ -542,6 +590,13 @@ private fun OpenDroidNavBar(
             val accent = colors.accentRed
             val liftPx = with(density) { 4.dp.toPx() }
 
+            // Held across frames and rewound rather than rebuilt. Two fresh Paths
+            // per frame is two allocations sixty times a second, and the garbage
+            // they leave is collected in pauses long enough to drop a frame - the
+            // one thing a bar whose whole job is to move smoothly cannot afford.
+            val crestPath = remember { Path() }
+            val fillPath = remember { Path() }
+
             Canvas(modifier = Modifier.fillMaxSize()) {
                 // Well clear of the pill's rounded bottom. At 12dp the flat run
                 // either side of the pocket sat inside the corner radius and was
@@ -557,8 +612,12 @@ private fun OpenDroidNavBar(
                 // Sampled rather than built from control points: the crest is a
                 // function, so the curve is exactly that function and not an
                 // approximation of it stitched together at the joins.
-                val steps = 120
-                val path = Path()
+                // 72 samples across the bar: about one every five pixels, which is
+                // finer than the 2.5dp stroke can show. 120 cost more to stroke
+                // five times over and looked identical.
+                val steps = 72
+                val path = crestPath
+                path.rewind()
                 for (i in 0..steps) {
                     val x = size.width * i / steps
                     val y = baseY - rise * navCrest((x - centreX) / slotWidthPx)
@@ -570,13 +629,12 @@ private fun OpenDroidNavBar(
                 // region, because they are one region. Cutting the fill back to
                 // the dome to make the baseline visible traded the darkness away
                 // for the line; the line is made to carry instead.
-                val fill = Path().apply {
-                    addPath(path)
-                    lineTo(size.width, heightPx)
-                    lineTo(0f, heightPx)
-                    close()
-                }
-                drawPath(path = fill, color = colors.background)
+                fillPath.rewind()
+                fillPath.addPath(path)
+                fillPath.lineTo(size.width, heightPx)
+                fillPath.lineTo(0f, heightPx)
+                fillPath.close()
+                drawPath(path = fillPath, color = colors.background)
 
                 val pulse = breath.value
 
@@ -617,11 +675,12 @@ private fun OpenDroidNavBar(
                 // light escaping inward from the line; the point of a glow is that
                 // it falls off over a distance, and two narrow passes gave it
                 // nowhere to fall off over.
+                // Three passes, not four. Each one strokes a 72-segment path, and
+                // the fourth was doing less for the falloff than it cost.
                 listOf(
-                    24.dp to 0.030f * pulse,
-                    16.dp to 0.045f * pulse,
-                    10.dp to 0.065f * pulse,
-                    6.dp to 0.090f * pulse,
+                    24.dp to 0.035f * pulse,
+                    14.dp to 0.055f * pulse,
+                    7.dp to 0.085f * pulse,
                 ).forEach { (width, alpha) ->
                     drawPath(
                         path = path,
