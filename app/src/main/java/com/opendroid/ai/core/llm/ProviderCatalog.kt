@@ -35,6 +35,11 @@ object ProviderCatalog {
         ProviderSpec("Cohere", "command-r-plus"),
         ProviderSpec("DeepSeek", "deepseek-chat"),
         ProviderSpec("Copilot API", "gpt-4o"),
+        // Reached through the bridge on the owner's computer, which fronts the
+        // Codex CLI and the ChatGPT account that CLI is signed in to. The model
+        // is whatever Codex itself is configured to use, so the seed is a name
+        // for that rather than a model this app could pick.
+        ProviderSpec("Codex", "codex"),
         ProviderSpec("Custom OpenAI Compatible", "custom-model"),
         ProviderSpec("Ollama", "llama3"),
         ProviderSpec(ON_DEVICE, "gemma-4-on-device"),
@@ -72,6 +77,9 @@ object ProviderCatalog {
         "Together AI",
         "Cohere",
         "DeepSeek",
+        // The bridge's shared secret, not an OpenAI key: it is what stops
+        // anything else on the Wi-Fi spending the owner's ChatGPT plan.
+        "Codex",
         "Custom OpenAI Compatible" -> true
         else -> false
     }

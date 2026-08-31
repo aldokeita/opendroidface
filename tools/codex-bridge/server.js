@@ -134,6 +134,41 @@ function extractJson(text) {
   return text.trim()
 }
 
+// Runs the Codex CLI with the given arguments and hands back what it said.
+//
+// Separate from runCodex below, which is built for `exec` and its sandbox flags,
+// temp workdir and JSON handling. The auth endpoints want none of that - they
+// want the CLI's own words about the account, verbatim.
+function runCodexArgs(args, timeoutMs) {
+  return new Promise((resolve) => {
+    const child = spawn(CODEX_BIN, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+    let stdout = ''
+    let stderr = ''
+    let settled = false
+
+    const finish = (code) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolve({ code, stdout, stderr })
+    }
+
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM')
+      stderr += `\nTimed out after ${timeoutMs} ms.`
+      finish(1)
+    }, timeoutMs)
+
+    child.stdout.on('data', (chunk) => { stdout += chunk })
+    child.stderr.on('data', (chunk) => { stderr += chunk })
+    child.on('error', (error) => {
+      stderr += `\n${error.message}`
+      finish(1)
+    })
+    child.on('close', (code) => finish(code ?? 1))
+  })
+}
+
 function runCodex(prompt, wantsJson) {
   return new Promise((resolve, reject) => {
     const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-bridge-'))
@@ -259,6 +294,33 @@ const server = http.createServer(async (req, res) => {
         `from ${req.socket.remoteAddress}, key length ${supplied.length} (expected ${TOKEN.length})`
     )
     sendJson(res, 401, { error: { message: 'Invalid or missing bearer token', type: 'auth_error' } })
+    return
+  }
+
+  // Whether the Codex CLI on THIS machine is signed in. The phone cannot answer
+  // this for itself: the ChatGPT session lives in the CLI's own credential
+  // store, and the only thing that can read it is the CLI.
+  if (req.method === 'GET' && url.pathname === '/auth/status') {
+    const result = await runCodexArgs(['login', 'status'], 15000)
+    const text = `${result.stdout}${result.stderr}`.trim()
+    sendJson(res, 200, {
+      signedIn: result.code === 0,
+      detail: text.slice(0, 400),
+    })
+    return
+  }
+
+  // Starts `codex login` here, on the computer. It opens a browser and finishes
+  // on this machine - the callback is bound to this machine's loopback, so it
+  // cannot be completed from the phone. The phone's part is to ask for it and to
+  // be told when it worked.
+  if (req.method === 'POST' && url.pathname === '/auth/login') {
+    const result = await runCodexArgs(['login'], 180000)
+    const text = `${result.stdout}${result.stderr}`.trim()
+    sendJson(res, result.code === 0 ? 200 : 502, {
+      signedIn: result.code === 0,
+      detail: text.slice(0, 800),
+    })
     return
   }
 

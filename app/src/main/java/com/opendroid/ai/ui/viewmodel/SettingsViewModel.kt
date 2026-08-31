@@ -41,6 +41,9 @@ import com.opendroid.ai.core.security.ProviderCredentialStore
 import com.opendroid.ai.core.settings.AppSettingsStore
 import com.opendroid.ai.data.repository.ProviderCredentialPersistenceState
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.opendroid.ai.core.llm.providers.CodexProvider
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import dagger.Lazy
@@ -544,6 +547,61 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    // ── Codex sign-in ────────────────────────────────────────────────────────
+    //
+    // The phone cannot sign into ChatGPT. A Plus subscription is not an API
+    // credential and there is no flow by which a third-party Android app spends
+    // one; what holds the session is the Codex CLI, on a computer, signed in
+    // through its own browser login. So these two calls ask the bridge about
+    // that machine's session, and ask it to start a login there.
+
+    private val _codexAuth = MutableStateFlow<CodexAuthState>(CodexAuthState.Unknown)
+    val codexAuth: StateFlow<CodexAuthState> = _codexAuth.asStateFlow()
+
+    fun checkCodexSignIn() = codexAuthCall(path = "auth/status", post = false)
+
+    fun startCodexSignIn() = codexAuthCall(path = "auth/login", post = true)
+
+    private fun codexAuthCall(path: String, post: Boolean) {
+        val config = _llmConfig.value
+        val base = config.customEndpoints[CodexProvider.PROVIDER_NAME].orEmpty().trim()
+        val token = config.apiKeys[CodexProvider.PROVIDER_NAME].orEmpty().trim()
+        if (base.isBlank() || token.isBlank()) {
+            _codexAuth.value = CodexAuthState.Failed("Set the bridge address and token first.")
+            return
+        }
+        // The provider field holds an OpenAI-style base ending in /v1; the auth
+        // routes sit beside it, not under it.
+        val root = base.trimEnd('/').removeSuffix("/v1")
+        _codexAuth.value = CodexAuthState.Working
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                val builder = Request.Builder()
+                    .url("$root/$path")
+                    .header("Authorization", "Bearer $token")
+                if (post) builder.post(ByteArray(0).toRequestBody(null))
+                // `codex login` opens a browser and waits for a person; the
+                // default read timeout would give up long before they finish.
+                val client = okHttpClient.newBuilder()
+                    .readTimeout(if (post) 200 else 20, TimeUnit.SECONDS)
+                    .build()
+                client.newCall(builder.build()).execute().use { response ->
+                    val body = response.body?.string().orEmpty()
+                    val signedIn = body.contains("\"signedIn\":true") ||
+                        body.contains("\"signedIn\": true")
+                    val detail = Regex("\"detail\"\\s*:\\s*\"(.*?)\"", RegexOption.DOT_MATCHES_ALL)
+                        .find(body)?.groupValues?.get(1)?.replace("\\n", " ")?.trim().orEmpty()
+                    if (signedIn) CodexAuthState.SignedIn(detail.ifBlank { "Signed in on your computer." })
+                    else CodexAuthState.SignedOut(detail.ifBlank { "Not signed in." })
+                }
+            }
+            _codexAuth.value = result.getOrElse { error ->
+                CodexAuthState.Failed(error.message ?: "Could not reach the bridge.")
+            }
+        }
+    }
+
     fun testConnection(providerName: String) {
         connectionTestJob?.cancel()
         clearInFlightConnectionState()
@@ -836,4 +894,18 @@ class SettingsViewModel @Inject constructor(
             )
         }
     }
+}
+
+
+/**
+ * What the bridge said about the Codex session on the owner's computer.
+ *
+ * Deliberately not called "logged in": nothing about this describes the phone.
+ */
+sealed interface CodexAuthState {
+    object Unknown : CodexAuthState
+    object Working : CodexAuthState
+    data class SignedIn(val detail: String) : CodexAuthState
+    data class SignedOut(val detail: String) : CodexAuthState
+    data class Failed(val message: String) : CodexAuthState
 }

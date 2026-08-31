@@ -21,12 +21,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CustomOpenAIProvider @Inject constructor(
+open class CustomOpenAIProvider @Inject constructor(
     private val client: OkHttpClient,
     private val settingsRepository: SettingsRepository
 ) : LLMProvider {
 
-    override val name: String = "Custom OpenAI Compatible"
+    // Open so a provider that speaks the same protocol against a different
+    // endpoint can reuse this transport rather than copy it. The name is what
+    // selects the stored endpoint and key, so it has to be the subclass's.
+    override val name: String get() = "Custom OpenAI Compatible"
     override val availableModels: List<String> = listOf("custom-model")
 
     private val gson = Gson()

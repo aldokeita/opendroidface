@@ -40,6 +40,7 @@ class LLMProviderFactory @Inject constructor(
     private val deepSeekProvider: Provider<DeepSeekProvider>,
     private val copilotProvider: Provider<CopilotProvider>,
     private val customOpenAIProvider: Provider<CustomOpenAIProvider>,
+    private val codexProvider: Provider<CodexProvider>,
     private val gemmaProvider: Provider<GemmaProvider>,
     private val liteRTLMProvider: Provider<LiteRTLMProvider>,
     private val hybridOnDeviceProvider: Provider<HybridOnDeviceProvider>,
@@ -63,6 +64,7 @@ class LLMProviderFactory @Inject constructor(
             "Cohere" -> cohereProvider.get()
             "DeepSeek" -> deepSeekProvider.get()
             "Copilot API" -> copilotProvider.get()
+            "Codex" -> codexProvider.get()
             "Custom OpenAI Compatible" -> customOpenAIProvider.get()
             // Hybrid on-device: both old and new names map here
             "On-Device AI",
@@ -119,6 +121,7 @@ class LLMProviderFactory @Inject constructor(
         return when (provider) {
             "Ollama" -> config.ollamaUrl.isNotBlank()
             "Copilot API" -> config.copilotUrl.isNotBlank()
+            "Codex",
             "Custom OpenAI Compatible" ->
                 config.customEndpoints[provider].orEmpty().isNotBlank() &&
                     config.apiKeys[provider].orEmpty().isNotBlank()
