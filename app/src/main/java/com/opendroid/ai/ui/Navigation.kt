@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
@@ -471,12 +473,18 @@ private fun OpenDroidNavBar(
 ) {
     val colors = LocalOpenDroidColors.current
     val selectedIndex = tabs.indexOf(current).coerceAtLeast(0)
-    // Stiff and barely under-damped: quick to arrive, with just enough overshoot
-    // to read as travel rather than as a jump. The old 420 stiffness took long
-    // enough to feel like the bar was thinking about it.
-    val indicator by animateFloatAsState(
+    // Soft and all but critically damped. Stiff enough to arrive without delay
+    // reads as abrupt on a shape this large - the pocket crosses a third of the
+    // screen - so it glides instead, with no bounce at the end to draw attention
+    // to the arrival.
+    // Deliberately NOT read through `by`. Every read of this value happens inside
+    // a draw or layout lambda below, so a frame of the animation costs a redraw
+    // rather than a recomposition. Read here in composition instead, the whole
+    // row - three icons, three labels, their text layout - was rebuilt sixty
+    // times a second, which is what stopped it feeling like sixty frames.
+    val indicator = animateFloatAsState(
         targetValue = selectedIndex.toFloat(),
-        animationSpec = spring(dampingRatio = 0.82f, stiffness = 900f),
+        animationSpec = spring(dampingRatio = 0.95f, stiffness = 260f),
         label = "navIndicator",
     )
 
@@ -493,10 +501,11 @@ private fun OpenDroidNavBar(
                 // has to fit above the icon rather than behind it.
                 .height(100.dp)
                 .clip(RoundedCornerShape(50.dp))
-                // A step lighter than the page. The reference bar is black on a
-                // pale screen; here the screen is already near-black, so the bar
-                // has to come up rather than down to read as an object on it.
-                .background(colors.cardBackground)
+                // Barely above the page rather than a step above it. The bar wants
+                // to be the darkest thing on the screen with only the line and the
+                // pocket reading on it; the card colour was light enough to make
+                // the bar itself the thing you noticed.
+                .background(colors.surface)
         ) {
             val density = LocalDensity.current
             // The tabs are inset from the pill's ends, so that even the outer
@@ -521,7 +530,7 @@ private fun OpenDroidNavBar(
                 // below the top of the bar - as tall as the pill can carry it
                 // without the stroke touching its own edge.
                 val rise = with(density) { 73.dp.toPx() }
-                val centreX = edgeInsetPx + slotWidthPx * (indicator + 0.5f)
+                val centreX = edgeInsetPx + slotWidthPx * (indicator.value + 0.5f)
 
                 // Sampled rather than built from control points: the crest is a
                 // function, so the curve is exactly that function and not an
@@ -534,40 +543,32 @@ private fun OpenDroidNavBar(
                     if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
                 }
 
-                // The dome the curve encloses, filled a shade apart from the rest
-                // of the bar. Without it the line is a line drawn across a flat
-                // surface; with it the selected tab sits in a pocket the line is
-                // the edge of, which is what the reference does.
+                // Everything under the curve is dark, right down to the bottom of
+                // the bar - the pocket and the strip either side of it are one
+                // region, because they are one region. Cutting the fill back to
+                // the dome to make the baseline visible traded the darkness away
+                // for the line; the line is made to carry instead.
                 val fill = Path().apply {
                     addPath(path)
                     lineTo(size.width, heightPx)
                     lineTo(0f, heightPx)
                     close()
                 }
-                // Both the fill and the stroke fade at the same two stops, so the
-                // pocket and its edge stop existing together rather than one being
-                // clipped by the pill while the other tapers.
-                val fadeStops = arrayOf(
-                    0.00f to Color.Transparent,
-                    0.13f to accent,
-                    0.87f to accent,
-                    1.00f to Color.Transparent,
-                )
-                // Darker than the bar, not a red wash. The pocket should read as a
-                // recess cut into the bar, and a recess is darker than the surface
-                // it is cut into; a tint of the line's own colour just looked like
-                // spill from the line.
-                val pocket = colors.background
-                drawPath(
-                    path = fill,
-                    brush = Brush.horizontalGradient(
-                        *fadeStops.map { (at, c) -> at to pocket.copy(alpha = c.alpha) }.toTypedArray()
-                    ),
-                )
+                drawPath(path = fill, color = colors.background)
+
+                // The stroke is what has to read now, so it is thicker and does
+                // not fade to nothing at the ends - it fades to a dim red instead,
+                // which keeps the outline continuous around the whole bar rather
+                // than stopping short of the corners.
                 drawPath(
                     path = path,
-                    brush = Brush.horizontalGradient(*fadeStops),
-                    style = Stroke(width = with(density) { 2.dp.toPx() }, cap = StrokeCap.Round),
+                    brush = Brush.horizontalGradient(
+                        0.00f to accent.copy(alpha = 0.35f),
+                        0.12f to accent,
+                        0.88f to accent,
+                        1.00f to accent.copy(alpha = 0.35f),
+                    ),
+                    style = Stroke(width = with(density) { 2.5f.dp.toPx() }, cap = StrokeCap.Round),
                 )
             }
 
@@ -577,12 +578,17 @@ private fun OpenDroidNavBar(
                     .padding(horizontal = edgeInset)
             ) {
                 tabs.forEachIndexed { index, tab ->
-                    // The same crest the line is drawn from, sampled at this tab's
-                    // centre. At 1 the tab is fully selected; between stops it is
-                    // partly both, which is what makes the handover continuous.
-                    val crest = navCrest(index - indicator)
-                    val tint = lerp(colors.textSecondary, accent, crest)
-                    val labelColor = lerp(colors.textSecondary, colors.textPrimary, crest)
+                    // Every use of the crest below is inside a graphicsLayer or an
+                    // offset lambda, so none of it is a composition read. The
+                    // selected and unselected states are both drawn, at every
+                    // moment, and cross-faded by layer alpha - which is a property
+                    // the render thread can animate without Compose rebuilding
+                    // anything. Tinting one copy would have meant recomposing to
+                    // change the tint.
+                    val crestOf = { navCrest(index - indicator.value) }
+                    val riseOffset: Density.() -> IntOffset =
+                        { IntOffset(0, -(liftPx * crestOf()).roundToInt()) }
+
                     // Sat low in the bar rather than centred in it. The crest has
                     // to arc OVER the icon to read as wrapping around the tab, and
                     // centred content left it nowhere to go: the line came up
@@ -599,33 +605,53 @@ private fun OpenDroidNavBar(
                         verticalArrangement = Arrangement.Bottom,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Icon(
-                            imageVector = tab.icon,
-                            contentDescription = tab.title,
-                            tint = tint,
-                            modifier = Modifier
-                                .offset { IntOffset(0, -(liftPx * crest).roundToInt()) }
-                                .size(23.dp),
-                        )
+                        Box(modifier = Modifier.offset(riseOffset)) {
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = tab.title,
+                                tint = colors.textSecondary,
+                                modifier = Modifier
+                                    .size(23.dp)
+                                    .graphicsLayer { alpha = 1f - crestOf() },
+                            )
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = null,
+                                tint = accent,
+                                modifier = Modifier
+                                    .size(23.dp)
+                                    .graphicsLayer { alpha = crestOf() },
+                            )
+                        }
                         Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = tab.title,
-                            color = labelColor,
-                            fontSize = 11.sp,
-                            fontWeight = if (crest > 0.5f) FontWeight.SemiBold else FontWeight.Normal,
-                            maxLines = 1,
-                            modifier = Modifier.offset { IntOffset(0, -(liftPx * crest).roundToInt()) },
-                        )
+                        Box(modifier = Modifier.offset(riseOffset)) {
+                            Text(
+                                text = tab.title,
+                                color = colors.textSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                modifier = Modifier.graphicsLayer { alpha = 1f - crestOf() },
+                            )
+                            Text(
+                                text = tab.title,
+                                color = colors.textPrimary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                modifier = Modifier.graphicsLayer { alpha = crestOf() },
+                            )
+                        }
                         Spacer(modifier = Modifier.height(5.dp))
-                        // The dot under the selected label. It takes its opacity
-                        // from the same crest, so it arrives with the pocket
-                        // rather than blinking on once the pocket has settled.
+                        // The dot under the selected label, fading in with the
+                        // pocket rather than blinking on once it has settled.
                         Box(
                             modifier = Modifier
-                                .offset { IntOffset(0, -(liftPx * crest).roundToInt()) }
+                                .offset(riseOffset)
+                                .graphicsLayer { alpha = crestOf() }
                                 .size(5.dp)
                                 .clip(CircleShape)
-                                .background(accent.copy(alpha = crest))
+                                .background(accent)
                         )
                     }
                 }

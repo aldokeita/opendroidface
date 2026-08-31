@@ -655,7 +655,11 @@ fun ChatScreen(
                                 .weight(1f)
                                 .heightIn(min = 52.dp, max = 120.dp)
                                 .clip(RoundedCornerShape(26.dp))
-                                .background(colors.cardBackground)
+                                // The same near-black as the nav bar. The composer
+                                // and the bar sit one above the other, so a field
+                                // a shade lighter than the bar under it read as two
+                                // unrelated surfaces stacked up.
+                                .background(colors.surface)
                                 .padding(horizontal = 14.dp),
                             contentAlignment = Alignment.CenterStart
                         ) {
