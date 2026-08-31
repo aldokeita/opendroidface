@@ -25,6 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,12 +49,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-enum class MemoryScreenTab(val title: String) {
-    GROWTH_GRAPH("GROWTH GRAPH"),
-    SEMANTIC("LONG-TERM"),
-    WORKING("TEMPORARY"),
-    EPISODIC("EPISODIC"),
-    PROCEDURAL("MACROS")
+/**
+ * The five things the agent keeps, and what each is called on screen.
+ *
+ * [title] is the tile label. [blurb] is the line under the picker that explains
+ * what you are looking at, because "episodic" and "procedural" are the words the
+ * memory system uses, not words anyone else would reach for.
+ */
+enum class MemoryScreenTab(val title: String, val blurb: String) {
+    GROWTH_GRAPH("Knowledge", "People, places and habits it has worked out about you."),
+    SEMANTIC("Facts", "Things you told it to remember."),
+    WORKING("Working", "What it is holding on to for the task in hand."),
+    EPISODIC("Episodes", "Conversations it can look back on."),
+    PROCEDURAL("Macros", "Sequences it has learned to repeat."),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +78,23 @@ fun MemoryScreen(
     var newKey by remember { mutableStateOf("") }
     var newValue by remember { mutableStateOf("") }
     var showMemoryMenu by remember { mutableStateOf(false) }
+
+    // What each store is holding, for the tiles. Collected here rather than
+    // inside each view so the picker can show all five counts at once, which is
+    // the whole reason it is tiles instead of tabs.
+    val graph by viewModel.knowledgeGraph.collectAsState()
+    val memories by viewModel.memoriesList.collectAsState()
+    val conversations by viewModel.conversationHistory.collectAsState()
+    val macros by viewModel.macrosList.collectAsState()
+    val tabCounts: Map<MemoryScreenTab, Int?> = mapOf(
+        MemoryScreenTab.GROWTH_GRAPH to graph.nodes.size,
+        MemoryScreenTab.SEMANTIC to memories.count { it.type == MemoryType.SEMANTIC },
+        // Working memory is device state - battery, network, where you are - not a
+        // pile of items, so there is no number to put on the tile.
+        MemoryScreenTab.WORKING to null,
+        MemoryScreenTab.EPISODIC to conversations.size,
+        MemoryScreenTab.PROCEDURAL to macros.size,
+    )
 
     Scaffold(
         topBar = {
@@ -133,37 +161,44 @@ fun MemoryScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Memory Category Tabs. Bled out to the screen edge so the tab that
-            // continues off-screen is visibly cut by the display rather than
-            // ending mid-word inside a margin, which reads as a layout bug.
-            ScrollableTabRow(
-                selectedTabIndex = selectedTab.ordinal,
-                containerColor = colors.background,
-                contentColor = colors.accentNeonGreen,
-                edgePadding = 16.dp,
-                divider = { Divider(color = colors.borderColor) },
-                modifier = Modifier.bleedHorizontally(16.dp)
+            // Tiles, not tabs. Five scrollable tabs across the top said only what
+            // each store is called, in the memory system's own vocabulary, and one
+            // of them was always cut off. A tile carries its count, which is the
+            // thing worth knowing at a glance - most of these are empty most of
+            // the time, and a tab row cannot tell you that.
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .bleedHorizontally(16.dp)
             ) {
-                MemoryScreenTab.values().forEach { tab ->
-                    Tab(
+                items(MemoryScreenTab.values()) { tab ->
+                    MemoryStoreTile(
+                        label = tab.title,
+                        count = tabCounts[tab],
                         selected = selectedTab == tab,
-                        onClick = { 
+                        onClick = {
                             selectedTab = tab
                             searchQuery = "" // Reset search query when changing tabs
                             isAddingFact = false
                         },
-                        text = {
-                            Text(
-                                text = tab.title,
-                                fontSize = 12.sp,
-                                fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // One line saying what the selected store actually holds. "Episodic"
+            // and "procedural" are the memory system's words, not anyone else's.
+            Text(
+                text = selectedTab.blurb,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                color = colors.textSecondary,
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Search Bar & Add Button (Conditional)
             if (selectedTab != MemoryScreenTab.WORKING) {
@@ -171,36 +206,64 @@ fun MemoryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    // Filled and borderless, the same control as the chat
+                    // composer. An outlined field with a floating label was a
+                    // second form language on a screen that only asks one thing.
+                    TextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         placeholder = {
-                            val hint = when (selectedTab) {
-                                MemoryScreenTab.GROWTH_GRAPH -> "Search Knowledge Graph..."
-                                MemoryScreenTab.EPISODIC -> "Search conversation logs..."
-                                MemoryScreenTab.PROCEDURAL -> "Search macros..."
-                                else -> "Search facts..."
-                            }
-                            Text(hint, color = colors.textSecondary, fontSize = 13.sp)
+                            Text(
+                                "Search ${selectedTab.title.lowercase()}",
+                                color = colors.textSecondary,
+                                fontSize = 14.sp,
+                            )
                         },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = colors.textSecondary) },
+                        textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = null,
+                                tint = colors.textSecondary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        },
+                        trailingIcon = if (searchQuery.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = "Clear search",
+                                        tint = colors.textSecondary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+                        } else null,
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = colors.accentNeonGreen,
-                            unfocusedBorderColor = colors.borderColor,
+                        shape = RoundedCornerShape(24.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = colors.cardBackground,
+                            unfocusedContainerColor = colors.cardBackground,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
                             focusedTextColor = colors.textPrimary,
-                            unfocusedTextColor = colors.textPrimary
+                            unfocusedTextColor = colors.textPrimary,
+                            cursorColor = colors.accentNeonGreen,
                         ),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
                     )
                     if (selectedTab == MemoryScreenTab.SEMANTIC) {
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         IconButton(
                             onClick = { isAddingFact = !isAddingFact },
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(colors.accentNeonGreen)
+                                .size(52.dp)
+                                .clip(CircleShape)
+                                .background(colors.accentGreenButton)
                         ) {
                             Icon(Icons.Default.Add, contentDescription = "Add Memory", tint = colors.background)
                         }
@@ -239,6 +302,55 @@ fun MemoryScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * One store in the picker: how much is in it, and what it is called.
+ *
+ * The count is the larger of the two, because on this screen the question is
+ * almost always "is there anything in there" rather than "what is it called".
+ */
+@Composable
+private fun MemoryStoreTile(
+    label: String,
+    /** Null for a store that holds state rather than items; shown as a dash. */
+    count: Int?,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = LocalOpenDroidColors.current
+    val container by animateColorAsState(
+        if (selected) colors.accentNeonGreen.copy(alpha = 0.14f) else colors.cardBackground,
+        tween(220),
+        label = "tileContainer",
+    )
+    val content by animateColorAsState(
+        if (selected) colors.accentNeonGreen else colors.textSecondary,
+        tween(220),
+        label = "tileContent",
+    )
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(container)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = count?.toString() ?: "—",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (count == 0 && !selected) colors.textSecondary.copy(alpha = 0.5f) else content,
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            letterSpacing = 0.3.sp,
+            color = content,
+        )
     }
 }
 

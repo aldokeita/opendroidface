@@ -2,15 +2,12 @@ package com.opendroid.ai.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +22,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -450,74 +450,111 @@ private fun OpenDroidNavBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(62.dp)
-                .clip(RoundedCornerShape(31.dp))
-                .background(colors.cardBackground)
+                .height(74.dp)
+                .clip(RoundedCornerShape(37.dp))
+                // Near-black rather than the card colour: the bar is meant to read
+                // as a solid object laid on the screen, and the red only carries
+                // if there is nothing else competing with it.
+                .background(colors.surface)
         ) {
+            val density = LocalDensity.current
             val slotWidth = maxWidth / tabs.size
-            val slotWidthPx = with(LocalDensity.current) { slotWidth.toPx() }
+            val slotWidthPx = with(density) { slotWidth.toPx() }
+            val heightPx = with(density) { 74.dp.toPx() }
+            val accent = colors.accentRed
 
-            // The travelling pill, drawn under the row. The offset is read in the
-            // lambda overload so the slide is a layout pass per frame rather than
-            // a recomposition per frame.
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset((slotWidthPx * indicator).roundToInt(), 0) }
-                    .width(slotWidth)
-                    .fillMaxHeight()
-                    .padding(6.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(colors.accentNeonGreen.copy(alpha = 0.14f))
-            )
+            // The line that runs the width of the bar and swoops up around
+            // whichever tab is selected. It is the whole animation: one continuous
+            // stroke whose bend travels, rather than three states lighting up in
+            // turn. Drawn on a Canvas because a path that has to be re-shaped every
+            // frame cannot be built out of layout.
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val baseY = heightPx - with(density) { 12.dp.toPx() }
+                val rise = with(density) { 24.dp.toPx() }
+                val centreX = slotWidthPx * (indicator + 0.5f)
+                val half = slotWidthPx * 0.30f
+                val ease = slotWidthPx * 0.22f
+
+                val path = Path().apply {
+                    moveTo(0f, baseY)
+                    lineTo(centreX - half - ease, baseY)
+                    // Two mirrored curves into and out of the notch, so the line
+                    // lifts rather than steps.
+                    cubicTo(
+                        centreX - half + ease * 0.3f, baseY,
+                        centreX - half - ease * 0.2f, baseY - rise,
+                        centreX - half + ease * 0.5f, baseY - rise,
+                    )
+                    lineTo(centreX + half - ease * 0.5f, baseY - rise)
+                    cubicTo(
+                        centreX + half + ease * 0.2f, baseY - rise,
+                        centreX + half - ease * 0.3f, baseY,
+                        centreX + half + ease, baseY,
+                    )
+                    lineTo(size.width, baseY)
+                }
+                drawPath(
+                    path = path,
+                    color = accent,
+                    style = Stroke(width = with(density) { 2.dp.toPx() }, cap = StrokeCap.Round),
+                )
+            }
 
             Row(modifier = Modifier.fillMaxSize()) {
                 tabs.forEach { tab ->
                     val isSelected = tab == current
                     val tint by animateColorAsState(
-                        if (isSelected) colors.accentNeonGreen else colors.textSecondary,
+                        if (isSelected) accent else colors.textSecondary,
                         tween(220),
                         label = "navTint",
                     )
-                    Row(
+                    val labelColor by animateColorAsState(
+                        if (isSelected) colors.textPrimary else colors.textSecondary,
+                        tween(220),
+                        label = "navLabel",
+                    )
+                    // The selected icon sits inside the notch, so it lifts with it.
+                    // In pixels, and read inside the offset lambda: a value that
+                    // changes every frame belongs in the layout pass, not in a
+                    // recomposition.
+                    val liftPx by animateFloatAsState(
+                        if (isSelected) with(density) { (-6).dp.toPx() } else 0f,
+                        spring(dampingRatio = 0.7f, stiffness = 400f),
+                        label = "navLift",
+                    )
+                    Column(
                         modifier = Modifier
                             .width(slotWidth)
                             .fillMaxHeight()
-                            .clip(RoundedCornerShape(25.dp))
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                             ) { onSelect(tab) },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Icon(
                             imageVector = tab.icon,
                             contentDescription = tab.title,
                             tint = tint,
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier
+                                .offset { IntOffset(0, liftPx.roundToInt()) }
+                                .size(23.dp),
                         )
-                        // The label belongs to the selected tab only. With three
-                        // stops there is room for it, and a bar of three permanent
-                        // captions is a strip of buttons again.
-                        AnimatedVisibility(
-                            visible = isSelected,
-                            enter = fadeIn(tween(180)) + expandHorizontally(tween(220)),
-                            exit = fadeOut(tween(120)) + shrinkHorizontally(tween(180)),
-                        ) {
-                            Text(
-                                text = tab.title,
-                                color = tint,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                modifier = Modifier.padding(start = 8.dp),
-                            )
-                        }
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = tab.title,
+                            color = labelColor,
+                            fontSize = 11.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            maxLines = 1,
+                            modifier = Modifier.offset { IntOffset(0, liftPx.roundToInt()) },
+                        )
                     }
                 }
             }
