@@ -7,12 +7,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -369,16 +371,44 @@ fun MacrosScreen(
                 }
             } else {
                 item {
-                    Box(
+                    // The same empty state the other two screens use: a quiet mark
+                    // in a soft disc, a title, and a line saying how something
+                    // gets here. One grey sentence floating in a 160dp box said
+                    // nothing about what to do next.
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(160.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(top = 56.dp, bottom = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(colors.cardBackground),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Build,
+                                contentDescription = null,
+                                tint = colors.textSecondary.copy(alpha = 0.75f),
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(18.dp))
                         Text(
-                            text = "No custom macros declared.",
+                            text = "No macros yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = colors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Save a completed task from Logs, or add one with the + button.",
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
                             color = colors.textSecondary,
-                            fontSize = 13.sp
+                            modifier = Modifier.padding(horizontal = 32.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 }

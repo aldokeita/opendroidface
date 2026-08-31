@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -281,38 +283,43 @@ fun PlanHeaderCard(
 @Composable
 fun EmptyPlanPlaceholder() {
     val colors = LocalOpenDroidColors.current
-    Card(
+    // No card. An empty state boxed inside a surface reads as a thing that failed
+    // to load; on its own it reads as a screen waiting for something to happen.
+    Column(
         modifier = Modifier
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = colors.surface)
+            .fillMaxWidth()
+            .padding(top = 64.dp, bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(colors.cardBackground),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = "No plan",
-                tint = colors.textSecondary,
-                modifier = Modifier.size(36.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "No active plans running",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Plans formulated by the autonomous system will display here in real-time.",
-                fontSize = 11.sp,
-                color = colors.textSecondary,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                contentDescription = null,
+                tint = colors.textSecondary.copy(alpha = 0.75f),
+                modifier = Modifier.size(26.dp)
             )
         }
+        Spacer(modifier = Modifier.height(18.dp))
+        Text(
+            text = "Nothing running",
+            style = MaterialTheme.typography.titleMedium,
+            color = colors.textPrimary
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "When you give the agent a task, the steps it plans appear here as it works through them.",
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+            color = colors.textSecondary,
+            modifier = Modifier.padding(horizontal = 32.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }
 

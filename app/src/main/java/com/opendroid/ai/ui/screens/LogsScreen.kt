@@ -1,7 +1,10 @@
 package com.opendroid.ai.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,7 +41,7 @@ fun LogsScreen(
 ) {
     val colors = LocalOpenDroidColors.current
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Execution Logs", "Action Errors")
+    val tabs = listOf("Executions", "Errors")
 
     val history by viewModel.taskHistory.collectAsState()
     val actionErrors by viewModel.unknownActions.collectAsState()
@@ -112,33 +115,46 @@ fun LogsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = colors.background,
-                contentColor = colors.accentNeonGreen,
-                indicator = { tabPositions ->
-                    TabRowDefaults.Indicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                        color = colors.accentNeonGreen
-                    )
-                },
-                divider = {
-                    Divider(color = colors.borderColor)
-                }
+            // A segmented control, not a tab row. Two underlined captions in neon
+            // caps read as a page of a document; two segments in a track read as
+            // a switch between two lists, which is what this is.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(colors.cardBackground)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = {
-                            Text(
-                                text = title,
-                                fontSize = 13.sp,
-                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
-                                color = if (selectedTab == index) colors.accentNeonGreen else colors.textSecondary
-                            )
-                        }
+                    val isSelected = selectedTab == index
+                    val container by animateColorAsState(
+                        if (isSelected) colors.accentNeonGreen.copy(alpha = 0.16f) else Color.Transparent,
+                        tween(200),
+                        label = "segContainer",
                     )
+                    val content by animateColorAsState(
+                        if (isSelected) colors.accentNeonGreen else colors.textSecondary,
+                        tween(200),
+                        label = "segContent",
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(container)
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = title,
+                            fontSize = 13.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = content,
+                        )
+                    }
                 }
             }
 
@@ -173,7 +189,7 @@ fun LogsScreen(
                         EmptyStateView(
                             title = "No executions recorded yet",
                             subtitle = "Every step OpenDroid executes is archived here.",
-                            icon = Icons.Default.Info
+                            icon = Icons.Default.History
                         )
                     }
                 } else {
@@ -189,8 +205,8 @@ fun LogsScreen(
                         }
                     } else {
                         EmptyStateView(
-                            title = "All systems fully aligned",
-                            subtitle = "OpenDroid's Repair Engine has not encountered any unrecognized commands.",
+                            title = "Nothing has gone wrong",
+                            subtitle = "Commands the agent could not recognise would be listed here.",
                             icon = Icons.Default.CheckCircle,
                             iconColor = colors.accentNeonGreen
                         )
@@ -270,25 +286,36 @@ fun EmptyStateView(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            // A quiet mark inside a soft disc, not a 48dp filled circle. The old
+            // one was the heaviest thing on a screen whose entire message is that
+            // there is nothing here yet.
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(colors.cardBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconColor.copy(alpha = 0.75f),
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(18.dp))
             Text(
                 text = title,
+                style = MaterialTheme.typography.titleMedium,
                 color = colors.textPrimary,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = subtitle,
                 color = colors.textSecondary,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(horizontal = 24.dp),
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                modifier = Modifier.padding(horizontal = 32.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
