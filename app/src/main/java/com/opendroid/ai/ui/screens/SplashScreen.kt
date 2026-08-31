@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -34,6 +38,9 @@ import kotlinx.coroutines.delay
  * time the user spends looking at a logo for no reason. Short enough to read as
  * a transition rather than a screen.
  */
+/** How wide the accent hairline grows. Roughly the width of the wordmark. */
+private val RULE_WIDTH = 96.dp
+
 data class SplashTiming(
     val fadeInMillis: Int,
     val holdMillis: Int,
@@ -48,15 +55,13 @@ data class SplashTiming(
  * which reads as a glitch rather than as a launch.
  */
 fun splashTiming(reduceMotion: Boolean): SplashTiming = if (reduceMotion) {
-    SplashTiming(fadeInMillis = 0, holdMillis = 280, fadeOutMillis = 0)
+    SplashTiming(fadeInMillis = 0, holdMillis = 1_100, fadeOutMillis = 0)
 } else {
-    // Deliberately short. The platform splash has already held for the whole of
-    // a two-second cold start by the time this composable draws its first frame,
-    // so anything generous here is a second logo screen after the first one -
-    // measured on a Pixel 8a, the old 860ms showed the icon, then this, then the
-    // app. Now the window colour, the platform splash and this screen are the
-    // same black, so it reads as the face arriving on a screen already there.
-    SplashTiming(fadeInMillis = 220, holdMillis = 80, fadeOutMillis = 120)
+    // Paced to be looked at rather than caught. The three staged parts below run
+    // over the fade-in, and the hold after them is the part that decides whether
+    // the screen reads as a moment or as a frame that flicked past - at 480ms it
+    // was still the latter.
+    SplashTiming(fadeInMillis = 520, holdMillis = 900, fadeOutMillis = 320)
 }
 
 @Composable
@@ -65,23 +70,40 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
     val reduceMotion = rememberReduceMotion()
     val timing = remember(reduceMotion) { splashTiming(reduceMotion) }
 
-    val reveal = remember { Animatable(0f) }
+    // Three parts, staged rather than simultaneous. Everything appearing at once
+    // is a picture being switched on; one thing after another is a sequence, and
+    // a sequence is the only thing a second of screen time can be spent on
+    // without feeling like a wait.
+    val name = remember { Animatable(0f) }
+    val rule = remember { Animatable(0f) }
+    val tagline = remember { Animatable(0f) }
+    // Kept separate from the three so the exit dims whatever state they are in,
+    // rather than rewinding the entrance.
+    val exit = remember { Animatable(1f) }
 
     LaunchedEffect(timing) {
         if (timing.fadeInMillis == 0) {
-            reveal.snapTo(1f)
+            name.snapTo(1f)
+            rule.snapTo(1f)
+            tagline.snapTo(1f)
         } else {
-            reveal.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(timing.fadeInMillis, easing = FastOutSlowInEasing),
-            )
+            launch {
+                name.animateTo(1f, tween(timing.fadeInMillis, easing = FastOutSlowInEasing))
+            }
+            launch {
+                // The rule starts while the name is still arriving, so it reads as
+                // being drawn under it rather than as a third thing appearing.
+                delay(220)
+                rule.animateTo(1f, tween(560, easing = FastOutSlowInEasing))
+            }
+            launch {
+                delay(420)
+                tagline.animateTo(1f, tween(420, easing = FastOutSlowInEasing))
+            }
         }
-        delay(timing.holdMillis.toLong())
+        delay((timing.fadeInMillis + timing.holdMillis).toLong())
         if (timing.fadeOutMillis > 0) {
-            reveal.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(timing.fadeOutMillis, easing = FastOutSlowInEasing),
-            )
+            exit.animateTo(0f, tween(timing.fadeOutMillis, easing = FastOutSlowInEasing))
         }
         onNavigateNext()
     }
@@ -96,12 +118,7 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(horizontal = 32.dp)
-                .graphicsLayer {
-                    alpha = reveal.value
-                    // A short rise into place, not a slide: enough to give the
-                    // fade a direction, small enough that nothing appears to move.
-                    translationY = (1f - reveal.value) * 16.dp.toPx()
-                },
+                .graphicsLayer { alpha = exit.value },
         ) {
             // The name, and nothing else. The face belongs to the app itself -
             // it is the first thing on the chat screen and the whole of
@@ -114,8 +131,30 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
                 fontSize = 34.sp,
                 letterSpacing = (-0.8).sp,
                 color = colors.textPrimary,
+                modifier = Modifier.graphicsLayer {
+                    alpha = name.value
+                    // A short rise into place, not a slide: enough to give the
+                    // fade a direction, small enough that nothing appears to move.
+                    translationY = (1f - name.value) * 18.dp.toPx()
+                    // And a fraction of scale with it, so the name settles rather
+                    // than lands.
+                    val s = 0.94f + 0.06f * name.value
+                    scaleX = s
+                    scaleY = s
+                },
             )
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            // A hairline drawn out from the centre. It is the one moving thing on
+            // the screen, and it gives the beat between the name and the line
+            // under it something to be filled with.
+            Box(
+                modifier = Modifier
+                    .width(RULE_WIDTH * rule.value)
+                    .height(2.dp)
+                    .clip(RoundedCornerShape(1.dp))
+                    .background(colors.accentNeonGreen)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Your open autonomous Android agent",
                 fontSize = 13.sp,
@@ -123,6 +162,10 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
                 letterSpacing = 0.2.sp,
                 color = colors.textSecondary,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.graphicsLayer {
+                    alpha = tagline.value
+                    translationY = (1f - tagline.value) * 8.dp.toPx()
+                },
             )
         }
     }

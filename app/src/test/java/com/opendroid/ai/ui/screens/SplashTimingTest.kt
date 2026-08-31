@@ -30,19 +30,20 @@ class SplashTimingTest {
     }
 
     @Test
-    fun `the animated splash stays shorter than half a second`() {
-        // The platform splash covers the whole cold start before this composable
-        // draws anything, so a generous animation here is a second logo screen
-        // played after the first one has finished.
-        assertTrue(splashTiming(reduceMotion = false).totalMillis <= 500)
+    fun `the animated splash lasts long enough to be watched`() {
+        // Its three parts arrive in sequence - name, rule, tagline - and the last
+        // of them does not start until 300ms in. Shorter than this and the
+        // sequence is over before the eye has followed it, which is what the
+        // 420ms version got wrong.
+        assertTrue(splashTiming(reduceMotion = false).totalMillis >= 900)
     }
 
     @Test
-    fun `neither path delays the app for as much as a second`() {
+    fun `neither path delays the app past two seconds`() {
         // The startup route is resolved off the main thread while the splash
-        // runs; anything past a second here is the splash making the user wait,
-        // not the app still deciding where to go.
-        assertTrue(splashTiming(reduceMotion = false).totalMillis < 1_000)
-        assertTrue(splashTiming(reduceMotion = true).totalMillis < 1_000)
+        // runs, and the platform splash has already held the screen for the whole
+        // cold start. Past this the splash is making the user wait on purpose.
+        assertTrue(splashTiming(reduceMotion = false).totalMillis <= 2_000)
+        assertTrue(splashTiming(reduceMotion = true).totalMillis <= 2_000)
     }
 }
