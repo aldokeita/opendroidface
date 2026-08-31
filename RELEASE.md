@@ -2,6 +2,13 @@
 
 See the full release documentation and changelogs in [docs/RELEASE.md](docs/RELEASE.md).
 
+> **Sideloading these APKs on a certified Android device** goes through Android's
+> developer verification since 30 September 2026 (Brazil, Indonesia, Singapore and
+> Thailand first; worldwide in 2027), and a self-signed release does not satisfy it.
+> If an install fails with "Something went wrong. App not installed.", see
+> [docs/RELEASE.md](docs/RELEASE.md#before-you-sideload-android-developer-verification)
+> — `adb install` is exempt, and the device has a one-time advanced flow.
+
 ## v1.0.6 — Latest Release (August 20, 2026)
 
 ### Highlights since v1.0.5

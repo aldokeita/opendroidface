@@ -140,6 +140,54 @@ nama tag-nya.
 Untuk memasang di HP: buka halaman Releases, unduh APK, izinkan pemasangan dari
 sumber ini saat diminta.
 
+### Verifikasi developer Android — baca ini kalau pemasangan gagal
+
+Android punya layanan sistem **Android Developer Verifier**
+(`com.google.android.verifier`) yang memeriksa apakah sebuah app terdaftar pada
+developer terverifikasi. Sejak **30 September 2026** hanya app dari developer
+terverifikasi yang bisa dipasang di perangkat Android bersertifikat, dan
+**Indonesia termasuk empat pasar pertama** (bersama Brasil, Singapura,
+Thailand); sisanya menyusul 2027. Alur pemasangan barunya sudah digulirkan
+bertahap sejak pertengahan Agustus 2026.
+
+Artinya APK dari repo ini — mau ditandatangani kunci debug maupun kunci rilis
+sendiri — **ditolak** di perangkat bersertifikat, dengan pesan yang tidak
+menjelaskan apa pun:
+
+> Something went wrong. App not installed.
+
+Yang penting dipahami: ini **bukan** Play Protect. Mematikan Play Protect atau
+Advanced Protection tidak berpengaruh, dan verifikasi ini juga bukan soal jenis
+tanda tangan — menyiapkan keystore rilis di atas tidak membuatnya lolos.
+
+Dua jalan keluar, keduanya resmi:
+
+**1. `adb` — dikecualikan sepenuhnya.** Cara tercepat kalau ada PC:
+
+```powershell
+adb install -r app\build\outputs\apk\debug\app-debug.apk
+```
+
+`adb` juga yang mencetak kode kegagalan sebenarnya (`INSTALL_FAILED_...`) kalau
+suatu saat pemasangan gagal karena sebab lain — jauh lebih berguna daripada
+pesan generik di HP.
+
+**2. Alur lanjutan di HP,** sekali siapkan lalu berlaku terus:
+
+1. Developer options → **Apps from unverified developers**
+2. Nyalakan **Allow apps from unverified developers**
+3. Autentikasi dengan kunci layar
+4. Konfirmasi tidak ada yang menekan Anda mengubah setelan ini
+5. **Restart HP, tunggu 24 jam**
+6. Kembali ke setelan itu, pilih izinkan **7 hari** atau **selamanya**
+
+Masa tunggu 24 jam itu sekali saja, bukan per app — dirancang memutus tekanan
+penipu yang memandu korban lewat telepon. Developer options tidak perlu
+dibiarkan menyala setelah selesai.
+
+Rujukan: [Android Help](https://support.google.com/android/answer/17065026),
+[Play Console Help](https://support.google.com/android-developer-console/answer/16561738).
+
 ## 8. Bekerja langsung dari HP
 
 Cukup dengan editor Git di HP (mis. aplikasi klien Git + editor teks) atau lewat
@@ -147,7 +195,13 @@ antarmuka web GitHub:
 
 - Sunting berkas, commit, dorong ke `main`.
 - `Android CI` berjalan otomatis pada tiap push ke `main` dan tiap pull request.
-- Kalau hasilnya mau dipasang, dorong tag `v*` dan tunggu Release-nya.
+- APK debug tiap run tersimpan sebagai artifact `app-debug-apk` (retensi 7 hari),
+  jadi sebuah branch bisa dipasang tanpa menunggu rilis. Berkasnya dibungkus ZIP
+  oleh GitHub — ekstrak dulu sebelum memasang.
+- Kalau hasilnya mau dipasang sebagai rilis, dorong tag `v*` dan tunggu Release-nya.
+
+Pemasangan dari HP tunduk pada verifikasi developer Android — lihat §7 kalau
+muncul "App not installed".
 
 > **Perhatian kuota.** Repo privat memakai jatah menit GitHub Actions. `Android CI`
 > menjalankan emulator untuk API 26 dan 36 pada setiap push ke `main`, dan itu

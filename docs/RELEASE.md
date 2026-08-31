@@ -4,6 +4,42 @@ This document tracks release updates, changelogs, and binary verification checks
 
 ---
 
+## Before you sideload: Android developer verification
+
+Android ships a system service, **Android Developer Verifier**
+(`com.google.android.verifier`), that checks whether an app is registered to a
+verified developer. From **30 September 2026** only apps from verified
+developers install on certified Android devices in the first four markets —
+Brazil, Indonesia, Singapore and Thailand — with the rest of the world
+following in 2027. The new install flow has been rolling out gradually since
+mid-August 2026.
+
+Every APK on this page is therefore affected. Signing a release with your own
+keystore does not help: verification is about a registered developer identity,
+not about the kind of signature. On an affected device the install fails with a
+message that explains nothing:
+
+> Something went wrong. App not installed.
+
+This is **not** Play Protect. Turning Play Protect or Advanced Protection off
+changes nothing, because a different service is doing the checking.
+
+Two supported ways through:
+
+1. **`adb install` is exempt.** `adb install -r <file>.apk` works as it always
+   has, and prints the real `INSTALL_FAILED_*` reason if an install fails for
+   some other cause.
+2. **The advanced flow on the device**, once, then it keeps working: Developer
+   options → *Apps from unverified developers* → allow → authenticate with the
+   screen lock → confirm nobody is pressuring you → restart → **wait 24 hours**
+   → return and choose 7 days or indefinitely. The wait is one-time, not
+   per-app.
+
+References: [Android Help](https://support.google.com/android/answer/17065026),
+[Play Console Help](https://support.google.com/android-developer-console/answer/16561738).
+
+---
+
 ## v1.0.6 — Latest Release (August 20, 2026)
 
 Current release. Sideload the APK for direct install, or use the AAB for Play Store distribution.
