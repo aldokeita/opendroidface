@@ -96,6 +96,8 @@ jobs:
 
   instrumented-tests:
     name: Instrumented tests (API ${{ matrix.api-level }})
+    # Emulator tests are the most expensive CI jobs; run them on pull requests only.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
