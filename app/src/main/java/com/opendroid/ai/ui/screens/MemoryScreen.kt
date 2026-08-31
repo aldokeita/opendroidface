@@ -54,6 +54,7 @@ fun MemoryScreen(
     viewModel: MemoryViewModel,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalOpenDroidColors.current
     var selectedTab by remember { mutableStateOf(MemoryScreenTab.GROWTH_GRAPH) }
     var searchQuery by remember { mutableStateOf("") }
     var isAddingFact by remember { mutableStateOf(false) }
@@ -66,12 +67,12 @@ fun MemoryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "PERSONAL MEMORY",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Memory",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
                 actions = {
@@ -84,13 +85,13 @@ fun MemoryScreen(
                             MemoryScreenTab.PROCEDURAL -> viewModel.clearMemories(MemoryType.PROCEDURAL)
                         }
                     }) {
-                        Text("Wipe Category", color = AccentRed, fontSize = 12.sp)
+                        Text("Wipe Category", color = colors.accentRed, fontSize = 12.sp)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
             )
         },
-        containerColor = DarkBackground,
+        containerColor = colors.background,
         modifier = modifier
     ) { padding ->
         Column(
@@ -102,10 +103,10 @@ fun MemoryScreen(
             // Memory Category Tabs
             ScrollableTabRow(
                 selectedTabIndex = selectedTab.ordinal,
-                containerColor = DarkBackground,
-                contentColor = AccentNeonGreen,
+                containerColor = colors.background,
+                contentColor = colors.accentNeonGreen,
                 edgePadding = 0.dp,
-                divider = { Divider(color = BorderColor) }
+                divider = { Divider(color = colors.borderColor) }
             ) {
                 MemoryScreenTab.values().forEach { tab ->
                     Tab(
@@ -119,7 +120,6 @@ fun MemoryScreen(
                             Text(
                                 text = tab.title,
                                 fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace,
                                 fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal
                             )
                         }
@@ -145,15 +145,15 @@ fun MemoryScreen(
                                 MemoryScreenTab.PROCEDURAL -> "Search macros..."
                                 else -> "Search facts..."
                             }
-                            Text(hint, color = TextSecondary, fontSize = 13.sp)
+                            Text(hint, color = colors.textSecondary, fontSize = 13.sp)
                         },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = TextSecondary) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = colors.textSecondary) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.weight(1f)
                     )
@@ -164,9 +164,9 @@ fun MemoryScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(AccentNeonGreen)
+                                .background(colors.accentNeonGreen)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Add Memory", tint = DarkBackground)
+                            Icon(Icons.Default.Add, contentDescription = "Add Memory", tint = colors.background)
                         }
                     }
                 }
@@ -208,6 +208,7 @@ fun MemoryScreen(
 
 @Composable
 fun WorkingMemoryView(viewModel: MemoryViewModel) {
+    val colors = LocalOpenDroidColors.current
     val activePlan by viewModel.activePlan.collectAsState()
     val workingMemory = viewModel.workingMemory
     
@@ -220,18 +221,14 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
         item {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "ACTIVE ENVIRONMENT STATE",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = AccentCyan,
-                        letterSpacing = 1.sp
+                        text = "DEVICE STATE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -239,23 +236,23 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        StateItem("Battery Level", "${workingMemory.batteryLevel}%", AccentNeonGreen)
-                        StateItem("WiFi State", workingMemory.wifiState, if (workingMemory.wifiState == "Active") AccentNeonGreen else if (workingMemory.wifiState == "Inactive") AccentRed else TextSecondary)
+                        StateItem("Battery Level", "${workingMemory.batteryLevel}%", colors.accentNeonGreen)
+                        StateItem("WiFi State", workingMemory.wifiState, if (workingMemory.wifiState == "Active") colors.accentNeonGreen else if (workingMemory.wifiState == "Inactive") colors.accentRed else colors.textSecondary)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        StateItem("Connectivity", workingMemory.connectivity, AccentCyan)
-                        StateItem("Internet", if (workingMemory.isInternetAvailable) "Available" else "NOT AVAILABLE", if (workingMemory.isInternetAvailable) AccentNeonGreen else AccentRed)
+                        StateItem("Connectivity", workingMemory.connectivity, colors.accentCyan)
+                        StateItem("Internet", if (workingMemory.isInternetAvailable) "Available" else "NOT AVAILABLE", if (workingMemory.isInternetAvailable) colors.accentNeonGreen else colors.accentRed)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        StateItem("Location Context", workingMemory.locationContext, TextSecondary)
+                        StateItem("Location Context", workingMemory.locationContext, colors.textSecondary)
                     }
                 }
             }
@@ -265,18 +262,14 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
         item {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "ACTIVE PLAN MONITOR",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = AccentCyan,
-                        letterSpacing = 1.sp
+                        text = "ACTIVE PLAN",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -286,15 +279,15 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                             text = plan.goal,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 color = when (plan.status.name) {
-                                    "RUNNING" -> AccentCyan.copy(alpha = 0.2f)
-                                    "COMPLETED" -> AccentNeonGreen.copy(alpha = 0.2f)
-                                    else -> AccentRed.copy(alpha = 0.2f)
+                                    "RUNNING" -> colors.accentCyan.copy(alpha = 0.2f)
+                                    "COMPLETED" -> colors.accentNeonGreen.copy(alpha = 0.2f)
+                                    else -> colors.accentRed.copy(alpha = 0.2f)
                                 },
                                 shape = RoundedCornerShape(4.dp),
                                 modifier = Modifier.padding(end = 6.dp)
@@ -302,19 +295,18 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                                 Text(
                                     text = plan.status.name,
                                     color = when (plan.status.name) {
-                                        "RUNNING" -> AccentCyan
-                                        "COMPLETED" -> AccentNeonGreen
-                                        else -> AccentRed
+                                        "RUNNING" -> colors.accentCyan
+                                        "COMPLETED" -> colors.accentNeonGreen
+                                        else -> colors.accentRed
                                     },
                                     fontSize = 10.sp,
-                                    fontFamily = FontFamily.Monospace,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
                         }
                         
                         Spacer(modifier = Modifier.height(12.dp))
-                        Divider(color = BorderColor)
+                        Divider(color = colors.borderColor)
                         Spacer(modifier = Modifier.height(12.dp))
                         
                         plan.steps.forEachIndexed { index, step ->
@@ -332,10 +324,10 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                                         else -> "○"
                                     },
                                     color = when (step.status.name) {
-                                        "COMPLETED" -> AccentNeonGreen
-                                        "RUNNING" -> AccentCyan
-                                        "FAILED" -> AccentRed
-                                        else -> TextSecondary
+                                        "COMPLETED" -> colors.accentNeonGreen
+                                        "RUNNING" -> colors.accentCyan
+                                        "FAILED" -> colors.accentRed
+                                        else -> colors.textSecondary
                                     },
                                     fontSize = 12.sp,
                                     modifier = Modifier.padding(end = 8.dp, top = 2.dp)
@@ -344,15 +336,14 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                                     Text(
                                         text = "${index + 1}. ${step.description}",
                                         fontSize = 12.sp,
-                                        color = if (step.status.name == "COMPLETED") TextSecondary else TextPrimary,
+                                        color = if (step.status.name == "COMPLETED") colors.textSecondary else colors.textPrimary,
                                         fontWeight = if (step.status.name == "RUNNING") FontWeight.Bold else FontWeight.Normal
                                     )
                                     if (!step.result.isNullOrBlank()) {
                                         Text(
                                             text = "Result: ${step.result}",
                                             fontSize = 10.sp,
-                                            color = AccentCyan,
-                                            fontFamily = FontFamily.Monospace,
+                                            color = colors.accentCyan,
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
                                     }
@@ -360,8 +351,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                                         Text(
                                             text = "Error: ${step.error}",
                                             fontSize = 10.sp,
-                                            color = AccentRed,
-                                            fontFamily = FontFamily.Monospace,
+                                            color = colors.accentRed,
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
                                     }
@@ -377,9 +367,8 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                         ) {
                             Text(
                                 text = "No active autonomous plan running.",
-                                color = TextSecondary,
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace
+                                color = colors.textSecondary,
+                                fontSize = 12.sp
                             )
                         }
                     }
@@ -391,18 +380,14 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
         item {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "WORKING SESSION HISTORY (LAST 20)",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = AccentCyan,
-                        letterSpacing = 1.sp
+                        text = "RECENT SESSIONS",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -418,23 +403,21 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                                     horizontalArrangement = if (msg.sender.name == "USER") Arrangement.End else Arrangement.Start
                                 ) {
                                     Surface(
-                                        color = if (msg.sender.name == "USER") AccentCyan.copy(alpha = 0.15f) else AccentNeonGreen.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(8.dp),
-                                        border = BorderStroke(1.dp, if (msg.sender.name == "USER") AccentCyan.copy(alpha = 0.3f) else AccentNeonGreen.copy(alpha = 0.2f))
+                                        color = if (msg.sender.name == "USER") colors.accentCyan.copy(alpha = 0.15f) else colors.accentNeonGreen.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(8.dp)
                                     ) {
                                         Column(modifier = Modifier.padding(10.dp)) {
                                             Text(
                                                 text = if (msg.sender.name == "USER") "USER" else "AGENT",
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                fontFamily = FontFamily.Monospace,
-                                                color = if (msg.sender.name == "USER") AccentCyan else AccentNeonGreen
+                                                color = if (msg.sender.name == "USER") colors.accentCyan else colors.accentNeonGreen
                                             )
                                             Spacer(modifier = Modifier.height(2.dp))
                                             Text(
                                                 text = msg.text,
                                                 fontSize = 12.sp,
-                                                color = TextPrimary
+                                                color = colors.textPrimary
                                             )
                                         }
                                     }
@@ -450,9 +433,8 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                         ) {
                             Text(
                                 text = "No messages in current working session.",
-                                color = TextSecondary,
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace
+                                color = colors.textSecondary,
+                                fontSize = 12.sp
                             )
                         }
                     }
@@ -464,8 +446,9 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
 
 @Composable
 fun StateItem(label: String, value: String, valueColor: Color) {
+    val colors = LocalOpenDroidColors.current
     Column {
-        Text(text = label, color = TextSecondary, fontSize = 11.sp)
+        Text(text = label, color = colors.textSecondary, fontSize = 11.sp)
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = value, color = valueColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
     }
@@ -473,6 +456,7 @@ fun StateItem(label: String, value: String, valueColor: Color) {
 
 @Composable
 fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
+    val colors = LocalOpenDroidColors.current
     val conversations by viewModel.conversationHistory.collectAsState()
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()) }
 
@@ -490,9 +474,8 @@ fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
             items(filteredLogs) { log ->
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(
@@ -505,20 +488,18 @@ fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                                     text = if (log.sender.name == "USER") "USER" else "AGENT",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = if (log.sender.name == "USER") AccentCyan else AccentNeonGreen
+                                    color = if (log.sender.name == "USER") colors.accentCyan else colors.accentNeonGreen
                                 )
                                 log.modelBadge?.let { badge ->
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Surface(
-                                        color = AccentCyan.copy(alpha = 0.1f),
+                                        color = colors.accentCyan.copy(alpha = 0.1f),
                                         shape = RoundedCornerShape(4.dp)
                                     ) {
                                         Text(
                                             text = badge,
                                             fontSize = 9.sp,
-                                            fontFamily = FontFamily.Monospace,
-                                            color = AccentCyan,
+                                            color = colors.accentCyan,
                                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                         )
                                     }
@@ -527,15 +508,14 @@ fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                             Text(
                                 text = dateFormat.format(Date(log.timestamp)),
                                 fontSize = 9.sp,
-                                color = TextSecondary,
-                                fontFamily = FontFamily.Monospace
+                                color = colors.textSecondary
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = log.text,
                             fontSize = 13.sp,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                     }
                 }
@@ -548,9 +528,8 @@ fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
         ) {
             Text(
                 text = "No episodic chat logs recorded.",
-                color = TextSecondary,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
+                color = colors.textSecondary,
+                fontSize = 12.sp
             )
         }
     }
@@ -567,6 +546,7 @@ fun SemanticMemoryView(
     newValue: String,
     onNewValueChange: (String) -> Unit
 ) {
+    val colors = LocalOpenDroidColors.current
     val allMemories by viewModel.memoriesList.collectAsState()
     
     val filteredMemories = allMemories.filter {
@@ -581,17 +561,14 @@ fun SemanticMemoryView(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    .padding(vertical = 12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "STORE NEW MEMORY FACT",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = AccentCyan
+                        text = "New fact",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
@@ -600,10 +577,10 @@ fun SemanticMemoryView(
                         label = { Text("Fact Key/Identifier", fontSize = 12.sp) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -613,17 +590,17 @@ fun SemanticMemoryView(
                         onValueChange = onNewValueChange,
                         label = { Text("Fact Content/Details", fontSize = 12.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { onIsAddingFactChange(false) }) {
-                            Text("Cancel", color = AccentRed)
+                            Text("Cancel", color = colors.accentRed)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -635,7 +612,7 @@ fun SemanticMemoryView(
                                     onIsAddingFactChange(false)
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen, contentColor = DarkBackground),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("Save Fact", fontWeight = FontWeight.Bold)
@@ -669,9 +646,8 @@ fun SemanticMemoryView(
             ) {
                 Text(
                     text = "No semantic facts indexed in this category.",
-                    color = TextSecondary,
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace
+                    color = colors.textSecondary,
+                    fontSize = 13.sp
                 )
             }
         }
@@ -683,13 +659,13 @@ fun MemoryItemCard(
     memory: Memory,
     onDelete: () -> Unit
 ) {
+    val colors = LocalOpenDroidColors.current
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
     ) {
         Row(
             modifier = Modifier
@@ -703,20 +679,19 @@ fun MemoryItemCard(
                     text = memory.key,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AccentNeonGreen,
-                    fontFamily = FontFamily.Monospace
+                    color = colors.accentNeonGreen
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = memory.value,
                     fontSize = 13.sp,
-                    color = TextPrimary
+                    color = colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Indexed: ${dateFormat.format(Date(memory.timestamp))}",
                     fontSize = 9.sp,
-                    color = TextSecondary
+                    color = colors.textSecondary
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -724,7 +699,7 @@ fun MemoryItemCard(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Memory",
-                    tint = TextSecondary.copy(alpha = 0.6f)
+                    tint = colors.textSecondary.copy(alpha = 0.6f)
                 )
             }
         }
@@ -733,6 +708,7 @@ fun MemoryItemCard(
 
 @Composable
 fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
+    val colors = LocalOpenDroidColors.current
     val macros by viewModel.macrosList.collectAsState()
 
     val filteredMacros = macros.filter {
@@ -749,9 +725,8 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
             items(filteredMacros) { macro ->
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -766,20 +741,18 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                                     text = macro.name.uppercase(),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = AccentNeonGreen,
-                                    fontFamily = FontFamily.Monospace
+                                    color = colors.accentNeonGreen
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Surface(
-                                    color = if (macro.isSystem) AccentCyan.copy(alpha = 0.15f) else TextSecondary.copy(alpha = 0.1f),
+                                    color = if (macro.isSystem) colors.accentCyan.copy(alpha = 0.15f) else colors.textSecondary.copy(alpha = 0.1f),
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Text(
                                         text = if (macro.isSystem) "SYSTEM" else "USER",
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold,
-                                        fontFamily = FontFamily.Monospace,
-                                        color = if (macro.isSystem) AccentCyan else TextSecondary,
+                                        color = if (macro.isSystem) colors.accentCyan else colors.textSecondary,
                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                     )
                                 }
@@ -788,16 +761,14 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                             Text(
                                 text = "Trigger: \"${macro.trigger}\"",
                                 fontSize = 12.sp,
-                                color = TextPrimary,
+                                color = colors.textPrimary,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "PROCEDURAL ACTIONS:",
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = AccentCyan,
-                                fontFamily = FontFamily.Monospace
+                                text = "STEPS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             macro.steps.forEachIndexed { index, step ->
@@ -808,13 +779,12 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                                     Text(
                                         text = "  → ",
                                         fontSize = 11.sp,
-                                        color = AccentCyan,
-                                        fontFamily = FontFamily.Monospace
+                                        color = colors.accentCyan
                                     )
                                     Text(
                                         text = step.description,
                                         fontSize = 11.sp,
-                                        color = TextSecondary
+                                        color = colors.textSecondary
                                     )
                                 }
                             }
@@ -825,7 +795,7 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "Delete Macro",
-                                    tint = AccentRed.copy(alpha = 0.8f)
+                                    tint = colors.accentRed.copy(alpha = 0.8f)
                                 )
                             }
                         }
@@ -840,9 +810,8 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
         ) {
             Text(
                 text = "No custom macros or procedures registered.",
-                color = TextSecondary,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
+                color = colors.textSecondary,
+                fontSize = 12.sp
             )
         }
     }
@@ -853,6 +822,7 @@ fun KnowledgeGraphView(
     viewModel: MemoryViewModel,
     searchQuery: String
 ) {
+    val colors = LocalOpenDroidColors.current
     val graph by viewModel.knowledgeGraph.collectAsState()
     var selectedTierFilter by remember { mutableStateOf<MemoryTier?>(null) }
     var selectedCategoryFilter by remember { mutableStateOf<KnowledgeCategory?>(null) }
@@ -896,10 +866,10 @@ fun KnowledgeGraphView(
                     onClick = { selectedTierFilter = null },
                     label = { Text("All Levels (${allNodes.size})", fontSize = 11.sp, fontFamily = FontFamily.Monospace) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = AccentNeonGreen,
-                        selectedLabelColor = DarkBackground,
-                        containerColor = CardBackground,
-                        labelColor = TextSecondary
+                        selectedContainerColor = colors.accentNeonGreen,
+                        selectedLabelColor = colors.background,
+                        containerColor = colors.cardBackground,
+                        labelColor = colors.textSecondary
                     )
                 )
             }
@@ -917,13 +887,13 @@ fun KnowledgeGraphView(
                     label = { Text("$icon $label ($count)", fontSize = 11.sp, fontFamily = FontFamily.Monospace) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = when (tier) {
-                            MemoryTier.SENSITIVE -> AccentOrange
-                            MemoryTier.LEARNED_PATTERN -> AccentCyan
-                            else -> AccentNeonGreen
+                            MemoryTier.SENSITIVE -> colors.accentOrange
+                            MemoryTier.LEARNED_PATTERN -> colors.accentCyan
+                            else -> colors.accentNeonGreen
                         },
-                        selectedLabelColor = DarkBackground,
-                        containerColor = CardBackground,
-                        labelColor = TextSecondary
+                        selectedLabelColor = colors.background,
+                        containerColor = colors.cardBackground,
+                        labelColor = colors.textSecondary
                     )
                 )
             }
@@ -943,10 +913,10 @@ fun KnowledgeGraphView(
                     onClick = { selectedCategoryFilter = null },
                     label = { Text("All Categories", fontSize = 10.sp) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TextPrimary.copy(alpha = 0.2f),
-                        selectedLabelColor = TextPrimary,
-                        containerColor = CardBackground.copy(alpha = 0.6f),
-                        labelColor = TextSecondary
+                        selectedContainerColor = colors.textPrimary.copy(alpha = 0.2f),
+                        selectedLabelColor = colors.textPrimary,
+                        containerColor = colors.cardBackground.copy(alpha = 0.6f),
+                        labelColor = colors.textSecondary
                     )
                 )
             }
@@ -966,10 +936,10 @@ fun KnowledgeGraphView(
                     onClick = { selectedCategoryFilter = if (selectedCategoryFilter == cat) null else cat },
                     label = { Text("$icon ${cat.name.replace('_', ' ')}", fontSize = 10.sp) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = AccentCyan.copy(alpha = 0.3f),
-                        selectedLabelColor = AccentCyan,
-                        containerColor = CardBackground.copy(alpha = 0.6f),
-                        labelColor = TextSecondary
+                        selectedContainerColor = colors.accentCyan.copy(alpha = 0.3f),
+                        selectedLabelColor = colors.accentCyan,
+                        containerColor = colors.cardBackground.copy(alpha = 0.6f),
+                        labelColor = colors.textSecondary
                     )
                 )
             }
@@ -984,17 +954,14 @@ fun KnowledgeGraphView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "KNOWLEDGE ENTITIES (${filteredNodes.size})",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
-                color = AccentCyan,
-                letterSpacing = 1.sp
+                text = "ENTITIES (${filteredNodes.size})",
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.textSecondary
             )
             TextButton(onClick = { isAddingKnowledge = !isAddingKnowledge }) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = AccentNeonGreen, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.Add, contentDescription = null, tint = colors.accentNeonGreen, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(if (isAddingKnowledge) "Close" else "Add Entity / Secret", color = AccentNeonGreen, fontSize = 11.sp)
+                Text(if (isAddingKnowledge) "Close" else "Add Entity / Secret", color = colors.accentNeonGreen, fontSize = 11.sp)
             }
         }
 
@@ -1003,17 +970,15 @@ fun KnowledgeGraphView(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    .padding(vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(
                         text = if (addIsSensitive) "ADD LEVEL 4 ENCRYPTED SECRET" else "ADD LEVEL 2 LONG-TERM KNOWLEDGE",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = if (addIsSensitive) AccentOrange else AccentNeonGreen
+                        color = if (addIsSensitive) colors.accentOrange else colors.accentNeonGreen
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1036,10 +1001,10 @@ fun KnowledgeGraphView(
                         label = { Text(if (addIsSensitive) "Secret Key / Label (e.g. locker_code)" else "Label / Title (e.g. Favorite Coffee)", fontSize = 12.sp) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (addIsSensitive) AccentOrange else AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = if (addIsSensitive) colors.accentOrange else colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1049,17 +1014,17 @@ fun KnowledgeGraphView(
                         onValueChange = { newSummary = it },
                         label = { Text(if (addIsSensitive) "Secret Value (Hardware Encrypted)" else "Details / Description", fontSize = 12.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (addIsSensitive) AccentOrange else AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = if (addIsSensitive) colors.accentOrange else colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { isAddingKnowledge = false }) {
-                            Text("Cancel", color = AccentRed)
+                            Text("Cancel", color = colors.accentRed)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -1076,8 +1041,8 @@ fun KnowledgeGraphView(
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (addIsSensitive) AccentOrange else AccentNeonGreen,
-                                contentColor = DarkBackground
+                                containerColor = if (addIsSensitive) colors.accentOrange else colors.accentNeonGreen,
+                                contentColor = colors.background
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -1113,9 +1078,8 @@ fun KnowledgeGraphView(
             ) {
                 Text(
                     text = "No Knowledge Graph entities matching filter.",
-                    color = TextSecondary,
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace
+                    color = colors.textSecondary,
+                    fontSize = 13.sp
                 )
             }
         }
@@ -1128,11 +1092,12 @@ fun KnowledgeNodeCard(
     onPromote: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val colors = LocalOpenDroidColors.current
     val tierColor = when (node.tier) {
-        MemoryTier.SENSITIVE -> AccentOrange
-        MemoryTier.LEARNED_PATTERN -> AccentCyan
-        MemoryTier.TEMPORARY -> TextSecondary
-        MemoryTier.LONG_TERM -> AccentNeonGreen
+        MemoryTier.SENSITIVE -> colors.accentOrange
+        MemoryTier.LEARNED_PATTERN -> colors.accentCyan
+        MemoryTier.TEMPORARY -> colors.textSecondary
+        MemoryTier.LONG_TERM -> colors.accentNeonGreen
     }
     val tierIcon = when (node.tier) {
         MemoryTier.SENSITIVE -> "🔒"
@@ -1143,9 +1108,8 @@ fun KnowledgeNodeCard(
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -1159,27 +1123,25 @@ fun KnowledgeNodeCard(
                 ) {
                     Surface(
                         color = tierColor.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(1.dp, tierColor.copy(alpha = 0.4f))
+                        shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
                             text = "$tierIcon ${node.tier.name}",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
                             color = tierColor,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
                     Surface(
-                        color = TextPrimary.copy(alpha = 0.08f),
+                        color = colors.textPrimary.copy(alpha = 0.08f),
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
                             text = node.category.name.replace('_', ' '),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -1191,8 +1153,7 @@ fun KnowledgeNodeCard(
                             text = "${(node.confidence * 100).toInt()}% conf",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = AccentCyan
+                            color = colors.accentCyan
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -1203,7 +1164,7 @@ fun KnowledgeNodeCard(
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete Node",
-                            tint = TextSecondary.copy(alpha = 0.6f),
+                            tint = colors.textSecondary.copy(alpha = 0.6f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -1216,14 +1177,13 @@ fun KnowledgeNodeCard(
                 text = node.label,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = AccentNeonGreen,
-                fontFamily = FontFamily.Monospace
+                color = colors.accentNeonGreen
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = node.summary,
                 fontSize = 13.sp,
-                color = TextPrimary
+                color = colors.textPrimary
             )
 
             if (node.properties.isNotEmpty()) {
@@ -1236,8 +1196,7 @@ fun KnowledgeNodeCard(
                         Text(
                             text = "$k: $v",
                             fontSize = 9.sp,
-                            color = TextSecondary,
-                            fontFamily = FontFamily.Monospace
+                            color = colors.textSecondary
                         )
                     }
                 }
@@ -1252,12 +1211,12 @@ fun KnowledgeNodeCard(
                     OutlinedButton(
                         onClick = onPromote,
                         shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(1.dp, AccentNeonGreen.copy(alpha = 0.5f)),
+                        border = BorderStroke(1.dp, colors.accentNeonGreen.copy(alpha = 0.5f)),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                     ) {
-                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = AccentNeonGreen, modifier = Modifier.size(12.dp))
+                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = colors.accentNeonGreen, modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Promote to Long-Term", fontSize = 10.sp, color = AccentNeonGreen)
+                        Text("Promote to Long-Term", fontSize = 10.sp, color = colors.accentNeonGreen)
                     }
                 }
             }

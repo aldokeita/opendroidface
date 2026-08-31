@@ -197,12 +197,29 @@ style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamil
       Clear pindah ke menu chat, chat kosong membuka pada satu blok sapaan di tengah.
       Sekalian: layar ini dulu memakai alias warna gelap statis (tema terang salah cat),
       dan bar navigasi tersiram hijau karena `tonalElevation` menarik warna primary.
-- [ ] **Splash** — masih monospace + neon hijau; ini hal pertama yang dilihat orang
-- [ ] **Settings** — layar terpanjang, paling banyak menyimpan pola lama
-- [ ] Sisanya: Plan, Memory, Macros, Logs, Onboarding, Permissions
+- [x] **Splash** — wordmark Montserrat menggantikan monospace neon, baris "SYSTEM BOOT: ONLINE"
+      dibuang, logo raster diganti `RobotFace` supaya peluncuran menyambung ke layar Chat,
+      warna dibaca dari palet (tema terang dulu salah cat), durasi turun dari 3,3 detik ke
+      di bawah 1 detik dan menghormati setelan animasi perangkat.
+- [x] **Settings** — judul jadi "Settings" (Montserrat), 291 pembacaan alias warna gelap
+      statis diganti palet aktif (tema terang dulu salah cat sepenuhnya), 35 pemakaian
+      monospace dibuang, garis tepi kartu dihapus kecuali satu yang menandai model aktif,
+      judul bagian jadi labelSmall netral, sebelas baris tautan memakai judul kalimat +
+      ikon satu warna (empat di antaranya dulu emoji), dan Color.Red/Yellow/gold mentah
+      diganti warna palet.
+- [x] **Plan, Memory, Macros** — judul jadi "Plan"/"Memory"/"Macros" (Montserrat), palet aktif
+      menggantikan alias gelap statis (259 pembacaan di empat berkas), 48 pemakaian monospace
+      dibuang, garis tepi kartu dihapus kecuali dua yang menandai keadaan (run aktif dan model
+      aktif), label bagian jadi labelSmall netral dengan nama yang lebih pendek, dan warna
+      status amber/deep-orange yang di-hardcode diganti warna palet.
+      `ui/components/PlanStepCard.kt` ikut karena itu isi layar Plan.
+- [x] **Logs, Onboarding, Permissions** — judul jadi "Logs"/"Permissions" (Montserrat), palet
+      aktif menggantikan alias gelap statis (132 pembacaan), garis tepi berwarna status di tiap
+      baris log dibuang (lencana SUCCESS/FAILED sudah mengatakannya), dan Onboarding membuka
+      pada `RobotFace` — bukan logo raster dalam cincin gradien — sehingga wajah yang sama
+      menemani pengguna dari onboarding, splash, chat, sampai Hands-free.
 
-Catatan: `README.md` masih membawa promosi token kripto milik pemilik upstream.
-Sunting dulu sebelum repo dijadikan publik.
+Perombakan UI selesai untuk semua layar.
 
 ## Risiko yang sudah diketahui
 

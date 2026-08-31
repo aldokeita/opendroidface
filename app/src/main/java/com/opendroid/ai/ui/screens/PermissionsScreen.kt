@@ -36,6 +36,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,7 +59,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,31 +86,26 @@ import com.opendroid.ai.core.permissions.runtimePermissions
 import com.opendroid.ai.core.permissions.summaryHasBlocked
 import com.opendroid.ai.core.permissions.summaryLine
 import com.opendroid.ai.core.permissions.visibleCards
-import com.opendroid.ai.ui.theme.AccentGreenButton
-import com.opendroid.ai.ui.theme.AccentNeonGreen
-import com.opendroid.ai.ui.theme.AccentRed
-import com.opendroid.ai.ui.theme.BorderColor
-import com.opendroid.ai.ui.theme.CardBackground
-import com.opendroid.ai.ui.theme.DarkBackground
-import com.opendroid.ai.ui.theme.TextPrimary
-import com.opendroid.ai.ui.theme.TextSecondary
+import com.opendroid.ai.ui.theme.LocalOpenDroidColors
+import com.opendroid.ai.ui.theme.Montserrat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionsScreen(
     onNavigateBack: () -> Unit,
 ) {
+    val colors = LocalOpenDroidColors.current
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "PERMISSIONS",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Permissions",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp,
+                        color = colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp,
                     )
                 },
                 navigationIcon = {
@@ -118,14 +113,14 @@ fun PermissionsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = AccentNeonGreen,
+                            tint = colors.textSecondary,
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background),
             )
         },
-        containerColor = DarkBackground,
+        containerColor = colors.background,
     ) { padding ->
         PermissionsPanel(padding = padding, onFinished = null)
     }
@@ -296,6 +291,7 @@ private fun PermissionsPanelContent(
     onAppInfo: (PermissionCardId) -> Unit,
     onFinished: (() -> Unit)?,
 ) {
+    val colors = LocalOpenDroidColors.current
     val grantAll = grantAllButton(snapshot)
     val cards = visibleCards(snapshot.sdkInt)
     val firstManualIndex = cards.indexOfFirst { card ->
@@ -313,13 +309,13 @@ private fun PermissionsPanelContent(
             text = "Required Permissions",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary,
+            color = colors.textPrimary,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Configure permissions below to enable full autonomous features.",
             fontSize = 13.sp,
-            color = TextSecondary,
+            color = colors.textSecondary,
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -330,10 +326,10 @@ private fun PermissionsPanelContent(
                 .fillMaxWidth()
                 .heightIn(min = 50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = AccentGreenButton,
-                contentColor = DarkBackground,
-                disabledContainerColor = BorderColor,
-                disabledContentColor = TextSecondary,
+                containerColor = colors.accentGreenButton,
+                contentColor = colors.background,
+                disabledContainerColor = colors.borderColor,
+                disabledContentColor = colors.textSecondary,
             ),
             shape = RoundedCornerShape(8.dp),
         ) {
@@ -347,7 +343,7 @@ private fun PermissionsPanelContent(
         Text(
             text = summaryLine(snapshot),
             fontSize = 12.sp,
-            color = if (summaryHasBlocked(snapshot)) AccentRed else TextSecondary,
+            color = if (summaryHasBlocked(snapshot)) colors.accentRed else colors.textSecondary,
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -397,7 +393,7 @@ private fun PermissionsPanelContent(
                 Text(
                     text = "You can continue now and grant the rest later in Settings → Permissions.",
                     fontSize = 12.sp,
-                    color = TextSecondary,
+                    color = colors.textSecondary,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -407,10 +403,10 @@ private fun PermissionsPanelContent(
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (allRequirementsHeld) AccentGreenButton else CardBackground,
-                    contentColor = if (allRequirementsHeld) DarkBackground else TextPrimary,
+                    containerColor = if (allRequirementsHeld) colors.accentGreenButton else colors.cardBackground,
+                    contentColor = if (allRequirementsHeld) colors.background else colors.textPrimary,
                 ),
-                border = if (allRequirementsHeld) null else BorderStroke(1.dp, BorderColor),
+                border = if (allRequirementsHeld) null else BorderStroke(1.dp, colors.borderColor),
                 shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
@@ -425,21 +421,19 @@ private fun PermissionsPanelContent(
 
 @Composable
 private fun ManualSettingsHeader() {
+    val colors = LocalOpenDroidColors.current
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "NEEDS A TRIP TO SETTINGS",
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            letterSpacing = 1.sp,
-            color = AccentNeonGreen,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textSecondary,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "Android does not allow these to be granted from inside an app. " +
                 "\"Grant all permissions\" cannot cover them → open each one yourself.",
             fontSize = 12.sp,
-            color = TextSecondary,
+            color = colors.textSecondary,
         )
     }
 }
@@ -455,6 +449,7 @@ private fun PermissionCard(
     buttonHasError: Boolean,
     onAction: () -> Unit,
 ) {
+    val colors = LocalOpenDroidColors.current
     val semanticsModifier = if (statusLine.isBlank()) {
         Modifier
     } else {
@@ -467,7 +462,7 @@ private fun PermissionCard(
             .fillMaxWidth()
             .then(semanticsModifier)
             .clip(RoundedCornerShape(12.dp))
-            .background(CardBackground)
+            .background(colors.cardBackground)
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -477,13 +472,13 @@ private fun PermissionCard(
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = colors.textPrimary,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
                 fontSize = 12.sp,
-                color = TextSecondary,
+                color = colors.textSecondary,
             )
             if (statusLine.isNotBlank()) {
                 Spacer(modifier = Modifier.height(6.dp))
@@ -491,7 +486,7 @@ private fun PermissionCard(
                     text = statusLine,
                     fontSize = 12.sp,
                     fontWeight = if (statusHasError) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (statusHasError) AccentRed else TextSecondary,
+                    color = if (statusHasError) colors.accentRed else colors.textSecondary,
                 )
             }
         }
@@ -500,10 +495,10 @@ private fun PermissionCard(
             onClick = onAction,
             enabled = buttonEnabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (buttonHasError) AccentRed else AccentGreenButton,
-                contentColor = if (buttonHasError) TextPrimary else DarkBackground,
-                disabledContainerColor = BorderColor,
-                disabledContentColor = TextSecondary,
+                containerColor = if (buttonHasError) colors.accentRed else colors.accentGreenButton,
+                contentColor = if (buttonHasError) colors.textPrimary else colors.background,
+                disabledContainerColor = colors.borderColor,
+                disabledContentColor = colors.textSecondary,
             ),
             shape = RoundedCornerShape(8.dp),
         ) {

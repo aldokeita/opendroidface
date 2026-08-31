@@ -50,6 +50,7 @@ fun PlanStepCard(
     onSaveEdit: (description: String, params: Map<String, String>) -> Unit = { _, _ -> },
     onDeleteStep: () -> Unit = {}
 ) {
+    val colors = LocalOpenDroidColors.current
     var expanded by remember { mutableStateOf(false) }
     var isEditing by remember(step.stepId) { mutableStateOf(false) }
     var editDescription by remember(step.stepId, isEditing) { mutableStateOf(step.description) }
@@ -59,24 +60,21 @@ fun PlanStepCard(
     val displayState = getDisplayState(step)
 
     val statusColor = when (displayState) {
-        StepDisplayState.COMPLETED -> AccentNeonGreen
-        StepDisplayState.RUNNING -> AccentCyan
-        StepDisplayState.FAILED -> AccentRed
-        StepDisplayState.AUTO_FIXING -> Color(0xFFFFB300) // Amber
-        StepDisplayState.REPAIRED -> AccentPurple
-        StepDisplayState.SKIPPED -> TextSecondary
-        StepDisplayState.BLOCKED -> Color(0xFFFF5722) // Deep Orange
-        StepDisplayState.PENDING -> TextSecondary
+        StepDisplayState.COMPLETED -> colors.accentNeonGreen
+        StepDisplayState.RUNNING -> colors.accentCyan
+        StepDisplayState.FAILED -> colors.accentRed
+        StepDisplayState.AUTO_FIXING -> colors.accentPurple
+        StepDisplayState.REPAIRED -> colors.accentPurple
+        StepDisplayState.SKIPPED -> colors.textSecondary
+        StepDisplayState.BLOCKED -> colors.accentOrange
+        StepDisplayState.PENDING -> colors.textSecondary
     }
-
-    val statusBorderColor = statusColor.copy(alpha = 0.5f)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, statusBorderColor, RoundedCornerShape(12.dp))
             .clickable(enabled = !isEditing) { expanded = !expanded },
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -100,8 +98,7 @@ fun PlanStepCard(
                             text = "${step.order}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = statusColor,
-                            fontFamily = FontFamily.Monospace
+                            color = statusColor
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -109,7 +106,7 @@ fun PlanStepCard(
                         text = step.description,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary,
+                        color = colors.textPrimary,
                         maxLines = if (expanded) Int.MAX_VALUE else 1
                     )
                 }
@@ -123,7 +120,7 @@ fun PlanStepCard(
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit step",
-                                tint = AccentCyan,
+                                tint = colors.accentCyan,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -134,7 +131,7 @@ fun PlanStepCard(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete step",
-                                tint = AccentRed,
+                                tint = colors.accentRed,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -161,9 +158,9 @@ fun PlanStepCard(
 
             AnimatedVisibility(visible = isEditing) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
-                    Divider(color = BorderColor, modifier = Modifier.padding(vertical = 4.dp))
+                    Divider(color = colors.borderColor, modifier = Modifier.padding(vertical = 4.dp))
 
-                    Text("Action Module: ${step.action}", fontSize = 11.sp, color = AccentPurple, fontFamily = FontFamily.Monospace)
+                    Text("Action Module: ${step.action}", fontSize = 11.sp, color = colors.accentPurple, fontFamily = FontFamily.Monospace)
                     Spacer(modifier = Modifier.height(10.dp))
 
                     OutlinedTextField(
@@ -171,16 +168,16 @@ fun PlanStepCard(
                         onValueChange = { editDescription = it },
                         label = { Text("Step Description", fontSize = 11.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = AccentNeonGreen,
-                            unfocusedBorderColor = BorderColor,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            focusedBorderColor = colors.accentNeonGreen,
+                            unfocusedBorderColor = colors.borderColor,
+                            focusedTextColor = colors.textPrimary,
+                            unfocusedTextColor = colors.textPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text("Parameters", fontSize = 11.sp, color = TextSecondary)
+                    Text("Parameters", fontSize = 11.sp, color = colors.textSecondary)
 
                     editParams.forEachIndexed { index, (key, value) ->
                         Row(
@@ -197,10 +194,10 @@ fun PlanStepCard(
                                 label = { Text("Key", fontSize = 10.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.weight(1f)
                             )
@@ -213,10 +210,10 @@ fun PlanStepCard(
                                 label = { Text("Value", fontSize = 10.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.weight(1f)
                             )
@@ -227,7 +224,7 @@ fun PlanStepCard(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remove parameter",
-                                    tint = AccentRed,
+                                    tint = colors.accentRed,
                                     modifier = Modifier.size(14.dp)
                                 )
                             }
@@ -241,11 +238,11 @@ fun PlanStepCard(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
-                            tint = AccentCyan,
+                            tint = colors.accentCyan,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Parameter", fontSize = 11.sp, color = AccentCyan)
+                        Text("Add Parameter", fontSize = 11.sp, color = colors.accentCyan)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -254,7 +251,7 @@ fun PlanStepCard(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = { isEditing = false }) {
-                            Text("Cancel", color = TextSecondary)
+                            Text("Cancel", color = colors.textSecondary)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -267,7 +264,7 @@ fun PlanStepCard(
                                 onSaveEdit(cleanedDescription, cleanedParams)
                                 isEditing = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen, contentColor = DarkBackground),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text("Save", fontWeight = FontWeight.Bold, fontSize = 12.sp)
@@ -278,32 +275,32 @@ fun PlanStepCard(
 
             AnimatedVisibility(visible = expanded && !isEditing) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
-                    Divider(color = BorderColor, modifier = Modifier.padding(vertical = 4.dp))
+                    Divider(color = colors.borderColor, modifier = Modifier.padding(vertical = 4.dp))
                     
-                    Text("Action Module: ${step.action}", fontSize = 11.sp, color = AccentPurple, fontFamily = FontFamily.Monospace)
+                    Text("Action Module: ${step.action}", fontSize = 11.sp, color = colors.accentPurple, fontFamily = FontFamily.Monospace)
                     
                     if (step.params.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Parameters:", fontSize = 11.sp, color = TextSecondary)
+                        Text("Parameters:", fontSize = 11.sp, color = colors.textSecondary)
                         step.params.forEach { (key, valStr) ->
-                            Text("- $key: $valStr", fontSize = 11.sp, color = TextPrimary, fontFamily = FontFamily.Monospace)
+                            Text("- $key: $valStr", fontSize = 11.sp, color = colors.textPrimary, fontFamily = FontFamily.Monospace)
                         }
                     }
 
                     if (step.dependsOn.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Depends On Steps: ${step.dependsOn.joinToString()}", fontSize = 11.sp, color = TextSecondary, fontFamily = FontFamily.Monospace)
+                        Text("Depends On Steps: ${step.dependsOn.joinToString()}", fontSize = 11.sp, color = colors.textSecondary, fontFamily = FontFamily.Monospace)
                     }
 
                     if (step.canParallelize) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Parallel execution supported", fontSize = 11.sp, color = AccentCyan)
+                        Text("Parallel execution supported", fontSize = 11.sp, color = colors.accentCyan)
                     }
 
                     if (step.fallback.isNotBlank()) {
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Fallback Routine:", fontSize = 11.sp, color = TextSecondary)
-                        Text(step.fallback, fontSize = 11.sp, color = TextPrimary, fontFamily = FontFamily.Monospace)
+                        Text("Fallback Routine:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(step.fallback, fontSize = 11.sp, color = colors.textPrimary, fontFamily = FontFamily.Monospace)
                     }
 
                     if (step.result != null) {
@@ -312,12 +309,12 @@ fun PlanStepCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(DarkBackground)
+                                .background(colors.background)
                                 .padding(8.dp)
                         ) {
                             Column {
-                                Text("Execution Result:", fontSize = 10.sp, color = AccentNeonGreen, fontWeight = FontWeight.Bold)
-                                Text(step.result!!, fontSize = 11.sp, color = TextPrimary)
+                                Text("Execution Result:", fontSize = 10.sp, color = colors.accentNeonGreen, fontWeight = FontWeight.Bold)
+                                Text(step.result!!, fontSize = 11.sp, color = colors.textPrimary)
                             }
                         }
                     }
@@ -326,9 +323,8 @@ fun PlanStepCard(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         val isHallucinationError = displayState == StepDisplayState.AUTO_FIXING
-                        val errorBgColor = if (isHallucinationError) Color(0xFFFFB300).copy(alpha = 0.1f) else AccentRed.copy(alpha = 0.1f)
-                        val errorBorderColor = if (isHallucinationError) Color(0xFFFFB300).copy(alpha = 0.3f) else AccentRed.copy(alpha = 0.3f)
-                        val errorTitleColor = if (isHallucinationError) Color(0xFFFFB300) else AccentRed
+                        val errorAccent = if (isHallucinationError) colors.accentOrange else colors.accentRed
+                        val errorBgColor = errorAccent.copy(alpha = 0.1f)
                         val errorTextDisplay = if (isHallucinationError) "Auto-fixing: The requested system action is currently being recovered and updated by the OpenDroid Repair Engine." else step.error!!
 
                         Box(
@@ -336,17 +332,16 @@ fun PlanStepCard(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(errorBgColor)
-                                .border(1.dp, errorBorderColor, RoundedCornerShape(8.dp))
                                 .padding(8.dp)
                         ) {
                             Column {
                                 Text(
                                     text = if (isHallucinationError) "Repair Phase Active" else "Execution Error:",
                                     fontSize = 10.sp,
-                                    color = errorTitleColor,
+                                    color = errorAccent,
                                     fontWeight = FontWeight.Bold
                                 )
-                                Text(errorTextDisplay, fontSize = 11.sp, color = TextPrimary)
+                                Text(errorTextDisplay, fontSize = 11.sp, color = colors.textPrimary)
                             }
                         }
                     }

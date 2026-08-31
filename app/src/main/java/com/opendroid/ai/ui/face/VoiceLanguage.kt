@@ -8,6 +8,7 @@
 package com.opendroid.ai.ui.face
 
 import android.content.Context
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,9 +56,9 @@ class VoiceLanguageStore @Inject constructor(
     fun select(newTag: String?) {
         if (_tag.value == newTag) return
         _tag.value = newTag
-        prefs.edit().apply {
+        prefs.edit {
             if (newTag == null) remove(KEY_TAG) else putString(KEY_TAG, newTag)
-        }.apply()
+        }
     }
 
     private companion object {

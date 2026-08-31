@@ -9,6 +9,7 @@ package com.opendroid.ai.ui.face
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,7 +64,7 @@ class FaceColorStore @Inject constructor(
     fun select(id: String) {
         if (_colorId.value == id) return
         _colorId.value = id
-        prefs.edit().putString(KEY_COLOR, id).apply()
+        prefs.edit { putString(KEY_COLOR, id) }
     }
 
     private companion object {

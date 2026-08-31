@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,7 +91,7 @@ class MotionStore @Inject constructor(
     fun select(value: MotionSetting) {
         if (_setting.value == value) return
         _setting.value = value
-        prefs.edit().putString(KEY_MOTION, value.name).apply()
+        prefs.edit { putString(KEY_MOTION, value.name) }
     }
 
     // A preference written by a build that had different names must not crash the

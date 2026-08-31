@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +36,7 @@ fun PlanScreen(
     viewModel: PlanViewModel,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalOpenDroidColors.current
     val currentPlan by viewModel.currentPlan.collectAsState()
     val planHistory by viewModel.planHistory.collectAsState()
     
@@ -52,18 +52,18 @@ fun PlanScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "PLAN ENGINE",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Plan",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
             )
         },
-        containerColor = DarkBackground,
+        containerColor = colors.background,
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -89,11 +89,9 @@ fun PlanScreen(
 
                 item {
                     Text(
-                        text = "PLAN SEQUENCE STAGE",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextSecondary,
+                        text = "STEPS",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textSecondary,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                     )
                 }
@@ -121,11 +119,9 @@ fun PlanScreen(
             if (planHistory.isNotEmpty()) {
                 item {
                     Text(
-                        text = "AUTONOMOUS EXECUTION HISTORY",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        color = TextSecondary,
+                        text = "HISTORY",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textSecondary,
                         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                     )
                 }
@@ -151,11 +147,22 @@ fun PlanHeaderCard(
     onClearSelection: () -> Unit,
     onStop: () -> Unit
 ) {
+    val colors = LocalOpenDroidColors.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, if (isCurrentActive) AccentNeonGreen.copy(alpha = 0.4f) else BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = DarkSurface)
+            .then(
+                if (isCurrentActive) {
+                    Modifier.border(
+                        1.dp,
+                        colors.accentNeonGreen.copy(alpha = 0.4f),
+                        RoundedCornerShape(12.dp),
+                    )
+                } else {
+                    Modifier
+                }
+            ),
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -165,11 +172,11 @@ fun PlanHeaderCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val statusColor = when (plan.status) {
-                        PlanStatus.COMPLETED -> AccentNeonGreen
-                        PlanStatus.RUNNING -> AccentCyan
-                        PlanStatus.FAILED -> AccentRed
-                        PlanStatus.CANCELLED -> Color(0xFFFFB300) // Amber, matches PlanStepCard's in-between/warning states
-                        else -> TextSecondary
+                        PlanStatus.COMPLETED -> colors.accentNeonGreen
+                        PlanStatus.RUNNING -> colors.accentCyan
+                        PlanStatus.FAILED -> colors.accentRed
+                        PlanStatus.CANCELLED -> colors.accentOrange
+                        else -> colors.textSecondary
                     }
                     Box(
                         modifier = Modifier
@@ -182,33 +189,28 @@ fun PlanHeaderCard(
                         text = plan.status.name,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = statusColor,
-                        fontFamily = FontFamily.Monospace
+                        color = statusColor
                     )
                 }
                 if (!isCurrentActive) {
                     Text(
-                        text = "Viewing Past Run",
-                        fontSize = 10.sp,
-                        color = AccentPurple,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
+                        text = "VIEWING PAST RUN",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.accentPurple,
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(AccentPurple.copy(alpha = 0.2f))
+                            .background(colors.accentPurple.copy(alpha = 0.2f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                             .clickable { onClearSelection() }
                     )
                 } else {
                     Text(
                         text = "ACTIVE RUN",
-                        fontSize = 10.sp,
-                        color = AccentNeonGreen,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.accentNeonGreen,
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(AccentNeonGreen.copy(alpha = 0.2f))
+                            .background(colors.accentNeonGreen.copy(alpha = 0.2f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -218,32 +220,32 @@ fun PlanHeaderCard(
                 text = plan.goal,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Divider(color = BorderColor)
+            Divider(color = colors.borderColor)
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Steps", fontSize = 10.sp, color = TextSecondary)
-                    Text("${plan.steps.size} scheduled", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text("Steps", fontSize = 10.sp, color = colors.textSecondary)
+                    Text("${plan.steps.size} scheduled", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Estimated duration", fontSize = 10.sp, color = TextSecondary)
-                    Text(plan.estimatedDuration, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text("Estimated duration", fontSize = 10.sp, color = colors.textSecondary)
+                    Text(plan.estimatedDuration, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                 }
             }
 
             if (isCurrentActive && plan.status == PlanStatus.RUNNING) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Divider(color = BorderColor)
+                Divider(color = colors.borderColor)
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = onStop,
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentRed, contentColor = TextPrimary),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentRed, contentColor = colors.textPrimary),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -254,11 +256,8 @@ fun PlanHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "STOP TASK",
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp,
-                        letterSpacing = 1.sp
+                        text = "Stop task",
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -268,11 +267,11 @@ fun PlanHeaderCard(
 
 @Composable
 fun EmptyPlanPlaceholder() {
+    val colors = LocalOpenDroidColors.current
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = DarkSurface)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Column(
             modifier = Modifier
@@ -283,7 +282,7 @@ fun EmptyPlanPlaceholder() {
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = "No plan",
-                tint = TextSecondary,
+                tint = colors.textSecondary,
                 modifier = Modifier.size(36.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -291,13 +290,13 @@ fun EmptyPlanPlaceholder() {
                 text = "No active plans running",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Plans formulated by the autonomous system will display here in real-time.",
                 fontSize = 11.sp,
-                color = TextSecondary,
+                color = colors.textSecondary,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -311,14 +310,15 @@ fun PastPlanRow(
     onSelect: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val colors = LocalOpenDroidColors.current
     val dateFormat = remember { SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()) }
     
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) CardBackground else Color.Transparent)
-            .border(1.dp, if (isSelected) BorderColor else Color.Transparent, RoundedCornerShape(8.dp))
+            .background(if (isSelected) colors.cardBackground else Color.Transparent)
+            .border(1.dp, if (isSelected) colors.borderColor else Color.Transparent, RoundedCornerShape(8.dp))
             .clickable { onSelect() }
             .padding(12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -328,7 +328,7 @@ fun PastPlanRow(
             Text(
                 text = plan.goal,
                 fontSize = 13.sp,
-                color = TextPrimary,
+                color = colors.textPrimary,
                 maxLines = 1,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
@@ -337,14 +337,13 @@ fun PastPlanRow(
                 Text(
                     text = dateFormat.format(Date(plan.createdAt)),
                     fontSize = 10.sp,
-                    color = TextSecondary
+                    color = colors.textSecondary
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "${plan.steps.size} steps",
                     fontSize = 10.sp,
-                    color = AccentCyan,
-                    fontFamily = FontFamily.Monospace
+                    color = colors.accentCyan
                 )
             }
         }
@@ -358,10 +357,10 @@ fun PastPlanRow(
                 },
                 contentDescription = plan.status.name,
                 tint = when (plan.status) {
-                    PlanStatus.COMPLETED -> AccentNeonGreen
-                    PlanStatus.FAILED -> AccentRed
-                    PlanStatus.CANCELLED -> Color(0xFFFFB300) // Amber, matches PlanHeaderCard's CANCELLED color
-                    else -> TextSecondary
+                    PlanStatus.COMPLETED -> colors.accentNeonGreen
+                    PlanStatus.FAILED -> colors.accentRed
+                    PlanStatus.CANCELLED -> colors.accentOrange
+                    else -> colors.textSecondary
                 },
                 modifier = Modifier.size(16.dp)
             )
@@ -373,7 +372,7 @@ fun PastPlanRow(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Plan",
-                    tint = TextSecondary.copy(alpha = 0.5f),
+                    tint = colors.textSecondary.copy(alpha = 0.5f),
                     modifier = Modifier.size(16.dp)
                 )
             }

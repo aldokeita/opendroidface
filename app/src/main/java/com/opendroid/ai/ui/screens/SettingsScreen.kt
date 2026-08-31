@@ -10,11 +10,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
@@ -23,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +90,7 @@ fun SettingsScreen(
     val hfToken by viewModel.huggingFaceToken.collectAsState()
     val providerCredentialRecoveryState by viewModel.providerCredentialRecoveryState.collectAsState()
     val providerCredentialPersistenceState by viewModel.providerCredentialPersistenceState.collectAsState()
+    val colors = LocalOpenDroidColors.current
 
     val providers = listOf(
         "Google Gemini",
@@ -135,18 +139,18 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "AGENT PREFERENCES",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Settings",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
             )
         },
-        containerColor = DarkBackground,
+        containerColor = colors.background,
         modifier = modifier
     ) { padding ->
         LazyColumn(
@@ -162,32 +166,30 @@ fun SettingsScreen(
             if (providerCredentialRecoveryState == ProviderCredentialRecoveryState.CredentialsMustBeReentered) {
                 item {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color(0xFFFF9800), RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = colors.accentOrange.copy(alpha = 0.12f)
+                        )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "CREDENTIALS MUST BE RE-ENTERED",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = "Saved provider credentials cannot be read on this device. " +
                                     "Clear unavailable records, then enter your API keys again.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = viewModel::resetProviderCredentialsForReentry,
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                             ) {
-                                Text("Clear unavailable credentials", color = DarkBackground)
+                                Text("Clear unavailable credentials", color = colors.background)
                             }
                         }
                     }
@@ -199,25 +201,23 @@ fun SettingsScreen(
             ) {
                 item {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color(0xFFFF9800), RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = colors.accentOrange.copy(alpha = 0.12f)
+                        )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "CREDENTIALS WERE NOT SAVED",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = "Secure credential storage is unavailable. Existing settings " +
                                     "were preserved; check device storage and try again.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -228,17 +228,14 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "ACTIVE BRAIN PROVIDER",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = AccentCyan
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         
@@ -248,8 +245,7 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .height(56.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(DarkBackground)
-                                .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
+                                .background(colors.background)
                                 .clickable { providerDropdownExpanded = true }
                                 .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.CenterStart
@@ -261,14 +257,14 @@ fun SettingsScreen(
                             ) {
                                 Text(
                                     text = if (config.activeProvider == "On-Device AI" || config.activeProvider == "Gemma 4 (On-device)") "On-Device AI" else config.activeProvider,
-                                    color = TextPrimary,
+                                    color = colors.textPrimary,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
                                     contentDescription = "Dropdown",
-                                    tint = AccentNeonGreen
+                                    tint = colors.accentNeonGreen
                                 )
                             }
 
@@ -277,40 +273,35 @@ fun SettingsScreen(
                                 onDismissRequest = { providerDropdownExpanded = false },
                                 modifier = Modifier
                                     .fillMaxWidth(0.85f)
-                                    .background(CardBackground)
-                                    .border(1.dp, BorderColor)
+                                    .background(colors.cardBackground)
                             ) {
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = "OFFLINE AI", 
-                                            color = AccentCyan, 
-                                            fontWeight = FontWeight.Bold, 
-                                            fontSize = 11.sp, 
-                                            fontFamily = FontFamily.Monospace
+                                            text = "OFFLINE AI",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colors.textSecondary
                                         ) 
                                     },
                                     enabled = false,
                                     onClick = {}
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("On-Device AI", color = TextPrimary, modifier = Modifier.padding(start = 8.dp)) },
+                                    text = { Text("On-Device AI", color = colors.textPrimary, modifier = Modifier.padding(start = 8.dp)) },
                                     onClick = {
                                         viewModel.updateActiveProvider("On-Device AI")
                                         providerDropdownExpanded = false
                                     }
                                 )
                                 
-                                Divider(color = BorderColor, thickness = 1.dp)
+                                Divider(color = colors.borderColor, thickness = 1.dp)
 
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = "CLOUD AI", 
-                                            color = AccentCyan, 
-                                            fontWeight = FontWeight.Bold, 
-                                            fontSize = 11.sp, 
-                                            fontFamily = FontFamily.Monospace
+                                            text = "CLOUD AI",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = colors.textSecondary
                                         ) 
                                     },
                                     enabled = false,
@@ -324,7 +315,7 @@ fun SettingsScreen(
                                         else -> name
                                     }
                                     DropdownMenuItem(
-                                        text = { Text(displayName, color = TextPrimary, modifier = Modifier.padding(start = 8.dp)) },
+                                        text = { Text(displayName, color = colors.textPrimary, modifier = Modifier.padding(start = 8.dp)) },
                                         onClick = {
                                             viewModel.updateActiveProvider(name)
                                             providerDropdownExpanded = false
@@ -348,15 +339,13 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = "ACTIVE MODEL",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             if (modelsLoading) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(14.dp),
-                                    color = AccentNeonGreen,
+                                    color = colors.accentNeonGreen,
                                     strokeWidth = 2.dp
                                 )
                             } else {
@@ -367,7 +356,7 @@ fun SettingsScreen(
                                     Icon(
                                         imageVector = Icons.Default.Refresh,
                                         contentDescription = "Refresh models",
-                                        tint = TextSecondary,
+                                        tint = colors.textSecondary,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -387,15 +376,15 @@ fun SettingsScreen(
                                         Icon(
                                             imageVector = Icons.Default.ArrowDropDown,
                                             contentDescription = "Show models dropdown",
-                                            tint = AccentNeonGreen
+                                            tint = colors.accentNeonGreen
                                         )
                                     }
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -406,8 +395,7 @@ fun SettingsScreen(
                                     onDismissRequest = { modelDropdownExpanded = false },
                                     modifier = Modifier
                                         .fillMaxWidth(0.85f)
-                                        .background(CardBackground)
-                                        .border(1.dp, BorderColor)
+                                        .background(colors.cardBackground)
                                 ) {
                                     fetchedModels.forEach { model ->
                                         DropdownMenuItem(
@@ -419,7 +407,7 @@ fun SettingsScreen(
                                                 ) {
                                                     Text(
                                                         text = model.displayName,
-                                                        color = TextPrimary,
+                                                        color = colors.textPrimary,
                                                         fontSize = 14.sp
                                                     )
                                                     Row(
@@ -430,14 +418,14 @@ fun SettingsScreen(
                                                             Box(
                                                                 modifier = Modifier
                                                                     .background(
-                                                                        AccentNeonGreen.copy(alpha = 0.15f),
+                                                                        colors.accentNeonGreen.copy(alpha = 0.15f),
                                                                         RoundedCornerShape(4.dp)
                                                                     )
                                                                     .padding(horizontal = 4.dp, vertical = 2.dp)
                                                             ) {
                                                                 Text(
                                                                     text = "REC",
-                                                                    color = AccentNeonGreen,
+                                                                    color = colors.accentNeonGreen,
                                                                     fontSize = 9.sp,
                                                                     fontWeight = FontWeight.Bold
                                                                 )
@@ -447,14 +435,14 @@ fun SettingsScreen(
                                                             Box(
                                                                 modifier = Modifier
                                                                     .background(
-                                                                        AccentCyan.copy(alpha = 0.15f),
+                                                                        colors.accentCyan.copy(alpha = 0.15f),
                                                                         RoundedCornerShape(4.dp)
                                                                     )
                                                                     .padding(horizontal = 4.dp, vertical = 2.dp)
                                                             ) {
                                                                 Text(
                                                                     text = "FREE",
-                                                                    color = AccentCyan,
+                                                                    color = colors.accentCyan,
                                                                     fontSize = 9.sp,
                                                                     fontWeight = FontWeight.Bold
                                                                 )
@@ -464,14 +452,14 @@ fun SettingsScreen(
                                                             Box(
                                                                 modifier = Modifier
                                                                     .background(
-                                                                        Color(0xFFFFD700).copy(alpha = 0.15f),
+                                                                        colors.accentOrange.copy(alpha = 0.15f),
                                                                         RoundedCornerShape(4.dp)
                                                                     )
                                                                     .padding(horizontal = 4.dp, vertical = 2.dp)
                                                             ) {
                                                                 Text(
                                                                     text = "PRO",
-                                                                    color = Color(0xFFFFD700),
+                                                                    color = colors.accentOrange,
                                                                     fontSize = 9.sp,
                                                                     fontWeight = FontWeight.Bold
                                                                 )
@@ -493,15 +481,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "EXPLICIT PLANNING FALLBACKS",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = AccentCyan
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.textSecondary
                         )
                         Text(
                             text = "Only selected providers may receive a retry after an unusable low-impact local plan. High-impact plans never switch automatically.",
                             fontSize = 10.sp,
-                            color = TextSecondary,
+                            color = colors.textSecondary,
                             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                         )
                         providers
@@ -517,14 +503,14 @@ fun SettingsScreen(
                                             viewModel.updateFallbackProvider(fallbackProvider, enabled)
                                         },
                                         colors = CheckboxDefaults.colors(
-                                            checkedColor = AccentNeonGreen,
-                                            uncheckedColor = BorderColor,
-                                            checkmarkColor = DarkBackground
+                                            checkedColor = colors.accentNeonGreen,
+                                            uncheckedColor = colors.borderColor,
+                                            checkmarkColor = colors.background
                                         )
                                     )
                                     Text(
                                         text = fallbackProvider,
-                                        color = TextPrimary,
+                                        color = colors.textPrimary,
                                         fontSize = 12.sp
                                     )
                                 }
@@ -538,7 +524,7 @@ fun SettingsScreen(
                             Text(
                                 text = notice,
                                 fontSize = 11.sp,
-                                color = AccentRed,
+                                color = colors.accentRed,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -551,9 +537,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentCyan.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToBenchmark() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -564,23 +549,21 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "Benchmark",
-                            tint = AccentCyan,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "LLM RESPONSIVENESS REPORT",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                text = "Latency benchmark",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "View live charts comparing speeds & latency.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -592,17 +575,14 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "OLLAMA LOCAL ENDPOINT",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             OutlinedTextField(
@@ -611,10 +591,10 @@ fun SettingsScreen(
                                 label = { Text("Ollama Server URL", fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -622,7 +602,7 @@ fun SettingsScreen(
                             Text(
                                 text = "Use local LAN IP (e.g. http://192.168.1.50:11434) if testing from a physical Android device.",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -634,17 +614,14 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "ON-DEVICE AI STATUS",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             
@@ -653,14 +630,14 @@ fun SettingsScreen(
                             Text(
                                 text = "Active: ${activeSpec?.displayName ?: config.activeModel}",
                                 fontSize = 12.sp,
-                                color = AccentCyan,
+                                color = colors.accentCyan,
                                 fontWeight = FontWeight.SemiBold
                             )
                             if (activeSpec != null) {
                                 Text(
                                     text = "Backend: ${if (activeSpec.backend == OnDeviceBackend.AI_CORE) "Android AI Core" else "LiteRT-LM"}",
                                     fontSize = 11.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                             
@@ -671,8 +648,7 @@ fun SettingsScreen(
                                 text = "ANDROID AI CORE",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                color = colors.accentCyan
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             
@@ -731,11 +707,11 @@ fun SettingsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Gemma 4", fontSize = 13.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                                Text("Gemma 4", fontSize = 13.sp, color = colors.textPrimary, fontWeight = FontWeight.SemiBold)
                                 Text(
                                     text = gemma4Status,
                                     fontSize = 11.sp,
-                                    color = if (gemma4Status.contains("ready")) AccentNeonGreen else TextSecondary
+                                    color = if (gemma4Status.contains("ready")) colors.accentNeonGreen else colors.textSecondary
                                 )
                             }
                             if (showGemma4Download) {
@@ -755,10 +731,10 @@ fun SettingsScreen(
                                             }
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen),
+                                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Download Gemma 4 (AI Core)", color = DarkBackground)
+                                    Text("Download Gemma 4 (AI Core)", color = colors.background)
                                 }
                             }
                             
@@ -770,11 +746,11 @@ fun SettingsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Gemma 3n Multimodal", fontSize = 13.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                                Text("Gemma 3n Multimodal", fontSize = 13.sp, color = colors.textPrimary, fontWeight = FontWeight.SemiBold)
                                 Text(
                                     text = gemma3nStatus,
                                     fontSize = 11.sp,
-                                    color = if (gemma3nStatus.contains("ready")) AccentNeonGreen else TextSecondary
+                                    color = if (gemma3nStatus.contains("ready")) colors.accentNeonGreen else colors.textSecondary
                                 )
                             }
                             if (showGemma3nDownload) {
@@ -800,15 +776,15 @@ fun SettingsScreen(
                                             }
                                         }
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentCyan),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Download Gemma 3n (AI Core)", color = DarkBackground)
+                                    Text("Download Gemma 3n (AI Core)", color = colors.background)
                                 }
                             }
                             
                             Spacer(modifier = Modifier.height(16.dp))
-                            Divider(color = BorderColor, thickness = 1.dp)
+                            Divider(color = colors.borderColor, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(12.dp))
 
                             // ─── Hugging Face Section ───
@@ -816,22 +792,20 @@ fun SettingsScreen(
                                 text = "HUGGING FACE TOKEN (GATED MODELS ONLY)",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Needed only for gated Hugging Face downloads (the Google-hosted Gemma 3n LiteRT builds). Public models such as Qwen 2.5 and the Gemma 4 community mirrors download without a token. Not used for cloud API providers.",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Card(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, BorderColor, RoundedCornerShape(10.dp)),
-                                colors = CardDefaults.cardColors(containerColor = CardBackground.copy(alpha = 0.3f))
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = colors.cardBackground.copy(alpha = 0.3f))
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     val validationStatus by viewModel.huggingFaceValidationStatus.collectAsState()
@@ -844,21 +818,21 @@ fun SettingsScreen(
                                         label = { Text("Hugging Face Access Token", fontSize = 12.sp) },
                                         singleLine = true,
                                         visualTransformation = if (showToken) VisualTransformation.None else PasswordVisualTransformation(),
-                                        placeholder = { Text("hf_...", fontSize = 12.sp, color = TextSecondary) },
+                                        placeholder = { Text("hf_...", fontSize = 12.sp, color = colors.textSecondary) },
                                         trailingIcon = {
                                             IconButton(onClick = { showToken = !showToken }) {
                                                 Icon(
                                                     imageVector = if (showToken) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                                     contentDescription = "Toggle Token Visibility",
-                                                    tint = TextSecondary
+                                                    tint = colors.textSecondary
                                                 )
                                             }
                                         },
                                         colors = OutlinedTextFieldDefaults.colors(
-                                            focusedBorderColor = Color(0xFFFF9800),
-                                            unfocusedBorderColor = BorderColor,
-                                            focusedTextColor = TextPrimary,
-                                            unfocusedTextColor = TextPrimary
+                                            focusedBorderColor = colors.accentOrange,
+                                            unfocusedBorderColor = colors.borderColor,
+                                            focusedTextColor = colors.textPrimary,
+                                            unfocusedTextColor = colors.textPrimary
                                         ),
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -884,14 +858,14 @@ fun SettingsScreen(
                                                 },
                                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                             ) {
-                                                Text("📋 Paste", fontSize = 11.sp, color = Color(0xFFFF9800))
+                                                Text("📋 Paste", fontSize = 11.sp, color = colors.accentOrange)
                                             }
 
                                             TextButton(
                                                 onClick = { viewModel.updateHuggingFaceToken("") },
                                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                             ) {
-                                                Text("❌ Clear", fontSize = 11.sp, color = Color.Red)
+                                                Text("❌ Clear", fontSize = 11.sp, color = colors.accentRed)
                                             }
                                         }
                                     }
@@ -908,11 +882,11 @@ fun SettingsScreen(
                                     }
 
                                     val statusColor = when (validationStatus) {
-                                        "Valid" -> AccentNeonGreen
-                                        "Invalid" -> Color.Red
-                                        "Verifying..." -> AccentCyan
-                                        "Unable to verify" -> Color.Yellow
-                                        else -> TextSecondary
+                                        "Valid" -> colors.accentNeonGreen
+                                        "Invalid" -> colors.accentRed
+                                        "Verifying..." -> colors.accentCyan
+                                        "Unable to verify" -> colors.accentOrange
+                                        else -> colors.textSecondary
                                     }
 
                                     Row(
@@ -922,28 +896,28 @@ fun SettingsScreen(
                                     ) {
                                         Column {
                                             Text("Status: $statusDisplay", fontSize = 11.sp, color = statusColor, fontWeight = FontWeight.Bold)
-                                            Text("Last Verified: $lastVerified", fontSize = 9.sp, color = TextSecondary)
-                                            Text("Storage: Encrypted", fontSize = 9.sp, color = TextSecondary)
+                                            Text("Last Verified: $lastVerified", fontSize = 9.sp, color = colors.textSecondary)
+                                            Text("Storage: Encrypted", fontSize = 9.sp, color = colors.textSecondary)
                                         }
 
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                             Button(
                                                 onClick = { viewModel.validateHuggingFaceToken() },
-                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
+                                                colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange),
                                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                                                 modifier = Modifier.height(28.dp)
                                             ) {
-                                                Text("Validate Token", fontSize = 10.sp, color = DarkBackground, fontWeight = FontWeight.Bold)
+                                                Text("Validate Token", fontSize = 10.sp, color = colors.background, fontWeight = FontWeight.Bold)
                                             }
 
                                             if (hfToken.isNotBlank()) {
                                                 Button(
                                                     onClick = { viewModel.removeHuggingFaceToken() },
-                                                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f)),
+                                                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentRed.copy(alpha = 0.2f)),
                                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                                                     modifier = Modifier.height(28.dp)
                                                 ) {
-                                                    Text("Remove Token", fontSize = 10.sp, color = Color.Red, fontWeight = FontWeight.Bold)
+                                                    Text("Remove Token", fontSize = 10.sp, color = colors.accentRed, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -952,7 +926,7 @@ fun SettingsScreen(
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Divider(color = BorderColor, thickness = 1.dp)
+                            Divider(color = colors.borderColor, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(12.dp))
                             
                             // ─── LiteRT-LM Backend Section ───
@@ -960,14 +934,13 @@ fun SettingsScreen(
                                 text = "LITERT-LM (FALLBACK)",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Runs without Google AI Core. Models tagged PUBLIC (Qwen, the Gemma 4 community mirrors) need no HF token; models tagged GATED (the Google-hosted Gemma 3n builds) do. Or import your own .task / .litertlm file.",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
 
@@ -990,14 +963,27 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 6.dp)
-                                        .border(
-                                            1.dp,
-                                            if (config.activeModel == spec.id) AccentNeonGreen.copy(alpha = 0.5f) else BorderColor,
-                                            RoundedCornerShape(10.dp)
+                                        // The only outline left on this screen, because
+                                        // here it says which model is live rather than
+                                        // just drawing a box around a row.
+                                        .then(
+                                            if (config.activeModel == spec.id) {
+                                                Modifier.border(
+                                                    1.dp,
+                                                    colors.accentNeonGreen.copy(alpha = 0.5f),
+                                                    RoundedCornerShape(10.dp),
+                                                )
+                                            } else {
+                                                Modifier
+                                            }
                                         )
                                         .clickable { if (isApiCompatible) expanded = !expanded },
                                     colors = CardDefaults.cardColors(
-                                        containerColor = if (config.activeModel == spec.id) CardBackground.copy(alpha = 0.8f) else CardBackground.copy(alpha = 0.3f)
+                                        containerColor = if (config.activeModel == spec.id) {
+                                            colors.accentNeonGreen.copy(alpha = 0.08f)
+                                        } else {
+                                            colors.background
+                                        }
                                     )
                                 ) {
                                     Column(modifier = Modifier.padding(12.dp)) {
@@ -1011,19 +997,19 @@ fun SettingsScreen(
                                                     Text(
                                                         text = spec.displayName,
                                                         fontSize = 13.sp,
-                                                        color = if (isApiCompatible) TextPrimary else TextSecondary,
+                                                        color = if (isApiCompatible) colors.textPrimary else colors.textSecondary,
                                                         fontWeight = FontWeight.SemiBold
                                                     )
                                                     if (spec.isRecommended) {
                                                         Spacer(modifier = Modifier.width(6.dp))
                                                         Box(
                                                             modifier = Modifier
-                                                                .background(Color(0xFFFF9800).copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                                                .background(colors.accentOrange.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
                                                                 .padding(horizontal = 4.dp, vertical = 2.dp)
                                                         ) {
                                                             Text(
                                                                 text = "REC",
-                                                                color = Color(0xFFFF9800),
+                                                                color = colors.accentOrange,
                                                                 fontSize = 8.sp,
                                                                 fontWeight = FontWeight.Bold
                                                             )
@@ -1033,15 +1019,15 @@ fun SettingsScreen(
                                                     Box(
                                                         modifier = Modifier
                                                             .background(
-                                                                if (spec.authRequired) Color(0xFFFF9800).copy(alpha = 0.12f)
-                                                                else AccentCyan.copy(alpha = 0.12f),
+                                                                if (spec.authRequired) colors.accentOrange.copy(alpha = 0.12f)
+                                                                else colors.accentCyan.copy(alpha = 0.12f),
                                                                 RoundedCornerShape(4.dp)
                                                             )
                                                             .padding(horizontal = 4.dp, vertical = 2.dp)
                                                     ) {
                                                         Text(
                                                             text = if (spec.authRequired) "GATED · HF TOKEN" else "PUBLIC · NO TOKEN",
-                                                            color = if (spec.authRequired) Color(0xFFFF9800) else AccentCyan,
+                                                            color = if (spec.authRequired) colors.accentOrange else colors.accentCyan,
                                                             fontSize = 8.sp,
                                                             fontWeight = FontWeight.Bold
                                                         )
@@ -1058,17 +1044,17 @@ fun SettingsScreen(
                                                         "Backend: LiteRT-LM · In-app download unavailable; local import only"
                                                     },
                                                     fontSize = 10.sp,
-                                                    color = TextSecondary
+                                                    color = colors.textSecondary
                                                 )
                                             }
                                             
                                             val badgeColor = when (status) {
-                                                ModelStatus.READY -> AccentNeonGreen
-                                                ModelStatus.DOWNLOADING -> Color(0xFFFF9800)
-                                                ModelStatus.PAUSED -> Color.Yellow
-                                                ModelStatus.LOADING -> AccentCyan
-                                                ModelStatus.FAILED -> Color.Red
-                                                else -> TextSecondary
+                                                ModelStatus.READY -> colors.accentNeonGreen
+                                                ModelStatus.DOWNLOADING -> colors.accentOrange
+                                                ModelStatus.PAUSED -> colors.accentOrange
+                                                ModelStatus.LOADING -> colors.accentCyan
+                                                ModelStatus.FAILED -> colors.accentRed
+                                                else -> colors.textSecondary
                                             }
                                             
                                             val statusText = when {
@@ -1099,8 +1085,8 @@ fun SettingsScreen(
                                                     .fillMaxWidth()
                                                     .height(4.dp)
                                                     .clip(RoundedCornerShape(2.dp)),
-                                                color = Color(0xFFFF9800),
-                                                trackColor = BorderColor
+                                                color = colors.accentOrange,
+                                                trackColor = colors.borderColor
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Row(
@@ -1112,13 +1098,13 @@ fun SettingsScreen(
                                                     text = "${formatBytes(downloadedSize)} / ${formatBytes(totalSize)}" +
                                                            (if (status == ModelStatus.DOWNLOADING && speed.isNotEmpty()) " @ $speed" else ""),
                                                     fontSize = 9.sp,
-                                                    color = TextSecondary
+                                                    color = colors.textSecondary
                                                 )
                                                 if (status == ModelStatus.DOWNLOADING && eta.isNotEmpty()) {
                                                     Text(
                                                         text = "ETA: $eta",
                                                         fontSize = 9.sp,
-                                                        color = TextSecondary
+                                                        color = colors.textSecondary
                                                     )
                                                 }
                                             }
@@ -1131,13 +1117,13 @@ fun SettingsScreen(
                                                 if (status == ModelStatus.DOWNLOADING) {
                                                     Button(
                                                         onClick = { viewModel.pauseDownload(spec.id) },
-                                                        colors = ButtonDefaults.buttonColors(containerColor = BorderColor),
+                                                        colors = ButtonDefaults.buttonColors(containerColor = colors.borderColor),
                                                         modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                     ) {
-                                                        Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(12.dp), tint = TextPrimary)
+                                                        Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(12.dp), tint = colors.textPrimary)
                                                         Spacer(modifier = Modifier.width(4.dp))
-                                                        Text("Pause", fontSize = 10.sp, color = TextPrimary)
+                                                        Text("Pause", fontSize = 10.sp, color = colors.textPrimary)
                                                     }
                                                 } else if (status == ModelStatus.PAUSED) {
                                                     Button(
@@ -1148,19 +1134,19 @@ fun SettingsScreen(
                                                                 viewModel.resumeDownload(spec.id)
                                                             }
                                                         },
-                                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
+                                                        colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange),
                                                         modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                     ) {
-                                                        Icon(Icons.Default.PlayArrow, contentDescription = "Resume", modifier = Modifier.size(12.dp), tint = DarkBackground)
+                                                        Icon(Icons.Default.PlayArrow, contentDescription = "Resume", modifier = Modifier.size(12.dp), tint = colors.background)
                                                         Spacer(modifier = Modifier.width(4.dp))
-                                                        Text("Resume", fontSize = 10.sp, color = DarkBackground)
+                                                        Text("Resume", fontSize = 10.sp, color = colors.background)
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Button(
                                                     onClick = { viewModel.cancelDownload(spec.id) },
-                                                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.6f)),
+                                                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentRed.copy(alpha = 0.6f)),
                                                     modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                 ) {
@@ -1175,7 +1161,7 @@ fun SettingsScreen(
                                             Text(
                                                 text = errorText,
                                                 fontSize = 10.sp,
-                                                color = Color.Red,
+                                                color = colors.accentRed,
                                                 fontWeight = FontWeight.SemiBold
                                             )
                                             if (spec.licenseUrl.isNotEmpty() && (errorText.contains("permission", ignoreCase = true) || errorText.contains("license", ignoreCase = true))) {
@@ -1183,11 +1169,11 @@ fun SettingsScreen(
                                                 val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
                                                 Button(
                                                     onClick = { uriHandler.openUri(spec.licenseUrl) },
-                                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800).copy(alpha = 0.2f)),
+                                                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange.copy(alpha = 0.2f)),
                                                     modifier = Modifier.fillMaxWidth().height(28.dp),
                                                     contentPadding = PaddingValues(vertical = 2.dp)
                                                 ) {
-                                                    Text("Open Model Page", color = Color(0xFFFF9800), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                                    Text("Open Model Page", color = colors.accentOrange, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -1195,7 +1181,7 @@ fun SettingsScreen(
                                         AnimatedVisibility(visible = expanded) {
                                             Column {
                                                 Spacer(modifier = Modifier.height(10.dp))
-                                                Divider(color = BorderColor, thickness = 0.5.dp)
+                                                Divider(color = colors.borderColor, thickness = 0.5.dp)
                                                 Spacer(modifier = Modifier.height(8.dp))
                                                 
                                                 Row(
@@ -1216,11 +1202,11 @@ fun SettingsScreen(
                                                                         viewModel.downloadModel(spec.id)
                                                                     }
                                                                 },
-                                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
+                                                                colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange),
                                                                 modifier = Modifier.weight(1f).height(32.dp),
                                                                 contentPadding = PaddingValues(horizontal = 4.dp)
                                                             ) {
-                                                                Text("Download", fontSize = 11.sp, color = DarkBackground)
+                                                                Text("Download", fontSize = 11.sp, color = colors.background)
                                                             }
                                                         }
 
@@ -1230,11 +1216,11 @@ fun SettingsScreen(
                                                                 activeImportModelId = spec.id
                                                                 importLauncher.launch("*/*")
                                                             },
-                                                            colors = ButtonDefaults.buttonColors(containerColor = BorderColor),
+                                                            colors = ButtonDefaults.buttonColors(containerColor = colors.borderColor),
                                                             modifier = Modifier.weight(1f).height(32.dp),
                                                             contentPadding = PaddingValues(horizontal = 4.dp)
                                                         ) {
-                                                            Text("Import", fontSize = 11.sp, color = TextPrimary)
+                                                            Text("Import", fontSize = 11.sp, color = colors.textPrimary)
                                                         }
                                                     }
                                                     
@@ -1242,7 +1228,7 @@ fun SettingsScreen(
                                                          Button(
                                                              onClick = { viewModel.loadModel(spec.id) },
                                                              colors = ButtonDefaults.buttonColors(
-                                                                 containerColor = if (config.activeModel == spec.id) AccentNeonGreen else AccentCyan
+                                                                 containerColor = if (config.activeModel == spec.id) colors.accentNeonGreen else colors.accentCyan
                                                              ),
                                                              modifier = Modifier.weight(1f).height(32.dp),
                                                              contentPadding = PaddingValues(horizontal = 4.dp)
@@ -1251,19 +1237,19 @@ fun SettingsScreen(
                                                                  if (config.activeModel == spec.id) Icons.Default.Check else Icons.Default.ArrowForward,
                                                                  contentDescription = null,
                                                                  modifier = Modifier.size(12.dp),
-                                                                 tint = DarkBackground
+                                                                 tint = colors.background
                                                              )
                                                              Spacer(modifier = Modifier.width(4.dp))
-                                                             Text(if (config.activeModel == spec.id) "Active" else "Load Model", fontSize = 11.sp, color = DarkBackground)
+                                                             Text(if (config.activeModel == spec.id) "Active" else "Load Model", fontSize = 11.sp, color = colors.background)
                                                          }
                                                          
                                                          Button(
                                                              onClick = { viewModel.deleteModel(spec.id) },
-                                                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f)),
+                                                             colors = ButtonDefaults.buttonColors(containerColor = colors.accentRed.copy(alpha = 0.2f)),
                                                              modifier = Modifier.height(32.dp),
                                                              contentPadding = PaddingValues(horizontal = 8.dp)
                                                          ) {
-                                                             Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = Color.Red)
+                                                             Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = colors.accentRed)
                                                          }
                                                     }
                                                     
@@ -1271,11 +1257,11 @@ fun SettingsScreen(
                                                         onClick = {
                                                             // Info clicked (No-op or log details)
                                                         },
-                                                        colors = ButtonDefaults.buttonColors(containerColor = BorderColor),
+                                                        colors = ButtonDefaults.buttonColors(containerColor = colors.borderColor),
                                                         modifier = Modifier.height(32.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp)
                                                     ) {
-                                                        Icon(Icons.Default.Info, contentDescription = "Info", modifier = Modifier.size(14.dp), tint = TextSecondary)
+                                                        Icon(Icons.Default.Info, contentDescription = "Info", modifier = Modifier.size(14.dp), tint = colors.textSecondary)
                                                     }
                                                 }
                                             }
@@ -1286,20 +1272,19 @@ fun SettingsScreen(
 
                             // ─── Custom LiteRT imports ───
                             Spacer(modifier = Modifier.height(12.dp))
-                            Divider(color = BorderColor, thickness = 1.dp)
+                            Divider(color = colors.borderColor, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "CUSTOM LITERT MODELS",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Import any .task or .litertlm file as its own model (not tied to a catalog slot). GGUF is not supported yet.",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
@@ -1308,10 +1293,10 @@ fun SettingsScreen(
                                     activeImportModelId = null
                                     importLauncher.launch("*/*")
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.accentCyan),
                                 modifier = Modifier.fillMaxWidth().height(36.dp)
                             ) {
-                                Text("Import custom LiteRT model", fontSize = 12.sp, color = DarkBackground)
+                                Text("Import custom LiteRT model", fontSize = 12.sp, color = colors.background)
                             }
 
                             val customModels = dbModels.filter {
@@ -1324,17 +1309,26 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 6.dp)
-                                        .border(
-                                            1.dp,
-                                            if (config.activeModel == entity.id) AccentNeonGreen.copy(alpha = 0.5f) else BorderColor,
-                                            RoundedCornerShape(10.dp)
+                                        // The only outline left on this screen, because
+                                        // here it says which model is live rather than
+                                        // just drawing a box around a row.
+                                        .then(
+                                            if (config.activeModel == entity.id) {
+                                                Modifier.border(
+                                                    1.dp,
+                                                    colors.accentNeonGreen.copy(alpha = 0.5f),
+                                                    RoundedCornerShape(10.dp),
+                                                )
+                                            } else {
+                                                Modifier
+                                            }
                                         )
                                         .clickable { expanded = !expanded },
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (config.activeModel == entity.id) {
-                                            CardBackground.copy(alpha = 0.8f)
+                                            colors.accentNeonGreen.copy(alpha = 0.08f)
                                         } else {
-                                            CardBackground.copy(alpha = 0.3f)
+                                            colors.background
                                         }
                                     )
                                 ) {
@@ -1348,26 +1342,26 @@ fun SettingsScreen(
                                                 Text(
                                                     text = entity.name,
                                                     fontSize = 13.sp,
-                                                    color = TextPrimary,
+                                                    color = colors.textPrimary,
                                                     fontWeight = FontWeight.SemiBold
                                                 )
                                                 Text(
                                                     text = "Custom LiteRT · ${formatBytes(entity.size)} · no token",
                                                     fontSize = 10.sp,
-                                                    color = TextSecondary
+                                                    color = colors.textSecondary
                                                 )
                                             }
                                             Text(
                                                 text = if (config.activeModel == entity.id) "Active" else "Ready",
                                                 fontSize = 10.sp,
-                                                color = AccentNeonGreen,
+                                                color = colors.accentNeonGreen,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
                                         AnimatedVisibility(visible = expanded) {
                                             Column {
                                                 Spacer(modifier = Modifier.height(10.dp))
-                                                Divider(color = BorderColor, thickness = 0.5.dp)
+                                                Divider(color = colors.borderColor, thickness = 0.5.dp)
                                                 Spacer(modifier = Modifier.height(8.dp))
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -1377,9 +1371,9 @@ fun SettingsScreen(
                                                         onClick = { viewModel.loadModel(entity.id) },
                                                         colors = ButtonDefaults.buttonColors(
                                                             containerColor = if (config.activeModel == entity.id) {
-                                                                AccentNeonGreen
+                                                                colors.accentNeonGreen
                                                             } else {
-                                                                AccentCyan
+                                                                colors.accentCyan
                                                             }
                                                         ),
                                                         modifier = Modifier.weight(1f).height(32.dp),
@@ -1388,13 +1382,13 @@ fun SettingsScreen(
                                                         Text(
                                                             if (config.activeModel == entity.id) "Active" else "Load Model",
                                                             fontSize = 11.sp,
-                                                            color = DarkBackground
+                                                            color = colors.background
                                                         )
                                                     }
                                                     Button(
                                                         onClick = { viewModel.deleteModel(entity.id) },
                                                         colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color.Red.copy(alpha = 0.2f)
+                                                            containerColor = colors.accentRed.copy(alpha = 0.2f)
                                                         ),
                                                         modifier = Modifier.height(32.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp)
@@ -1403,7 +1397,7 @@ fun SettingsScreen(
                                                             Icons.Default.Delete,
                                                             contentDescription = "Delete",
                                                             modifier = Modifier.size(14.dp),
-                                                            tint = Color.Red
+                                                            tint = colors.accentRed
                                                         )
                                                     }
                                                 }
@@ -1414,7 +1408,7 @@ fun SettingsScreen(
                             }
                             
                             Spacer(modifier = Modifier.height(12.dp))
-                            Divider(color = BorderColor, thickness = 1.dp)
+                            Divider(color = colors.borderColor, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(12.dp))
 
                             // ─── Storage Cleanup Section ───
@@ -1422,8 +1416,7 @@ fun SettingsScreen(
                                 text = "STORAGE CLEANUP",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = Color(0xFFFF9800)
+                                color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             
@@ -1439,12 +1432,12 @@ fun SettingsScreen(
                                 Text(
                                     text = "Used: ${formatBytes(totalSpace - freeSpace)} / ${formatBytes(totalSpace)}",
                                     fontSize = 11.sp,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "${((totalSpace - freeSpace) * 100 / (totalSpace.coerceAtLeast(1L)))}% Used",
                                     fontSize = 11.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                              }
                              Spacer(modifier = Modifier.height(4.dp))
@@ -1454,19 +1447,19 @@ fun SettingsScreen(
                                      .fillMaxWidth()
                                      .height(6.dp)
                                      .clip(RoundedCornerShape(3.dp)),
-                                 color = Color(0xFFFF9800),
-                                 trackColor = BorderColor
+                                 color = colors.accentOrange,
+                                 trackColor = colors.borderColor
                              )
                              Spacer(modifier = Modifier.height(6.dp))
                              Text(
                                  text = "OpenDroid models occupy ${formatBytes(usedByApp)} of on-device storage.",
                                  fontSize = 10.sp,
-                                 color = TextSecondary
+                                 color = colors.textSecondary
                              )
                              Spacer(modifier = Modifier.height(8.dp))
                              Button(
                                  onClick = { viewModel.deleteUnusedModels() },
-                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f)),
+                                 colors = ButtonDefaults.buttonColors(containerColor = colors.accentRed.copy(alpha = 0.8f)),
                                  modifier = Modifier.fillMaxWidth(),
                                  shape = RoundedCornerShape(8.dp)
                              ) {
@@ -1482,17 +1475,14 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "COPILOT LOCAL ENDPOINT",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             OutlinedTextField(
@@ -1501,10 +1491,10 @@ fun SettingsScreen(
                                 label = { Text("Copilot Server URL", fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -1512,7 +1502,7 @@ fun SettingsScreen(
                             Text(
                                 text = "Use local LAN IP (e.g. http://192.168.1.50:4141) if testing from a physical Android device.",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -1524,17 +1514,14 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = CardBackground)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "CUSTOM OPENAI ENDPOINT",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             OutlinedTextField(
@@ -1543,10 +1530,10 @@ fun SettingsScreen(
                                 label = { Text("Base URL (e.g. https://api.openai.com/v1)", fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = AccentNeonGreen,
-                                    unfocusedBorderColor = BorderColor,
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = colors.accentNeonGreen,
+                                    unfocusedBorderColor = colors.borderColor,
+                                    focusedTextColor = colors.textPrimary,
+                                    unfocusedTextColor = colors.textPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -1554,7 +1541,7 @@ fun SettingsScreen(
                             Text(
                                 text = "Provide the custom OpenAI-compatible API base URL (e.g. from Pollination, Aqua Dev, Portkey, etc.)",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -1565,9 +1552,8 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -1579,15 +1565,13 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = "PROVIDER API KEYS",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (keysSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = "Toggle Keys Section",
-                                tint = AccentCyan
+                                tint = colors.textSecondary
                             )
                         }
 
@@ -1613,8 +1597,7 @@ fun SettingsScreen(
                                         Text(
                                             text = connectionStatusLabel(connectionState),
                                             fontSize = 10.sp,
-                                            color = TextSecondary,
-                                            fontFamily = FontFamily.Monospace,
+                                            color = colors.textSecondary,
                                             modifier = Modifier.weight(1f)
                                         )
                                         TextButton(
@@ -1626,7 +1609,7 @@ fun SettingsScreen(
                                     Text(
                                         text = "Sends one minimal request to $providerName; provider charges may apply.",
                                         fontSize = 10.sp,
-                                        color = TextSecondary
+                                        color = colors.textSecondary
                                     )
                                 }
                             }
@@ -1639,9 +1622,8 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -1653,15 +1635,13 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = "ELEVENLABS VOICE SYNTHESIS",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (voiceSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = "Toggle Voice Section",
-                                tint = AccentCyan
+                                tint = colors.textSecondary
                             )
                         }
 
@@ -1681,17 +1661,17 @@ fun SettingsScreen(
                                     label = { Text("ElevenLabs Voice ID", fontSize = 12.sp) },
                                     singleLine = true,
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = AccentNeonGreen,
-                                        unfocusedBorderColor = BorderColor,
-                                        focusedTextColor = TextPrimary,
-                                        unfocusedTextColor = TextPrimary
+                                        focusedBorderColor = colors.accentNeonGreen,
+                                        unfocusedBorderColor = colors.borderColor,
+                                        focusedTextColor = colors.textPrimary,
+                                        unfocusedTextColor = colors.textPrimary
                                     ),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 Text(
                                     text = "If ElevenLabs key is not set, OpenDroid automatically falls back to native offline Android Text-to-Speech.",
                                     fontSize = 10.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                         }
@@ -1703,9 +1683,8 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -1717,15 +1696,13 @@ fun SettingsScreen(
                         ) {
                             Text(
                                 text = "PLANNING & AUTOMATION",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (planningSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = "Toggle Planning Section",
-                                tint = AccentCyan
+                                tint = colors.textSecondary
                             )
                         }
 
@@ -1739,27 +1716,27 @@ fun SettingsScreen(
                             text = "Auto Mode",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
+                            color = colors.textPrimary
                         )
                         Text(
                             text = "Auto runs plans whose every step you've allowed. YOLO runs everything without asking.",
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             AutoMode.entries.forEach { mode ->
                                 val selected = autoMode == mode
-                                val accent = if (mode == AutoMode.YOLO) AccentRed else AccentNeonGreen
+                                val accent = if (mode == AutoMode.YOLO) colors.accentRed else colors.accentNeonGreen
                                 OutlinedButton(
                                     onClick = {
                                         if (mode == AutoMode.YOLO && !selected) showYoloWarning = true
                                         else viewModel.setAutoMode(mode)
                                     },
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = if (selected) accent else TextSecondary
+                                        contentColor = if (selected) accent else colors.textSecondary
                                     ),
-                                    border = BorderStroke(1.dp, if (selected) accent else BorderColor),
+                                    border = BorderStroke(1.dp, if (selected) accent else colors.borderColor),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.weight(1f)
                                 ) {
@@ -1778,26 +1755,26 @@ fun SettingsScreen(
                         if (showYoloWarning) {
                             AlertDialog(
                                 onDismissRequest = { showYoloWarning = false },
-                                containerColor = DarkSurface,
-                                title = { Text("Enable YOLO mode?", color = AccentRed, fontWeight = FontWeight.Bold) },
+                                containerColor = colors.surface,
+                                title = { Text("Enable YOLO mode?", color = colors.accentRed, fontWeight = FontWeight.Bold) },
                                 text = {
                                     Text(
                                         "YOLO runs EVERY plan without asking — including actions that " +
                                         "spend money (UPI payments, food and cab orders) and irreversible " +
                                         "ones (installing apps, deleting files, restarting the device). " +
                                         "No approval gate remains.",
-                                        color = TextPrimary
+                                        color = colors.textPrimary
                                     )
                                 },
                                 confirmButton = {
                                     TextButton(onClick = {
                                         showYoloWarning = false
                                         viewModel.setAutoMode(AutoMode.YOLO)
-                                    }) { Text("I understand, enable", color = AccentRed) }
+                                    }) { Text("I understand, enable", color = colors.accentRed) }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { showYoloWarning = false }) {
-                                        Text("Cancel", color = TextSecondary)
+                                        Text("Cancel", color = colors.textSecondary)
                                     }
                                 }
                             )
@@ -1808,8 +1785,7 @@ fun SettingsScreen(
                         Text(
                             text = "ALLOWED ACTIONS (${grantedActions.size})",
                             fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = AccentCyan
+                            color = colors.accentCyan
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         val dateFormat = remember { java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()) }
@@ -1822,15 +1798,15 @@ fun SettingsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = action, fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = TextPrimary)
+                                        Text(text = action, fontSize = 13.sp, color = colors.textPrimary)
                                         Text(
                                             text = if (grantedAt == 0L) "Default" else "Granted ${dateFormat.format(java.util.Date(grantedAt))}",
                                             fontSize = 11.sp,
-                                            color = TextSecondary
+                                            color = colors.textSecondary
                                         )
                                     }
                                     TextButton(onClick = { viewModel.revokeGrant(action) }) {
-                                        Text("Revoke", color = AccentRed, fontSize = 12.sp)
+                                        Text("Revoke", color = colors.accentRed, fontSize = 12.sp)
                                     }
                                 }
                             }
@@ -1840,7 +1816,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(BorderColor)
+                                .background(colors.borderColor)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -1854,20 +1830,20 @@ fun SettingsScreen(
                                     text = "Multi-Agent Planning Mode",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "Use critic and plan merger agents for safer, more robust plan generation.",
                                     fontSize = 12.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                             Switch(
                                 checked = config.multiAgentModeEnabled,
                                 onCheckedChange = { viewModel.updateMultiAgentMode(it) },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = AccentNeonGreen,
-                                    checkedTrackColor = AccentNeonGreen.copy(alpha = 0.5f)
+                                    checkedThumbColor = colors.accentNeonGreen,
+                                    checkedTrackColor = colors.accentNeonGreen.copy(alpha = 0.5f)
                                 )
                             )
                         }
@@ -1877,7 +1853,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(BorderColor)
+                                .background(colors.borderColor)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -1891,20 +1867,20 @@ fun SettingsScreen(
                                     text = "Show Floating Button",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "Show a tiny floating bubble to launch the app or record commands directly.",
                                     fontSize = 12.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                             Switch(
                                 checked = config.showFloatingButton,
                                 onCheckedChange = { viewModel.updateShowFloatingButton(it) },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = AccentNeonGreen,
-                                    checkedTrackColor = AccentNeonGreen.copy(alpha = 0.5f)
+                                    checkedThumbColor = colors.accentNeonGreen,
+                                    checkedTrackColor = colors.accentNeonGreen.copy(alpha = 0.5f)
                                 )
                             )
                         }
@@ -1914,7 +1890,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(BorderColor)
+                                .background(colors.borderColor)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -1928,20 +1904,20 @@ fun SettingsScreen(
                                     text = if (config.isDarkMode) "Dark Mode" else "Light Mode",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = TextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "Switch between dark and light appearance.",
                                     fontSize = 12.sp,
-                                    color = TextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                             Switch(
                                 checked = config.isDarkMode,
                                 onCheckedChange = { viewModel.updateDarkMode(it) },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = AccentNeonGreen,
-                                    checkedTrackColor = AccentNeonGreen.copy(alpha = 0.5f)
+                                    checkedThumbColor = colors.accentNeonGreen,
+                                    checkedTrackColor = colors.accentNeonGreen.copy(alpha = 0.5f)
                                 )
                             )
                         }
@@ -1956,9 +1932,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentPurple.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToAutoReply() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -1966,27 +1941,30 @@ fun SettingsScreen(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("🤖", fontSize = 22.sp)
+                        Icon(
+                            imageVector = Icons.Default.Forum,
+                            contentDescription = "Auto-reply",
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "AUTO-REPLY SETTINGS",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentPurple
+                                text = "Auto-reply",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Configure AI auto-reply for WhatsApp, SMS & Email.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -1997,9 +1975,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentCyan.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToNotificationHistory() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2007,27 +1984,30 @@ fun SettingsScreen(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("🔔", fontSize = 22.sp)
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notification history",
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "NOTIFICATION HISTORY",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                text = "Notification history",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "View captured notifications and auto-reply log.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2038,9 +2018,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentNeonGreen.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToPermissions() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2051,29 +2030,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Security,
                             contentDescription = "Permissions",
-                            tint = AccentNeonGreen,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "PERMISSIONS",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                text = "Permissions",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Review and grant microphone, storage, accessibility & other permissions.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2084,9 +2061,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentNeonGreen.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToRoutines() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2094,27 +2070,30 @@ fun SettingsScreen(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("⚡", fontSize = 22.sp)
+                        Icon(
+                            imageVector = Icons.Default.Autorenew,
+                            contentDescription = "Habits and routines",
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "HABITS & ROUTINES",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                text = "Habits & routines",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Detect repeated daily patterns & automate morning routines.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2125,9 +2104,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentRed.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
                         .clickable { onNavigateToCrashLog() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2135,27 +2113,30 @@ fun SettingsScreen(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("💥", fontSize = 22.sp)
+                        Icon(
+                            imageVector = Icons.Default.BugReport,
+                            contentDescription = "Crash log",
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "CRASH LOG",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentRed
+                                text = "Crash log",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "View and share crashes recorded on this device.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2166,9 +2147,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                         .clickable { onNavigateToPrivacyPolicy() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2179,29 +2159,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Privacy Policy",
-                            tint = AccentNeonGreen,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "PRIVACY POLICY",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                text = "Privacy policy",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "How OpenDroid handles your data and privacy.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2212,9 +2190,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                         .clickable { onNavigateToTermsOfUse() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2225,29 +2202,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "Terms of Use",
-                            tint = AccentCyan,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "TERMS OF USE",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentCyan
+                                text = "Terms of use",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Usage terms and conditions for OpenDroid.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2258,9 +2233,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                         .clickable { onNavigateToHelpCenter() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2271,29 +2245,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "Help Center",
-                            tint = AccentNeonGreen,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "HELP CENTER",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentNeonGreen
+                                text = "Help center",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Guides, FAQs, and troubleshooting.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2304,9 +2276,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                         .clickable { onNavigateToLicense() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2317,29 +2288,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "License",
-                            tint = AccentPurple,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "LICENSE",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentPurple
+                                text = "License",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Open-source license and third-party credits.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2350,9 +2319,8 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
                         .clickable { onNavigateToAbout() },
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -2363,29 +2331,27 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "About",
-                            tint = AccentPurple,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "ABOUT OPENDROID",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                color = AccentPurple
+                                text = "About OpenDroid",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "Version info, features, and technology stack.",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go",
-                            tint = TextSecondary
+                            tint = colors.textSecondary
                         )
                     }
                 }
@@ -2395,23 +2361,20 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "SYSTEM INTEGRATION PERMISSIONS",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = TextSecondary
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = "To allow OpenDroid to operate other applications autonomously (e.g. WhatsApp, Calendar), verify that the accessibility service 'OpenDroid' is active in Settings -> Accessibility -> Installed Services.",
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = colors.textSecondary
                         )
                     }
                 }
@@ -2424,31 +2387,31 @@ fun SettingsScreen(
     if (showAuthRequiredDialog != null) {
         AlertDialog(
             onDismissRequest = { showAuthRequiredDialog = null },
-            title = { Text("Authentication Required", color = TextPrimary) },
+            title = { Text("Authentication Required", color = colors.textPrimary) },
             text = {
                 Text(
                     text = "This model is gated on Hugging Face and needs an Access Token to download.\n\n" +
                         "Models tagged PUBLIC (for example Qwen 2.5 and the Gemma 4 community mirrors) do not need a token — only the ones tagged GATED do. " +
                         "Add a read-only token in the Hugging Face section above, or pick a PUBLIC model.",
-                    color = TextSecondary
+                    color = colors.textSecondary
                 )
             },
             confirmButton = {
                 Button(
                     onClick = { showAuthRequiredDialog = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("OK", color = DarkBackground)
+                    Text("OK", color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAuthRequiredDialog = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text("Cancel", color = colors.textSecondary)
                 }
             },
-            containerColor = CardBackground,
-            titleContentColor = TextPrimary,
-            textContentColor = TextSecondary
+            containerColor = colors.cardBackground,
+            titleContentColor = colors.textPrimary,
+            textContentColor = colors.textSecondary
         )
     }
 
@@ -2456,11 +2419,11 @@ fun SettingsScreen(
         val modelIdToDownload = showCellularWarningDialog!!
         AlertDialog(
             onDismissRequest = { showCellularWarningDialog = null },
-            title = { Text("Cellular Network Warning", color = TextPrimary) },
+            title = { Text("Cellular Network Warning", color = colors.textPrimary) },
             text = {
                 Text(
                     text = "You are downloading model on cellular network, data charges may apply.",
-                    color = TextSecondary
+                    color = colors.textSecondary
                 )
             },
             confirmButton = {
@@ -2469,19 +2432,19 @@ fun SettingsScreen(
                         showCellularWarningDialog = null
                         viewModel.downloadModel(modelIdToDownload)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("Download", color = DarkBackground)
+                    Text("Download", color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCellularWarningDialog = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text("Cancel", color = colors.textSecondary)
                 }
             },
-            containerColor = CardBackground,
-            titleContentColor = TextPrimary,
-            textContentColor = TextSecondary
+            containerColor = colors.cardBackground,
+            titleContentColor = colors.textPrimary,
+            textContentColor = colors.textSecondary
         )
     }
 
@@ -2489,11 +2452,11 @@ fun SettingsScreen(
         val modelIdToResume = pendingCellularResumeModelId!!
         AlertDialog(
             onDismissRequest = { pendingCellularResumeModelId = null },
-            title = { Text("Cellular Network Warning", color = TextPrimary) },
+            title = { Text("Cellular Network Warning", color = colors.textPrimary) },
             text = {
                 Text(
                     text = "You are downloading model on cellular network, data charges may apply.",
-                    color = TextSecondary
+                    color = colors.textSecondary
                 )
             },
             confirmButton = {
@@ -2502,19 +2465,19 @@ fun SettingsScreen(
                         pendingCellularResumeModelId = null
                         viewModel.resumeDownload(modelIdToResume)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("Resume", color = DarkBackground)
+                    Text("Resume", color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingCellularResumeModelId = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text("Cancel", color = colors.textSecondary)
                 }
             },
-            containerColor = CardBackground,
-            titleContentColor = TextPrimary,
-            textContentColor = TextSecondary
+            containerColor = colors.cardBackground,
+            titleContentColor = colors.textPrimary,
+            textContentColor = colors.textSecondary
         )
     }
 
@@ -2534,25 +2497,25 @@ fun SettingsScreen(
                         isSuccess -> "Import Successful"
                         else -> "Import Failed"
                     },
-                    color = TextPrimary
+                    color = colors.textPrimary
                 )
             },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                     when {
                         isImporting -> {
-                            CircularProgressIndicator(color = Color(0xFFFF9800))
+                            CircularProgressIndicator(color = colors.accentOrange)
                             Spacer(modifier = Modifier.height(12.dp))
-                            Text("Copying and verifying the model file. This may take a minute...", color = TextSecondary)
+                            Text("Copying and verifying the model file. This may take a minute...", color = colors.textSecondary)
                         }
                         isSuccess -> {
-                            Text("The model was imported and verified successfully. You can now load it.", color = TextSecondary)
+                            Text("The model was imported and verified successfully. You can now load it.", color = colors.textSecondary)
                         }
                         else -> {
                             Text(
                                 text = localImportStatus
                                     ?: "Failed to import model. Please make sure it is a valid LiteRT model file (.task or .litertlm) and is not corrupted.",
-                                color = Color.Red
+                                color = colors.accentRed
                             )
                         }
                     }
@@ -2562,15 +2525,15 @@ fun SettingsScreen(
                 if (!isImporting) {
                     Button(
                         onClick = { viewModel.clearImportStatus() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                     ) {
-                        Text("OK", color = DarkBackground)
+                        Text("OK", color = colors.background)
                     }
                 }
             },
-            containerColor = CardBackground,
-            titleContentColor = TextPrimary,
-            textContentColor = TextSecondary
+            containerColor = colors.cardBackground,
+            titleContentColor = colors.textPrimary,
+            textContentColor = colors.textSecondary
         )
     }
 }
@@ -2613,6 +2576,7 @@ private fun SecureApiKeyField(
     label: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalOpenDroidColors.current
     var visible by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = value,
@@ -2626,15 +2590,15 @@ private fun SecureApiKeyField(
                 Icon(
                     imageVector = if (visible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = if (visible) "Hide API key" else "Show API key",
-                    tint = TextSecondary
+                    tint = colors.textSecondary
                 )
             }
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AccentNeonGreen,
-            unfocusedBorderColor = BorderColor,
-            focusedTextColor = TextPrimary,
-            unfocusedTextColor = TextPrimary
+            focusedBorderColor = colors.accentNeonGreen,
+            unfocusedBorderColor = colors.borderColor,
+            focusedTextColor = colors.textPrimary,
+            unfocusedTextColor = colors.textPrimary
         ),
         modifier = modifier.fillMaxWidth()
     )
