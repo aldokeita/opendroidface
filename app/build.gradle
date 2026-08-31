@@ -57,6 +57,21 @@ android {
     }
 
     buildTypes {
+        debug {
+            // A debug build carries the same applicationId as the release build
+            // unless it is told otherwise, and Android refuses to install a
+            // package whose signature differs from the copy already there - the
+            // debug key is not the release key. Suffixing the id makes the test
+            // build a separate app, so it installs beside a production install
+            // instead of demanding it be uninstalled first.
+            //
+            // Consequence: it is a different app to Android, so its permissions
+            // (accessibility, microphone, notification access) and its
+            // downloaded on-device models are its own.
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+
         release {
             minifyEnabled true
             shrinkResources = false
