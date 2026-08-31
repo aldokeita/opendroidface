@@ -587,7 +587,10 @@ private fun OpenDroidNavBar(
             val slotWidthPx = with(density) { slotWidth.toPx() }
             val edgeInsetPx = with(density) { edgeInset.toPx() }
             val heightPx = with(density) { 100.dp.toPx() }
-            val accent = colors.accentRed
+            // The app's accent, not a red pinned here. The bar was the one place
+            // with a colour of its own, which made the accent setting a lie the
+            // moment it was added.
+            val accent = colors.accentNeonGreen
             val liftPx = with(density) { 4.dp.toPx() }
 
             // Held across frames and rewound rather than rebuilt. Two fresh Paths

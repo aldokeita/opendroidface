@@ -8,6 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -2053,6 +2057,9 @@ fun SettingsScreen(
                                 )
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                        AccentPicker()
                         }
                         }
                     }
@@ -2823,6 +2830,57 @@ private fun SettingsLinkCard(
                 contentDescription = null,
                 tint = colors.textSecondary
             )
+        }
+    }
+}
+
+/**
+ * The accent swatches.
+ *
+ * Circles rather than a dropdown: the thing being chosen is a colour, and a
+ * colour named in a list is a word you have to imagine, while a colour shown is
+ * the answer itself. The selected one wears a ring in its own colour rather than
+ * a tick, so nothing on the row is drawn in a colour that is not one of them.
+ */
+@Composable
+private fun AccentPicker() {
+    val colors = LocalOpenDroidColors.current
+    val store = rememberAccentStore()
+    val selectedId by store.accentId.collectAsState()
+
+    Column {
+        Text(
+            text = "ACCENT",
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Used across every screen, the navigation bar and its glow.",
+            fontSize = 12.sp,
+            color = colors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            ACCENT_OPTIONS.forEach { option ->
+                val swatch = if (colors.isDark) option.dark else option.light
+                val isSelected = option.id == selectedId
+                val ring by animateDpAsState(
+                    if (isSelected) 2.dp else 0.dp,
+                    label = "accentRing",
+                )
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .border(ring, swatch, CircleShape)
+                        .padding(5.dp)
+                        .clip(CircleShape)
+                        .background(swatch)
+                        .clickable { store.select(option.id) }
+                        .semantics { contentDescription = option.label }
+                )
+            }
         }
     }
 }

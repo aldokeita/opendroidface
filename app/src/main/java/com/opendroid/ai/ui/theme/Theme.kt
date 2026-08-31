@@ -11,6 +11,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -68,8 +70,15 @@ fun OpenDroidTheme(
     isDarkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val palette = if (isDarkTheme) DarkPalette else LightPalette
-    val colorScheme = if (isDarkTheme) DarkColorScheme else LightColorScheme
+    // The accent is applied here, once, so every screen picks it up by reading
+    // the palette it already reads. Doing it per screen would have meant every
+    // screen having an opinion about it.
+    val accentId by rememberAccentStore().accentId.collectAsState()
+    val accent = accentOptionFor(accentId)
+    val palette = (if (isDarkTheme) DarkPalette else LightPalette).withAccent(accent)
+    val accentColor = if (isDarkTheme) accent.dark else accent.light
+    val colorScheme = (if (isDarkTheme) DarkColorScheme else LightColorScheme)
+        .copy(primary = accentColor)
 
     val view = LocalView.current
     val activity = view.context as? ComponentActivity
