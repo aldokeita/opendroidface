@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -435,15 +436,17 @@ private fun navCrest(slotsFromCentre: Float): Float {
     // so the icon sits under a slope on both sides; a plateau wide enough for the
     // icon means the line runs level over it and turns down clear of it - which
     // is what makes it read as wrapping around the tab rather than passing above.
-    val flat = 0.30f
-    val shoulder = 0.42f
+    val flat = 0.26f
+    val shoulder = 0.44f
     val t = kotlin.math.abs(slotsFromCentre)
     if (t <= flat) return 1f
     if (t >= flat + shoulder) return 0f
-    // Smoothstep down the shoulder: flat where it meets the plateau and flat
-    // again where it meets the baseline, so there is no corner at either join.
+    // Smootherstep, not smoothstep: its ends are flatter still and its middle
+    // steeper, so the shoulder tucks in under the plateau instead of leaning away
+    // from it. That tuck is what makes the pocket look like it curls around the
+    // tab rather than ramping up to it.
     val x = (t - flat) / shoulder
-    return 1f - x * x * (3f - 2f * x)
+    return 1f - x * x * x * (x * (x * 6f - 15f) + 10f)
 }
 
 /**
@@ -488,8 +491,8 @@ private fun OpenDroidNavBar(
                 .fillMaxWidth()
                 // Taller than a bar needs to be for its content, because the crest
                 // has to fit above the icon rather than behind it.
-                .height(88.dp)
-                .clip(RoundedCornerShape(44.dp))
+                .height(100.dp)
+                .clip(RoundedCornerShape(50.dp))
                 // A step lighter than the page. The reference bar is black on a
                 // pale screen; here the screen is already near-black, so the bar
                 // has to come up rather than down to read as an object on it.
@@ -504,16 +507,20 @@ private fun OpenDroidNavBar(
             val slotWidth = (maxWidth - edgeInset * 2) / tabs.size
             val slotWidthPx = with(density) { slotWidth.toPx() }
             val edgeInsetPx = with(density) { edgeInset.toPx() }
-            val heightPx = with(density) { 88.dp.toPx() }
+            val heightPx = with(density) { 100.dp.toPx() }
             val accent = colors.accentRed
             val liftPx = with(density) { 4.dp.toPx() }
 
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val baseY = heightPx - with(density) { 12.dp.toPx() }
-                // The plateau runs about 17dp above the top of the icon, so the
-                // icon sits inside the pocket with air around it rather than
-                // touching its ceiling.
-                val rise = with(density) { 58.dp.toPx() }
+                // Well clear of the pill's rounded bottom. At 12dp the flat run
+                // either side of the pocket sat inside the corner radius and was
+                // clipped away at both ends, so the bar appeared to have lost its
+                // baseline entirely.
+                val baseY = heightPx - with(density) { 17.dp.toPx() }
+                // The plateau runs about 20dp above the top of the icon and 10dp
+                // below the top of the bar - as tall as the pill can carry it
+                // without the stroke touching its own edge.
+                val rise = with(density) { 73.dp.toPx() }
                 val centreX = edgeInsetPx + slotWidthPx * (indicator + 0.5f)
 
                 // Sampled rather than built from control points: the crest is a
@@ -546,10 +553,15 @@ private fun OpenDroidNavBar(
                     0.87f to accent,
                     1.00f to Color.Transparent,
                 )
+                // Darker than the bar, not a red wash. The pocket should read as a
+                // recess cut into the bar, and a recess is darker than the surface
+                // it is cut into; a tint of the line's own colour just looked like
+                // spill from the line.
+                val pocket = colors.background
                 drawPath(
                     path = fill,
                     brush = Brush.horizontalGradient(
-                        *fadeStops.map { (at, c) -> at to c.copy(alpha = c.alpha * 0.10f) }.toTypedArray()
+                        *fadeStops.map { (at, c) -> at to pocket.copy(alpha = c.alpha) }.toTypedArray()
                     ),
                 )
                 drawPath(
@@ -583,7 +595,7 @@ private fun OpenDroidNavBar(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                             ) { onSelect(tab) }
-                            .padding(bottom = 13.dp),
+                            .padding(bottom = 20.dp),
                         verticalArrangement = Arrangement.Bottom,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -603,6 +615,17 @@ private fun OpenDroidNavBar(
                             fontWeight = if (crest > 0.5f) FontWeight.SemiBold else FontWeight.Normal,
                             maxLines = 1,
                             modifier = Modifier.offset { IntOffset(0, -(liftPx * crest).roundToInt()) },
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        // The dot under the selected label. It takes its opacity
+                        // from the same crest, so it arrives with the pocket
+                        // rather than blinking on once the pocket has settled.
+                        Box(
+                            modifier = Modifier
+                                .offset { IntOffset(0, -(liftPx * crest).roundToInt()) }
+                                .size(5.dp)
+                                .clip(CircleShape)
+                                .background(accent.copy(alpha = crest))
                         )
                     }
                 }
