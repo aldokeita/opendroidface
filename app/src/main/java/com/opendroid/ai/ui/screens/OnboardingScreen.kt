@@ -1,12 +1,10 @@
 package com.opendroid.ai.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,14 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.opendroid.ai.core.agent.AgentState
+import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.theme.*
 import com.opendroid.ai.ui.viewmodel.OnboardingViewModel
 
@@ -40,6 +38,7 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
+    val colors = LocalOpenDroidColors.current
     val uiState by viewModel.uiState.collectAsState()
 
     var stage by remember { mutableStateOf(OnboardingStage.INTRODUCTION) }
@@ -61,12 +60,12 @@ fun OnboardingScreen(
                         OnboardingStage.PERMISSION_PROMPT -> "Permissions"
                         OnboardingStage.PERMISSIONS -> "Grant Permissions"
                     }
-                    Text(titleText, color = AccentNeonGreen, fontWeight = FontWeight.Bold)
+                    Text(titleText, color = colors.accentNeonGreen, fontWeight = FontWeight.Bold)
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
             )
         },
-        containerColor = DarkBackground
+        containerColor = colors.background
     ) { padding ->
         when (stage) {
             OnboardingStage.INTRODUCTION -> {
@@ -120,6 +119,7 @@ fun IntroductionPanel(
     profileMustBeReentered: Boolean = false,
     storageError: Boolean = false
 ) {
+    val colors = LocalOpenDroidColors.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -128,28 +128,20 @@ fun IntroductionPanel(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .clip(CircleShape)
-                .background(CardBackground)
-                .border(3.dp, Brush.horizontalGradient(listOf(AccentNeonGreen, AccentCyan)), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = com.opendroid.ai.R.drawable.bot),
-                contentDescription = "OpenDroid Bot Avatar",
-                modifier = Modifier.size(120.dp)
-            )
-        }
+        RobotFace(
+            state = AgentState.Idle,
+            modifier = Modifier.size(140.dp)
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "Hello! I am OpenDroid",
-            fontSize = 24.sp,
+            fontFamily = Montserrat,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            fontSize = 24.sp,
+            letterSpacing = (-0.3).sp,
+            color = colors.textPrimary
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -157,7 +149,7 @@ fun IntroductionPanel(
         Text(
             text = "Your open autonomous device assistant. Please introduce yourself so I can serve you personally.",
             fontSize = 14.sp,
-            color = TextSecondary,
+            color = colors.textSecondary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
@@ -166,7 +158,7 @@ fun IntroductionPanel(
             Text(
                 text = "Your saved details could not be unlocked on this device, so they were " +
                         "not kept. Nothing was stored unencrypted - please enter them again.",
-                color = AccentRed,
+                color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -178,16 +170,16 @@ fun IntroductionPanel(
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text("What should I call you?", color = TextSecondary) },
-            placeholder = { Text("Enter your name", color = TextSecondary.copy(alpha = 0.6f)) },
+            label = { Text("What should I call you?", color = colors.textSecondary) },
+            placeholder = { Text("Enter your name", color = colors.textSecondary.copy(alpha = 0.6f)) },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AccentNeonGreen,
-                unfocusedBorderColor = BorderColor,
-                focusedLabelColor = AccentNeonGreen,
-                unfocusedLabelColor = TextSecondary,
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                cursorColor = AccentNeonGreen
+                focusedBorderColor = colors.accentNeonGreen,
+                unfocusedBorderColor = colors.borderColor,
+                focusedLabelColor = colors.accentNeonGreen,
+                unfocusedLabelColor = colors.textSecondary,
+                focusedTextColor = colors.textPrimary,
+                unfocusedTextColor = colors.textPrimary,
+                cursorColor = colors.accentNeonGreen
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -201,25 +193,25 @@ fun IntroductionPanel(
         OutlinedTextField(
             value = dob,
             onValueChange = onDobChange,
-            label = { Text("When is your birthday?", color = TextSecondary) },
-            placeholder = { Text("e.g. MM/DD/YYYY", color = TextSecondary.copy(alpha = 0.6f)) },
+            label = { Text("When is your birthday?", color = colors.textSecondary) },
+            placeholder = { Text("e.g. MM/DD/YYYY", color = colors.textSecondary.copy(alpha = 0.6f)) },
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = "Pick your birthday",
-                        tint = AccentNeonGreen
+                        tint = colors.accentNeonGreen
                     )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = AccentNeonGreen,
-                unfocusedBorderColor = BorderColor,
-                focusedLabelColor = AccentNeonGreen,
-                unfocusedLabelColor = TextSecondary,
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                cursorColor = AccentNeonGreen
+                focusedBorderColor = colors.accentNeonGreen,
+                unfocusedBorderColor = colors.borderColor,
+                focusedLabelColor = colors.accentNeonGreen,
+                unfocusedLabelColor = colors.textSecondary,
+                focusedTextColor = colors.textPrimary,
+                unfocusedTextColor = colors.textPrimary,
+                cursorColor = colors.accentNeonGreen
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
@@ -243,11 +235,11 @@ fun IntroductionPanel(
                             showDatePicker = false
                         },
                         enabled = datePickerState.selectedDateMillis != null
-                    ) { Text("OK", color = AccentNeonGreen, fontWeight = FontWeight.Bold) }
+                    ) { Text("OK", color = colors.accentNeonGreen, fontWeight = FontWeight.Bold) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) {
-                        Text("Cancel", color = TextSecondary)
+                        Text("Cancel", color = colors.textSecondary)
                     }
                 }
             ) {
@@ -259,7 +251,7 @@ fun IntroductionPanel(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Please enter both your name and birth date.",
-                color = AccentRed,
+                color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -269,7 +261,7 @@ fun IntroductionPanel(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Your details could not be saved securely. Please try again.",
-                color = AccentRed,
+                color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -280,7 +272,7 @@ fun IntroductionPanel(
         Button(
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen, contentColor = DarkBackground),
+            colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Let's Go", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -310,6 +302,7 @@ fun PermissionPromptPanel(
     onContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = LocalOpenDroidColors.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -318,28 +311,20 @@ fun PermissionPromptPanel(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .clip(CircleShape)
-                .background(CardBackground)
-                .border(3.dp, Brush.horizontalGradient(listOf(AccentCyan, AccentPurple)), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = com.opendroid.ai.R.drawable.bot),
-                contentDescription = "OpenDroid Bot Avatar",
-                modifier = Modifier.size(120.dp)
-            )
-        }
+        RobotFace(
+            state = AgentState.Idle,
+            modifier = Modifier.size(140.dp)
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "Permissions Setup",
-            fontSize = 24.sp,
+            fontFamily = Montserrat,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            fontSize = 24.sp,
+            letterSpacing = (-0.3).sp,
+            color = colors.textPrimary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -348,7 +333,7 @@ fun PermissionPromptPanel(
             text = "Let's give me permission so I can serve you well",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AccentCyan,
+            color = colors.textPrimary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
@@ -357,7 +342,7 @@ fun PermissionPromptPanel(
         Text(
             text = "To allow me to interact with your device, run commands, list files, and operate system features, some standard Android permissions are required.",
             fontSize = 14.sp,
-            color = TextSecondary,
+            color = colors.textSecondary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
@@ -366,7 +351,7 @@ fun PermissionPromptPanel(
         Button(
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen, contentColor = DarkBackground),
+            colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
             shape = RoundedCornerShape(8.dp)
         ) {
             Text("Grant Permissions", fontWeight = FontWeight.Bold, fontSize = 16.sp)

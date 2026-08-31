@@ -213,7 +213,13 @@ style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamil
       aktif), label bagian jadi labelSmall netral dengan nama yang lebih pendek, dan warna
       status amber/deep-orange yang di-hardcode diganti warna palet.
       `ui/components/PlanStepCard.kt` ikut karena itu isi layar Plan.
-- [ ] Sisanya: Logs, Onboarding, Permissions
+- [x] **Logs, Onboarding, Permissions** — judul jadi "Logs"/"Permissions" (Montserrat), palet
+      aktif menggantikan alias gelap statis (132 pembacaan), garis tepi berwarna status di tiap
+      baris log dibuang (lencana SUCCESS/FAILED sudah mengatakannya), dan Onboarding membuka
+      pada `RobotFace` — bukan logo raster dalam cincin gradien — sehingga wajah yang sama
+      menemani pengguna dari onboarding, splash, chat, sampai Hands-free.
+
+Perombakan UI selesai untuk semua layar.
 
 ## Risiko yang sudah diketahui
 

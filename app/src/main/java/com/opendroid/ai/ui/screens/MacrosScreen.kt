@@ -35,8 +35,8 @@ import java.util.UUID
 @Composable
 fun MacrosScreen(
     viewModel: MacroViewModel,
+    modifier: Modifier = Modifier,
     onNavigateToRoutines: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     val colors = LocalOpenDroidColors.current
     val macros by viewModel.macros.collectAsState()
