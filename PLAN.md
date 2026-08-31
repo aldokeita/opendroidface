@@ -201,7 +201,12 @@ style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamil
       dibuang, logo raster diganti `RobotFace` supaya peluncuran menyambung ke layar Chat,
       warna dibaca dari palet (tema terang dulu salah cat), durasi turun dari 3,3 detik ke
       di bawah 1 detik dan menghormati setelan animasi perangkat.
-- [ ] **Settings** — layar terpanjang, paling banyak menyimpan pola lama
+- [x] **Settings** — judul jadi "Settings" (Montserrat), 291 pembacaan alias warna gelap
+      statis diganti palet aktif (tema terang dulu salah cat sepenuhnya), 35 pemakaian
+      monospace dibuang, garis tepi kartu dihapus kecuali satu yang menandai model aktif,
+      judul bagian jadi labelSmall netral, sebelas baris tautan memakai judul kalimat +
+      ikon satu warna (empat di antaranya dulu emoji), dan Color.Red/Yellow/gold mentah
+      diganti warna palet.
 - [ ] Sisanya: Plan, Memory, Macros, Logs, Onboarding, Permissions
 
 ## Risiko yang sudah diketahui
