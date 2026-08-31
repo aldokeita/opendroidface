@@ -123,6 +123,10 @@ fun SettingsScreen(
     var providerDropdownExpanded by remember { mutableStateOf(false) }
     var keysSectionExpanded by remember { mutableStateOf(false) }
     var voiceSectionExpanded by remember { mutableStateOf(false) }
+    // Planning fallbacks: eleven checkboxes that sat between the model field and
+    // everything else, on a screen whose first job is getting one provider
+    // working. Folded away by default.
+    var fallbacksExpanded by remember { mutableStateOf(false) }
     var planningSectionExpanded by remember { mutableStateOf(false) }
 
     var showAuthRequiredDialog by remember { mutableStateOf<String?>(null) }
@@ -244,12 +248,26 @@ fun SettingsScreen(
                     colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
+                        // One card for the whole setup path, in the order it is
+                        // done: who answers, which model, and the key that lets
+                        // it. These were three separate places on the page.
                         Text(
-                            text = "ACTIVE BRAIN PROVIDER",
+                            text = "Brain",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = colors.textPrimary
+                        )
+                        Text(
+                            text = "Who answers, and what it needs to.",
+                            fontSize = 12.sp,
+                            color = colors.textSecondary,
+                        )
+                        Spacer(modifier = Modifier.height(18.dp))
+                        Text(
+                            text = "PROVIDER",
                             style = MaterialTheme.typography.labelSmall,
                             color = colors.textSecondary
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         
                         // Dropdown menu trigger
                         Box(
@@ -350,7 +368,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "ACTIVE MODEL",
+                                text = "MODEL",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -512,56 +530,123 @@ fun SettingsScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "EXPLICIT PLANNING FALLBACKS",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colors.textSecondary
-                        )
-                        Text(
-                            text = "Only selected providers may receive a retry after an unusable low-impact local plan. High-impact plans never switch automatically.",
-                            fontSize = 10.sp,
-                            color = colors.textSecondary,
-                            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                        )
-                        providers
-                            .filter { it != config.activeProvider && it != "On-Device AI" }
-                            .forEach { fallbackProvider ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Checkbox(
-                                        checked = config.fallbackProviders.contains(fallbackProvider),
-                                        onCheckedChange = { enabled ->
-                                            viewModel.updateFallbackProvider(fallbackProvider, enabled)
-                                        },
-                                        colors = CheckboxDefaults.colors(
-                                            checkedColor = colors.accentNeonGreen,
-                                            uncheckedColor = colors.borderColor,
-                                            checkmarkColor = colors.background
-                                        )
-                                    )
-                                    Text(
-                                        text = fallbackProvider,
-                                        color = colors.textPrimary,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-
                         // Model names are never bundled with the app, so when the
                         // live list is unavailable the reason is shown rather than
-                        // a list that quietly went out of date.
+                        // a list that quietly went out of date. Directly under the
+                        // model field: it was at the bottom of the card, four
+                        // controls away from the thing it is about.
                         modelFetchNotice?.let { notice ->
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = notice,
                                 fontSize = 11.sp,
+                                lineHeight = 16.sp,
                                 color = colors.accentRed,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
+
+                        // The key for the provider that was just chosen, in the
+                        // same card. It used to live in a collapsed section far
+                        // down the page, so setting a provider up meant picking it
+                        // here and then scrolling past everything else to find
+                        // where to paste the key - three separate places for one
+                        // job. The other providers' keys are still down there.
+                        val providerNeedsKey =
+                            config.activeProvider != "Ollama" && config.activeProvider != "On-Device AI"
+                        if (providerNeedsKey) {
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Text(
+                                text = "API KEY",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            SecureApiKeyField(
+                                value = config.apiKeys[config.activeProvider] ?: "",
+                                onValueChange = { viewModel.updateApiKey(config.activeProvider, it) },
+                                label = "${config.activeProvider} API key"
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = connectionStatusLabel(connectionResults[config.activeProvider]),
+                                    fontSize = 11.sp,
+                                    color = colors.textSecondary,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TextButton(onClick = { viewModel.testConnection(config.activeProvider) }) {
+                                    Text(
+                                        "Test connection",
+                                        fontSize = 12.sp,
+                                        color = colors.accentNeonGreen
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = colors.borderColor.copy(alpha = 0.4f))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { fallbacksExpanded = !fallbacksExpanded }
+                                .padding(vertical = 14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "PLANNING FALLBACKS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.textSecondary
+                            )
+                            Icon(
+                                imageVector = if (fallbacksExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = colors.textSecondary
+                            )
+                        }
+                        AnimatedVisibility(visible = fallbacksExpanded) {
+                            Column {
+                                Text(
+                                    text = "Only selected providers may receive a retry after an unusable low-impact local plan. High-impact plans never switch automatically.",
+                                    fontSize = 11.sp,
+                                    lineHeight = 16.sp,
+                                    color = colors.textSecondary,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                providers
+                                    .filter { it != config.activeProvider && it != "On-Device AI" }
+                                    .forEach { fallbackProvider ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Checkbox(
+                                                checked = config.fallbackProviders.contains(fallbackProvider),
+                                                onCheckedChange = { enabled ->
+                                                    viewModel.updateFallbackProvider(fallbackProvider, enabled)
+                                                },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkedColor = colors.accentNeonGreen,
+                                                    uncheckedColor = colors.borderColor,
+                                                    checkmarkColor = colors.background
+                                                )
+                                            )
+                                            Text(
+                                                text = fallbackProvider,
+                                                color = colors.textPrimary,
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
+                            }
+                        }
+
                     }
                 }
             }
@@ -1598,7 +1683,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "PROVIDER API KEYS",
+                                text = "KEYS FOR OTHER PROVIDERS",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -1614,7 +1699,13 @@ fun SettingsScreen(
                                 modifier = Modifier.padding(top = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                val inputProviders = providers.filter { it != "Ollama" && it != "On-Device AI" }
+                                // The active provider's key is in the Brain card at
+                                // the top, where it is needed. This section is for
+                                // the ones you are not using yet - keys pasted
+                                // ahead of switching.
+                                val inputProviders = providers.filter {
+                                    it != "Ollama" && it != "On-Device AI" && it != config.activeProvider
+                                }
                                 inputProviders.forEach { providerName ->
                                     val keyVal = config.apiKeys[providerName] ?: ""
                                     val connectionState = connectionResults[providerName]

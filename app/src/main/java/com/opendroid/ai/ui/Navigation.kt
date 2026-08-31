@@ -457,10 +457,10 @@ private fun OpenDroidNavBar(
                 .fillMaxWidth()
                 .height(74.dp)
                 .clip(RoundedCornerShape(37.dp))
-                // Near-black rather than the card colour: the bar is meant to read
-                // as a solid object laid on the screen, and the red only carries
-                // if there is nothing else competing with it.
-                .background(colors.surface)
+                // A step lighter than the page. The reference bar is black on a
+                // pale screen; here the screen is already near-black, so the bar
+                // has to come up rather than down to read as an object on it.
+                .background(colors.cardBackground)
         ) {
             val density = LocalDensity.current
             val slotWidth = maxWidth / tabs.size
@@ -480,8 +480,12 @@ private fun OpenDroidNavBar(
                 val half = slotWidthPx * 0.30f
                 val ease = slotWidthPx * 0.22f
 
+                // Held clear of the rounded ends: run flush to x=0 and the line
+                // crosses outside the corner radius and appears to escape the bar.
+                val inset = with(density) { 26.dp.toPx() }
+
                 val path = Path().apply {
-                    moveTo(0f, baseY)
+                    moveTo(inset, baseY)
                     lineTo(centreX - half - ease, baseY)
                     // Two mirrored curves into and out of the notch, so the line
                     // lifts rather than steps.
@@ -496,7 +500,7 @@ private fun OpenDroidNavBar(
                         centreX + half - ease * 0.3f, baseY,
                         centreX + half + ease, baseY,
                     )
-                    lineTo(size.width, baseY)
+                    lineTo(size.width - inset, baseY)
                 }
                 drawPath(
                     path = path,
