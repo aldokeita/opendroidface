@@ -197,12 +197,12 @@ style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamil
       Clear pindah ke menu chat, chat kosong membuka pada satu blok sapaan di tengah.
       Sekalian: layar ini dulu memakai alias warna gelap statis (tema terang salah cat),
       dan bar navigasi tersiram hijau karena `tonalElevation` menarik warna primary.
-- [ ] **Splash** — masih monospace + neon hijau; ini hal pertama yang dilihat orang
+- [x] **Splash** — wordmark Montserrat menggantikan monospace neon, baris "SYSTEM BOOT: ONLINE"
+      dibuang, logo raster diganti `RobotFace` supaya peluncuran menyambung ke layar Chat,
+      warna dibaca dari palet (tema terang dulu salah cat), durasi turun dari 3,3 detik ke
+      di bawah 1 detik dan menghormati setelan animasi perangkat.
 - [ ] **Settings** — layar terpanjang, paling banyak menyimpan pola lama
 - [ ] Sisanya: Plan, Memory, Macros, Logs, Onboarding, Permissions
-
-Catatan: `README.md` masih membawa promosi token kripto milik pemilik upstream.
-Sunting dulu sebelum repo dijadikan publik.
 
 ## Risiko yang sudah diketahui
 
