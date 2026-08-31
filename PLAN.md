@@ -207,7 +207,13 @@ style di `Theme.kt`, karena hampir semua layar memanggil `Text` tanpa `fontFamil
       judul bagian jadi labelSmall netral, sebelas baris tautan memakai judul kalimat +
       ikon satu warna (empat di antaranya dulu emoji), dan Color.Red/Yellow/gold mentah
       diganti warna palet.
-- [ ] Sisanya: Plan, Memory, Macros, Logs, Onboarding, Permissions
+- [x] **Plan, Memory, Macros** — judul jadi "Plan"/"Memory"/"Macros" (Montserrat), palet aktif
+      menggantikan alias gelap statis (259 pembacaan di empat berkas), 48 pemakaian monospace
+      dibuang, garis tepi kartu dihapus kecuali dua yang menandai keadaan (run aktif dan model
+      aktif), label bagian jadi labelSmall netral dengan nama yang lebih pendek, dan warna
+      status amber/deep-orange yang di-hardcode diganti warna palet.
+      `ui/components/PlanStepCard.kt` ikut karena itu isi layar Plan.
+- [ ] Sisanya: Logs, Onboarding, Permissions
 
 ## Risiko yang sudah diketahui
 
