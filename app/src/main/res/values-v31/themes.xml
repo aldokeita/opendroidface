@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   API 31+ draws the launch as a real splash screen rather than just a window
-  background, so it gets its own attributes. The icon stays the launcher icon:
-  the platform splash is the system's screen, and swapping in a different mark
-  there would make the app look like it launches as one thing and opens as
-  another.
+  background, so it gets its own attributes.
+
+  The icon cannot be switched off - the platform always draws one - and it stays
+  the launcher icon, which is the mark this app is recognised by on the home
+  screen. What follows it is the name, so the launch reads mark, then name, then
+  app. It used to be the robot mark and then a face, which looked like two
+  different apps; the face is gone from the splash entirely now.
 -->
 <resources>
     <style name="Theme.OpenDroid" parent="@android:style/Theme.DeviceDefault.NoActionBar">

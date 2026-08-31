@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,8 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.opendroid.ai.core.agent.AgentState
-import com.opendroid.ai.ui.face.RobotFace
 import com.opendroid.ai.ui.face.rememberReduceMotion
 import com.opendroid.ai.ui.theme.LocalOpenDroidColors
 import com.opendroid.ai.ui.theme.Montserrat
@@ -106,26 +103,24 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
                     translationY = (1f - reveal.value) * 16.dp.toPx()
                 },
         ) {
-            // The same face the app opens on, so the launch is one continuous
-            // thing rather than a logo that is then replaced by the product.
-            RobotFace(
-                state = AgentState.Idle,
-                modifier = Modifier.size(132.dp),
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+            // The name, and nothing else. The face belongs to the app itself -
+            // it is the first thing on the chat screen and the whole of
+            // hands-free mode - and putting it here too meant the launch showed
+            // it twice before anything happened.
             Text(
                 text = "OpenDroid",
                 fontFamily = Montserrat,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
-                letterSpacing = (-0.5).sp,
+                fontSize = 34.sp,
+                letterSpacing = (-0.8).sp,
                 color = colors.textPrimary,
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = "Your open autonomous Android agent",
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                letterSpacing = 0.2.sp,
                 color = colors.textSecondary,
                 textAlign = TextAlign.Center,
             )
