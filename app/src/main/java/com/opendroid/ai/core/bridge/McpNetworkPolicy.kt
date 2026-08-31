@@ -13,6 +13,7 @@
 package com.opendroid.ai.core.bridge
 
 import android.content.Context
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,7 +88,7 @@ class McpNetworkPolicy @Inject constructor(
     fun setNetworkExposed(exposed: Boolean) {
         if (_networkExposed.value == exposed) return
         _networkExposed.value = exposed
-        prefs.edit().putBoolean(KEY_EXPOSED, exposed).apply()
+        prefs.edit { putBoolean(KEY_EXPOSED, exposed) }
     }
 
     private companion object {

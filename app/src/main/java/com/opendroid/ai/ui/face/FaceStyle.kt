@@ -7,6 +7,7 @@
 package com.opendroid.ai.ui.face
 
 import android.content.Context
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +46,7 @@ class FaceStyleStore @Inject constructor(
     fun select(style: FaceStyle) {
         if (_style.value == style) return
         _style.value = style
-        prefs.edit().putString(KEY_STYLE, style.name).apply()
+        prefs.edit { putString(KEY_STYLE, style.name) }
     }
 
     private companion object {

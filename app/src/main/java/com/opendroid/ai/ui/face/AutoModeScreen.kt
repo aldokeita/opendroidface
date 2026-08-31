@@ -76,6 +76,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
@@ -208,7 +209,15 @@ fun AutoModeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 28.dp)
-                .offset(x = maxWidth * driftX, y = maxHeight * driftY),
+                // The lambda overload, because the drift changes on its own
+                // clock: reading it here defers the read to layout, so a nudge
+                // moves the face without recomposing everything inside it.
+                .offset {
+                    IntOffset(
+                        x = (maxWidth * driftX).roundToPx(),
+                        y = (maxHeight * driftY).roundToPx(),
+                    )
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
