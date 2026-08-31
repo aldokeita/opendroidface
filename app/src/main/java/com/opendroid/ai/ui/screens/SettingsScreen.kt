@@ -11,6 +11,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Info
@@ -366,10 +370,24 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            OutlinedTextField(
+                            // Filled, borderless, no floating label - the same
+                            // control as the provider box directly above it. It was
+                            // an outlined field with a notched label, so two
+                            // stacked controls doing the same job spoke two
+                            // different form languages. It stays a text field
+                            // rather than a pure dropdown because a model name can
+                            // be typed in for providers that serve one this build
+                            // has never heard of.
+                            TextField(
                                 value = config.activeModel,
                                 onValueChange = { viewModel.updateActiveModel(it) },
-                                label = { Text("Active LLM Model", fontSize = 12.sp) },
+                                placeholder = {
+                                    Text("Model name", color = colors.textSecondary, fontSize = 15.sp)
+                                },
+                                textStyle = LocalTextStyle.current.copy(
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                ),
                                 singleLine = true,
                                 trailingIcon = {
                                     IconButton(onClick = { modelDropdownExpanded = !modelDropdownExpanded }) {
@@ -380,13 +398,21 @@ fun SettingsScreen(
                                         )
                                     }
                                 },
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = colors.accentNeonGreen,
-                                    unfocusedBorderColor = colors.borderColor,
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = colors.background,
+                                    unfocusedContainerColor = colors.background,
+                                    disabledContainerColor = colors.background,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
                                     focusedTextColor = colors.textPrimary,
-                                    unfocusedTextColor = colors.textPrimary
+                                    unfocusedTextColor = colors.textPrimary,
+                                    cursorColor = colors.accentNeonGreen,
                                 ),
-                                modifier = Modifier.fillMaxWidth()
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
                             )
 
                         if (fetchedModels.isNotEmpty()) {
@@ -547,7 +573,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = Icons.Default.Speed,
                             contentDescription = "Benchmark",
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
@@ -1798,7 +1824,14 @@ fun SettingsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = action, fontSize = 13.sp, color = colors.textPrimary)
+                                        // CHECK_STOCK is the identifier the plan
+                                        // uses; "Check stock" is the thing the
+                                        // user is deciding whether to allow.
+                                        Text(
+                                            text = action.asActionLabel(),
+                                            fontSize = 13.sp,
+                                            color = colors.textPrimary
+                                        )
                                         Text(
                                             text = if (grantedAt == 0L) "Default" else "Granted ${dateFormat.format(java.util.Date(grantedAt))}",
                                             fontSize = 11.sp,
@@ -2200,7 +2233,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = Icons.Default.Gavel,
                             contentDescription = "Terms of Use",
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
@@ -2243,7 +2276,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = Icons.Default.HelpOutline,
                             contentDescription = "Help Center",
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
@@ -2286,7 +2319,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = Icons.Default.Description,
                             contentDescription = "License",
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
@@ -2603,3 +2636,12 @@ private fun SecureApiKeyField(
         modifier = modifier.fillMaxWidth()
     )
 }
+
+/**
+ * `CHECK_STOCK` becomes `Check stock`.
+ *
+ * The grant list shows the identifier the planner uses, which is fine in a log
+ * and wrong in a list of things a person is deciding whether to allow.
+ */
+private fun String.asActionLabel(): String =
+    replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }

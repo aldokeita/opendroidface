@@ -51,20 +51,12 @@ fun OnboardingScreen(
         }
     }
 
+    // No top bar. Each stage opens with its own heading - "Hello! I am OpenDroid",
+    // "Permissions Setup", "Required Permissions" - so a bar repeating a shorter
+    // version of that in accent green added a second title, pinned the loudest
+    // colour on the screen to a corner with nothing in it, and pushed the content
+    // it labelled into the bottom two thirds.
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    val titleText = when (stage) {
-                        OnboardingStage.INTRODUCTION -> "About You"
-                        OnboardingStage.PERMISSION_PROMPT -> "Permissions"
-                        OnboardingStage.PERMISSIONS -> "Grant Permissions"
-                    }
-                    Text(titleText, color = colors.accentNeonGreen, fontWeight = FontWeight.Bold)
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
-            )
-        },
         containerColor = colors.background
     ) { padding ->
         when (stage) {

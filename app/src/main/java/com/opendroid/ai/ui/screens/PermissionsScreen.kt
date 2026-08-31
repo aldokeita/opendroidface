@@ -491,21 +491,27 @@ private fun PermissionCard(
             }
         }
         Spacer(modifier = Modifier.width(16.dp))
+        // Tonal, not filled. "Grant all permissions" at the top of this screen is
+        // the one action that does the whole job; six identically loud green
+        // buttons underneath made it impossible to tell which one to press first.
+        // A failed permission still fills, because that one has to be found.
+        val accent = if (buttonHasError) colors.accentRed else colors.accentGreenButton
         Button(
             onClick = onAction,
             enabled = buttonEnabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (buttonHasError) colors.accentRed else colors.accentGreenButton,
-                contentColor = if (buttonHasError) colors.textPrimary else colors.background,
-                disabledContainerColor = colors.borderColor,
+                containerColor = if (buttonHasError) accent else accent.copy(alpha = 0.14f),
+                contentColor = if (buttonHasError) colors.textPrimary else accent,
+                disabledContainerColor = colors.borderColor.copy(alpha = 0.4f),
                 disabledContentColor = colors.textSecondary,
             ),
-            shape = RoundedCornerShape(8.dp),
+            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
+            shape = RoundedCornerShape(10.dp),
         ) {
             Text(
                 text = buttonLabel,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }

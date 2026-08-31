@@ -25,8 +25,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import com.opendroid.ai.core.memory.graph.KnowledgeCategory
 import com.opendroid.ai.core.memory.graph.KnowledgeNode
 import com.opendroid.ai.core.memory.graph.MemoryTier
@@ -61,6 +66,7 @@ fun MemoryScreen(
     
     var newKey by remember { mutableStateOf("") }
     var newValue by remember { mutableStateOf("") }
+    var showMemoryMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -76,16 +82,43 @@ fun MemoryScreen(
                     )
                 },
                 actions = {
-                    TextButton(onClick = {
-                        when (selectedTab) {
-                            MemoryScreenTab.GROWTH_GRAPH -> viewModel.clearMemoryTier(MemoryTier.LEARNED_PATTERN)
-                            MemoryScreenTab.SEMANTIC -> viewModel.clearMemories(MemoryType.SEMANTIC)
-                            MemoryScreenTab.WORKING -> viewModel.clearMemories(MemoryType.WORKING)
-                            MemoryScreenTab.EPISODIC -> viewModel.clearMemories(MemoryType.EPISODIC)
-                            MemoryScreenTab.PROCEDURAL -> viewModel.clearMemories(MemoryType.PROCEDURAL)
+                    // Wiping a whole memory category is destructive and rare. It
+                    // used to sit in the top bar as a red word beside the title,
+                    // which gave the most dangerous control on the screen the most
+                    // prominent position on it.
+                    Box {
+                        IconButton(onClick = { showMemoryMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More",
+                                tint = colors.textSecondary,
+                            )
                         }
-                    }) {
-                        Text("Wipe Category", color = colors.accentRed, fontSize = 12.sp)
+                        DropdownMenu(
+                            expanded = showMemoryMenu,
+                            onDismissRequest = { showMemoryMenu = false },
+                            modifier = Modifier.background(colors.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        "Wipe ${selectedTab.title.lowercase()}",
+                                        color = colors.accentRed,
+                                        fontSize = 13.sp,
+                                    )
+                                },
+                                onClick = {
+                                    showMemoryMenu = false
+                                    when (selectedTab) {
+                                        MemoryScreenTab.GROWTH_GRAPH -> viewModel.clearMemoryTier(MemoryTier.LEARNED_PATTERN)
+                                        MemoryScreenTab.SEMANTIC -> viewModel.clearMemories(MemoryType.SEMANTIC)
+                                        MemoryScreenTab.WORKING -> viewModel.clearMemories(MemoryType.WORKING)
+                                        MemoryScreenTab.EPISODIC -> viewModel.clearMemories(MemoryType.EPISODIC)
+                                        MemoryScreenTab.PROCEDURAL -> viewModel.clearMemories(MemoryType.PROCEDURAL)
+                                    }
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background)
@@ -100,13 +133,16 @@ fun MemoryScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Memory Category Tabs
+            // Memory Category Tabs. Bled out to the screen edge so the tab that
+            // continues off-screen is visibly cut by the display rather than
+            // ending mid-word inside a margin, which reads as a layout bug.
             ScrollableTabRow(
                 selectedTabIndex = selectedTab.ordinal,
                 containerColor = colors.background,
                 contentColor = colors.accentNeonGreen,
-                edgePadding = 0.dp,
-                divider = { Divider(color = colors.borderColor) }
+                edgePadding = 16.dp,
+                divider = { Divider(color = colors.borderColor) },
+                modifier = Modifier.bleedHorizontally(16.dp)
             ) {
                 MemoryScreenTab.values().forEach { tab ->
                     Tab(
@@ -203,6 +239,33 @@ fun MemoryScreen(
                 }
             }
         }
+    }
+}
+
+/** `TASK_ROUTINE` becomes `Task routine`. */
+private fun KnowledgeCategory.displayLabel(): String =
+    name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
+
+/**
+ * Lets a horizontally scrolling row reach past its parent's side padding.
+ *
+ * A scrollable row inside a padded column stops at the margin, so the item that
+ * continues off-screen ends in the middle of nowhere and reads as clipped text
+ * rather than as "there is more this way". Running it to the display edge, with
+ * its own content padding to keep the first item aligned with everything else,
+ * is what makes the cut legible as scrolling. Compose has no negative padding,
+ * hence the layout modifier.
+ */
+private fun Modifier.bleedHorizontally(amount: Dp) = this.layout { measurable, constraints ->
+    val extra = amount.roundToPx() * 2
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = constraints.minWidth + extra,
+            maxWidth = constraints.maxWidth + extra,
+        )
+    )
+    layout(constraints.maxWidth, placeable.height) {
+        placeable.place(-amount.roundToPx(), 0)
     }
 }
 
@@ -450,7 +513,7 @@ fun StateItem(label: String, value: String, valueColor: Color) {
     Column {
         Text(text = label, color = colors.textSecondary, fontSize = 11.sp)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = value, color = valueColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+        Text(text = value, color = valueColor, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -857,14 +920,16 @@ fun KnowledgeGraphView(
         // Tier Chips
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 4.dp),
-            modifier = Modifier.fillMaxWidth()
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .bleedHorizontally(16.dp)
         ) {
             item {
                 FilterChip(
                     selected = selectedTierFilter == null,
                     onClick = { selectedTierFilter = null },
-                    label = { Text("All Levels (${allNodes.size})", fontSize = 11.sp, fontFamily = FontFamily.Monospace) },
+                    label = { Text("All (${allNodes.size})", fontSize = 11.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = colors.accentNeonGreen,
                         selectedLabelColor = colors.background,
@@ -875,16 +940,19 @@ fun KnowledgeGraphView(
             }
             items(MemoryTier.values()) { tier ->
                 val count = allNodes.count { it.tier == tier }
-                val (label, icon) = when (tier) {
-                    MemoryTier.TEMPORARY -> "Level 1: Temp" to "⚡"
-                    MemoryTier.LONG_TERM -> "Level 2: Long-Term" to "🧠"
-                    MemoryTier.LEARNED_PATTERN -> "Level 3: Patterns" to "📈"
-                    MemoryTier.SENSITIVE -> "Level 4: Sensitive" to "🔒"
+                // The emoji and the "Level N:" prefix are gone: the tiers are
+                // already ordered left to right, and the numbering pushed every
+                // chip past the width the row had to give it.
+                val label = when (tier) {
+                    MemoryTier.TEMPORARY -> "Temporary"
+                    MemoryTier.LONG_TERM -> "Long-term"
+                    MemoryTier.LEARNED_PATTERN -> "Patterns"
+                    MemoryTier.SENSITIVE -> "Sensitive"
                 }
                 FilterChip(
                     selected = selectedTierFilter == tier,
                     onClick = { selectedTierFilter = if (selectedTierFilter == tier) null else tier },
-                    label = { Text("$icon $label ($count)", fontSize = 11.sp, fontFamily = FontFamily.Monospace) },
+                    label = { Text("$label ($count)", fontSize = 11.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = when (tier) {
                             MemoryTier.SENSITIVE -> colors.accentOrange
@@ -904,14 +972,16 @@ fun KnowledgeGraphView(
         // Category Chips
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            contentPadding = PaddingValues(vertical = 4.dp),
-            modifier = Modifier.fillMaxWidth()
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .bleedHorizontally(16.dp)
         ) {
             item {
                 FilterChip(
                     selected = selectedCategoryFilter == null,
                     onClick = { selectedCategoryFilter = null },
-                    label = { Text("All Categories", fontSize = 10.sp) },
+                    label = { Text("All", fontSize = 10.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = colors.textPrimary.copy(alpha = 0.2f),
                         selectedLabelColor = colors.textPrimary,
@@ -921,20 +991,12 @@ fun KnowledgeGraphView(
                 )
             }
             items(KnowledgeCategory.values()) { cat ->
-                val icon = when (cat) {
-                    KnowledgeCategory.CONTACT -> "👥"
-                    KnowledgeCategory.TASK_ROUTINE -> "⚙️"
-                    KnowledgeCategory.APP_PREFERENCE -> "📱"
-                    KnowledgeCategory.SCHEDULE -> "📅"
-                    KnowledgeCategory.PROJECT -> "📁"
-                    KnowledgeCategory.RESOURCE -> "🌐"
-                    KnowledgeCategory.NOTE_FACT -> "📝"
-                    KnowledgeCategory.USER_PREFERENCE -> "⭐"
-                }
                 FilterChip(
                     selected = selectedCategoryFilter == cat,
                     onClick = { selectedCategoryFilter = if (selectedCategoryFilter == cat) null else cat },
-                    label = { Text("$icon ${cat.name.replace('_', ' ')}", fontSize = 10.sp) },
+                    // Title case, not the raw enum. TASK_ROUTINE is what the code
+                    // calls it; "Task routine" is what a person calls it.
+                    label = { Text(cat.displayLabel(), fontSize = 10.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = colors.accentCyan.copy(alpha = 0.3f),
                         selectedLabelColor = colors.accentCyan,
