@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,30 +44,34 @@ fun BenchmarkScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "BRAIN BENCHMARK",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Benchmark",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 18.sp,
-                        letterSpacing = 2.sp
+                        color = AppTheme.colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = AccentNeonGreen)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = AppTheme.colors.textSecondary,
+                        )
                     }
                 },
                 actions = {
                     if (batchProgress != null) {
                         TextButton(onClick = { viewModel.cancelConnectionTests() }) {
-                            Text("Cancel", fontSize = 11.sp, color = AccentRed)
+                            Text("Cancel", fontSize = 11.sp, color = AppTheme.colors.accentRed)
                         }
                     } else {
                         Button(
                             onClick = { showConfirm = true },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = AccentNeonGreen,
-                                contentColor = DarkBackground
+                                containerColor = AppTheme.colors.accentNeonGreen,
+                                contentColor = AppTheme.colors.background
                             ),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
@@ -82,10 +86,10 @@ fun BenchmarkScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.colors.background)
             )
         },
-        containerColor = DarkBackground,
+        containerColor = AppTheme.colors.background,
         modifier = modifier
     ) { padding ->
         if (showConfirm) {
@@ -125,16 +129,14 @@ fun BenchmarkScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .border(1.dp, AppTheme.colors.borderColor, RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "DIAGNOSTIC REPORT SUMMARY",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = AccentCyan
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AppTheme.colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -143,7 +145,7 @@ fun BenchmarkScreen(
                             } ?: "Explicit connection tests use each provider's own selected model. " +
                                 "Missing keys surface as configuration errors instead of silent skips.",
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = AppTheme.colors.textSecondary
                         )
                     }
                 }
@@ -182,17 +184,17 @@ fun ProviderConnectionRow(
             ?: "Not tested"
     }
     val barColor = when (state) {
-        is ConnectionTestState.Connected -> AccentNeonGreen
-        is ConnectionTestState.Failed, is ConnectionTestState.ConfigMissing -> AccentRed
-        is ConnectionTestState.Testing -> AccentCyan
-        else -> BorderColor
+        is ConnectionTestState.Connected -> AppTheme.colors.accentNeonGreen
+        is ConnectionTestState.Failed, is ConnectionTestState.ConfigMissing -> AppTheme.colors.accentRed
+        is ConnectionTestState.Testing -> AppTheme.colors.accentCyan
+        else -> AppTheme.colors.borderColor
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+            .border(1.dp, AppTheme.colors.borderColor, RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -204,7 +206,7 @@ fun ProviderConnectionRow(
                     text = providerName,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = AppTheme.colors.textPrimary
                 )
                 TextButton(onClick = onTest) {
                     Text("Test", fontSize = 11.sp)
@@ -214,8 +216,7 @@ fun ProviderConnectionRow(
             Text(
                 text = statusText,
                 fontSize = 10.sp,
-                color = TextSecondary,
-                fontFamily = FontFamily.Monospace
+                color = AppTheme.colors.textSecondary,
             )
             Spacer(modifier = Modifier.height(10.dp))
             Box(
@@ -223,7 +224,7 @@ fun ProviderConnectionRow(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(BorderColor)
+                    .background(AppTheme.colors.borderColor)
             ) {
                 val fraction = when (state) {
                     is ConnectionTestState.Connected ->

@@ -8,8 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,20 +49,20 @@ fun RoutinesScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "HABITS & ROUTINES",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Habits & routines",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AppTheme.colors.accentNeonGreen,
-                        fontSize = 18.sp,
-                        letterSpacing = 1.5.sp
+                        color = AppTheme.colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = AppTheme.colors.textPrimary
+                            tint = AppTheme.colors.textSecondary
                         )
                     }
                 },
@@ -95,11 +97,8 @@ fun RoutinesScreen(
                 item {
                     Text(
                         text = "DISCOVERED HABITS & SUGGESTIONS",
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        color = AppTheme.colors.accentNeonGreen,
-                        fontSize = 13.sp,
-                        letterSpacing = 1.sp,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppTheme.colors.textSecondary,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -123,48 +122,51 @@ fun RoutinesScreen(
             item {
                 Text(
                     text = "AUTOMATED ROUTINES (${activeRoutines.size})",
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = AppTheme.colors.accentCyan,
-                    fontSize = 13.sp,
-                    letterSpacing = 1.sp,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppTheme.colors.textSecondary,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
 
             if (activeRoutines.isEmpty()) {
                 item {
-                    Card(
+                    // The same empty state as Plan, Macros and Logs: no card, no
+                    // outline, a quiet mark in a soft disc.
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, AppTheme.colors.borderColor, RoundedCornerShape(12.dp)),
-                        colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
+                            .padding(top = 32.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(AppTheme.colors.cardBackground),
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Schedule,
                                 contentDescription = null,
-                                tint = AppTheme.colors.textSecondary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "No Active Routines Yet",
-                                color = AppTheme.colors.textPrimary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "As you use apps like Gmail, Calendar, and Slack, OpenDroid detects repeated patterns and suggests automations here.",
-                                color = AppTheme.colors.textSecondary,
-                                fontSize = 12.sp,
-                                lineHeight = 18.sp
+                                tint = AppTheme.colors.textSecondary.copy(alpha = 0.75f),
+                                modifier = Modifier.size(26.dp)
                             )
                         }
+                        Spacer(modifier = Modifier.height(18.dp))
+                        Text(
+                            text = "No routines yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = AppTheme.colors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "As you use apps like Gmail, Calendar and Slack, OpenDroid spots the patterns you repeat and suggests them here.",
+                            color = AppTheme.colors.textSecondary,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
                     }
                 }
             } else {
@@ -197,18 +199,15 @@ fun RoutinesScreen(
             item {
                 Text(
                     text = "SAMPLE ROUTINE TEMPLATES",
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = AppTheme.colors.textSecondary,
-                    fontSize = 13.sp,
-                    letterSpacing = 1.sp,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppTheme.colors.textSecondary,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
 
             item {
                 RoutineTemplateCard(
-                    title = "🌅 Morning Routine",
+                    title = "Morning routine",
                     description = "Read calendar → Summarize today's meetings → Check notifications → Task list → Morning briefing",
                     trigger = "Every weekday at 9:00 AM",
                     onActivate = {
@@ -220,7 +219,7 @@ fun RoutinesScreen(
 
             item {
                 RoutineTemplateCard(
-                    title = "💼 Work Focus Routine",
+                    title = "Work focus routine",
                     description = "Open Slack → Check Calendar → Read important notifications",
                     trigger = "Every weekday at 9:30 AM",
                     onActivate = {
@@ -232,7 +231,7 @@ fun RoutinesScreen(
 
             item {
                 RoutineTemplateCard(
-                    title = "🌙 Evening Wrap-up",
+                    title = "Evening wrap-up",
                     description = "Check tomorrow's calendar → Check unread notifications → Daily summary",
                     trigger = "Daily at 9:00 PM",
                     onActivate = {
@@ -260,11 +259,9 @@ fun RoutinesScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "HABIT LEARNING ENGINE",
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = AppTheme.colors.textPrimary,
-                                fontSize = 13.sp
+                                text = "Habit learning",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = AppTheme.colors.textPrimary
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -305,11 +302,10 @@ fun SuggestedRoutineCard(
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
-                        text = "💡 ROUTINE DETECTED",
+                        text = "ROUTINE DETECTED",
                         color = AppTheme.colors.accentNeonGreen,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -322,7 +318,6 @@ fun SuggestedRoutineCard(
                         text = "${(routine.confidence * 100).toInt()}% match",
                         color = AppTheme.colors.textSecondary,
                         fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -341,11 +336,10 @@ fun SuggestedRoutineCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "⚡ ${routine.triggerLabel}",
+                text = "${routine.triggerLabel}",
                 color = AppTheme.colors.accentCyan,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = FontFamily.Monospace
             )
 
             if (routine.detectedActions.isNotEmpty()) {
@@ -406,7 +400,6 @@ fun SuggestedRoutineCard(
                                 text = "${idx + 1}.",
                                 color = AppTheme.colors.accentNeonGreen,
                                 fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.width(20.dp)
                             )
@@ -494,10 +487,9 @@ fun ActiveRoutineCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "⚡ ${routine.triggerLabel}",
+                        text = "${routine.triggerLabel}",
                         color = AppTheme.colors.accentCyan,
                         fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace
                     )
                 }
 
@@ -606,10 +598,9 @@ fun RoutineTemplateCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "⏰ $trigger",
+                    text = "$trigger",
                     color = AppTheme.colors.accentCyan,
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
                 )
             }
 

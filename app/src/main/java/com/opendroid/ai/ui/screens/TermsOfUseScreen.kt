@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.*
@@ -28,27 +29,27 @@ fun TermsOfUseScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "TERMS OF USE",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Terms of use",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = AppTheme.colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = AccentNeonGreen
+                            tint = AppTheme.colors.textSecondary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.colors.background)
             )
         },
-        containerColor = DarkBackground
+        containerColor = AppTheme.colors.background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -63,8 +64,8 @@ fun TermsOfUseScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentNeonGreen.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .border(1.dp, AppTheme.colors.accentNeonGreen.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -75,7 +76,7 @@ fun TermsOfUseScreen(
                         Icon(
                             imageVector = Icons.Default.Description,
                             contentDescription = "Terms",
-                            tint = AccentNeonGreen,
+                            tint = AppTheme.colors.accentNeonGreen,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -84,12 +85,12 @@ fun TermsOfUseScreen(
                                 text = "Terms of Use",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                                color = AppTheme.colors.textPrimary
                             )
                             Text(
                                 text = "Effective: May 2026",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = AppTheme.colors.textSecondary
                             )
                         }
                     }

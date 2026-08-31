@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
@@ -28,27 +29,27 @@ fun PrivacyPolicyScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "PRIVACY POLICY",
-                        fontFamily = FontFamily.Monospace,
+                        text = "Privacy policy",
+                        fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
-                        color = AccentNeonGreen,
-                        fontSize = 20.sp,
-                        letterSpacing = 2.sp
+                        color = AppTheme.colors.textPrimary,
+                        fontSize = 19.sp,
+                        letterSpacing = (-0.3).sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = AccentNeonGreen
+                            tint = AppTheme.colors.textSecondary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DarkBackground)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.colors.background)
             )
         },
-        containerColor = DarkBackground
+        containerColor = AppTheme.colors.background
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -63,8 +64,8 @@ fun PrivacyPolicyScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, AccentNeonGreen.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground)
+                        .border(1.dp, AppTheme.colors.accentNeonGreen.copy(alpha = 0.3f), RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
                 ) {
                     Row(
                         modifier = Modifier
@@ -75,7 +76,7 @@ fun PrivacyPolicyScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Privacy",
-                            tint = AccentNeonGreen,
+                            tint = AppTheme.colors.accentNeonGreen,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -84,12 +85,12 @@ fun PrivacyPolicyScreen(
                                 text = "Your Privacy Matters",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextPrimary
+                                color = AppTheme.colors.textPrimary
                             )
                             Text(
                                 text = "Last updated: August 2026",
                                 fontSize = 12.sp,
-                                color = TextSecondary
+                                color = AppTheme.colors.textSecondary
                             )
                         }
                     }
@@ -248,22 +249,21 @@ internal fun PolicySection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(containerColor = CardBackground)
+            .border(1.dp, AppTheme.colors.borderColor, RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
-                color = AccentCyan
+                color = AppTheme.colors.accentCyan
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = content,
                 fontSize = 13.sp,
-                color = TextPrimary,
+                color = AppTheme.colors.textPrimary,
                 lineHeight = 20.sp
             )
         }

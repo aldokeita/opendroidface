@@ -1113,7 +1113,6 @@ fun ProposedPlanPrompt(
                     text = "AUTONOMOUS PLAN PROPOSED",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
                     color = AccentCyan
                 )
             }
@@ -1135,7 +1134,6 @@ fun ProposedPlanPrompt(
                 Text(
                     text = "BLOCKED AUTO-RUN — these steps aren't in your allowlist:",
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
                     color = AccentRed
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -1384,7 +1382,6 @@ private fun ChatErrorRecoveryCard(
                     text = "Incomplete response",
                     color = AccentCyan,
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
                 )
             }
             Text(text = error.guidance(), color = TextSecondary, fontSize = 13.sp)
@@ -1393,7 +1390,6 @@ private fun ChatErrorRecoveryCard(
                     text = "Retry available in ${waitSecondsLeft}s",
                     color = TextSecondary,
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1431,7 +1427,6 @@ private fun ChatErrorRecoveryCard(
                     text = detail,
                     color = TextSecondary,
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
                 )
             }
         }

@@ -128,10 +128,8 @@ fun AutoReplySettingsScreen(
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = "SYSTEM PERMISSIONS REQUIRED",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = themeColors.accentRed,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                style = MaterialTheme.typography.labelSmall,
+                                color = themeColors.accentRed
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
