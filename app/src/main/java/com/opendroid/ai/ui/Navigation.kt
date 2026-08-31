@@ -2,9 +2,21 @@ package com.opendroid.ai.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,8 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
@@ -52,6 +67,14 @@ object OpenDroidRoutes {
     const val PERMISSIONS = "permissions"
     const val CRASH_LOG = "crash_log"
     const val ROUTINES = "routines"
+
+    // Plan, Macros and Logs used to be tabs. They are places you visit to check
+    // on something that already happened, not places you work, so they live one
+    // level down under Settings and the bar is left with the three tabs a person
+    // actually moves between.
+    const val PLAN = "plan"
+    const val MACROS = "macros"
+    const val LOGS = "logs"
 }
 
 /**
@@ -140,7 +163,41 @@ fun OpenDroidNavigation(
                 },
                 onNavigateToRoutines = {
                     navController.navigate(OpenDroidRoutes.ROUTINES)
+                },
+                onNavigateToPlan = {
+                    navController.navigate(OpenDroidRoutes.PLAN)
+                },
+                onNavigateToMacros = {
+                    navController.navigate(OpenDroidRoutes.MACROS)
+                },
+                onNavigateToLogs = {
+                    navController.navigate(OpenDroidRoutes.LOGS)
                 }
+            )
+        }
+
+        composable(OpenDroidRoutes.PLAN) {
+            val planViewModel: PlanViewModel = hiltViewModel()
+            PlanScreen(
+                viewModel = planViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(OpenDroidRoutes.MACROS) {
+            val macroViewModel: MacroViewModel = hiltViewModel()
+            MacrosScreen(
+                viewModel = macroViewModel,
+                onNavigateToRoutines = { navController.navigate(OpenDroidRoutes.ROUTINES) },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(OpenDroidRoutes.LOGS) {
+            val historyViewModel: HistoryViewModel = hiltViewModel()
+            LogsScreen(
+                viewModel = historyViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -243,12 +300,20 @@ fun OpenDroidNavigation(
     }
 }
 
+/**
+ * The three places the app is used from.
+ *
+ * Six tabs made the bar a strip of equal buttons, and four of them were things
+ * you look at rather than places you work: Plan, Macros and Logs are now reached
+ * from Settings. What is left is the conversation, what the agent knows, and how
+ * it is set up.
+ */
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Chat : Screen("chat", "Chat", Icons.Default.Chat)
-    object Plan : Screen("plan", "Plan", Icons.Default.List)
-    object Memory : Screen("memory", "Memory", Icons.Default.Star)
-    object Macros : Screen("macros", "Macros", Icons.Default.Build)
-    object History : Screen("history", "Logs", Icons.Default.History)
+
+    // Psychology, not a star: the tab holds what the agent remembers and has
+    // learned, and a star says "favourites" in every other app on the phone.
+    object Memory : Screen("memory", "Memory", Icons.Default.Psychology)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
 
@@ -264,7 +329,10 @@ fun MainDashboard(
     onNavigateToNotificationHistory: () -> Unit = {},
     onNavigateToPermissions: () -> Unit = {},
     onNavigateToCrashLog: () -> Unit = {},
-    onNavigateToRoutines: () -> Unit = {}
+    onNavigateToRoutines: () -> Unit = {},
+    onNavigateToPlan: () -> Unit = {},
+    onNavigateToMacros: () -> Unit = {},
+    onNavigateToLogs: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -301,10 +369,7 @@ fun MainDashboard(
 
     val tabs = listOf(
         Screen.Chat,
-        Screen.Plan,
         Screen.Memory,
-        Screen.Macros,
-        Screen.History,
         Screen.Settings
     )
 
@@ -312,46 +377,11 @@ fun MainDashboard(
 
     Scaffold(
         bottomBar = {
-            Column {
-                // A hairline instead of a rounded, outlined, floating slab. The bar
-                // is part of the screen, not a card sitting on top of it.
-                HorizontalDivider(color = colors.borderColor.copy(alpha = 0.4f))
-                NavigationBar(
-                    containerColor = colors.background,
-                    modifier = Modifier.fillMaxWidth(),
-                    // Material tints an elevated surface with the primary colour,
-                    // and this app's primary is neon green - which is why the bar
-                    // was washed green regardless of the container colour asked for.
-                    tonalElevation = 0.dp
-                ) {
-                    tabs.forEach { tab ->
-                        val isSelected = currentTab == tab
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = { currentTab = tab },
-                            icon = {
-                                Icon(
-                                    imageVector = tab.icon,
-                                    contentDescription = tab.title,
-                                    modifier = Modifier.size(21.dp),
-                                    tint = if (isSelected) colors.accentNeonGreen else colors.textSecondary
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = tab.title,
-                                    fontSize = 10.sp,
-                                    color = if (isSelected) colors.accentNeonGreen else colors.textSecondary,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                                )
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = colors.accentNeonGreen.copy(alpha = 0.10f)
-                            )
-                        )
-                    }
-                }
-            }
+            OpenDroidNavBar(
+                tabs = tabs,
+                current = currentTab,
+                onSelect = { currentTab = it },
+            )
         },
         containerColor = colors.background
     ) { paddingValues ->
@@ -363,13 +393,7 @@ fun MainDashboard(
         ) {
             when (currentTab) {
                 Screen.Chat -> ChatScreen(viewModel = chatViewModel)
-                Screen.Plan -> PlanScreen(viewModel = planViewModel)
                 Screen.Memory -> MemoryScreen(viewModel = memoryViewModel)
-                Screen.Macros -> MacrosScreen(
-                    viewModel = macroViewModel,
-                    onNavigateToRoutines = onNavigateToRoutines
-                )
-                Screen.History -> LogsScreen(viewModel = historyViewModel)
                 Screen.Settings -> SettingsScreen(
                     viewModel = settingsViewModel,
                     onNavigateToBenchmark = onNavigateToBenchmark,
@@ -382,8 +406,120 @@ fun MainDashboard(
                     onNavigateToNotificationHistory = onNavigateToNotificationHistory,
                     onNavigateToPermissions = onNavigateToPermissions,
                     onNavigateToCrashLog = onNavigateToCrashLog,
-                    onNavigateToRoutines = onNavigateToRoutines
+                    onNavigateToRoutines = onNavigateToRoutines,
+                    onNavigateToPlan = onNavigateToPlan,
+                    onNavigateToMacros = onNavigateToMacros,
+                    onNavigateToLogs = onNavigateToLogs
                 )
+            }
+        }
+    }
+}
+
+/**
+ * The bottom bar: a floating pill with an indicator that actually travels.
+ *
+ * Three tabs is the count where a standard Material bar starts to look sparse -
+ * three equal buttons in a full-width strip, most of it empty. A pill inset from
+ * the edges gives the bar a shape of its own, and because there are only three
+ * stops, the selected one can afford to carry its label while the other two are
+ * icons alone. That is what makes the selection obvious without colour doing all
+ * the work.
+ *
+ * The indicator is one moving thing rather than three that light up in turn: it
+ * is measured against the bar's own width and slides, so switching tabs reads as
+ * travel between two places rather than as two separate states blinking.
+ */
+@Composable
+private fun OpenDroidNavBar(
+    tabs: List<Screen>,
+    current: Screen,
+    onSelect: (Screen) -> Unit,
+) {
+    val colors = LocalOpenDroidColors.current
+    val selectedIndex = tabs.indexOf(current).coerceAtLeast(0)
+    // Spring, not tween: the slide has weight this way, and a bar this small
+    // needs the overshoot to register as movement at all.
+    val indicator by animateFloatAsState(
+        targetValue = selectedIndex.toFloat(),
+        animationSpec = spring(dampingRatio = 0.72f, stiffness = 420f),
+        label = "navIndicator",
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(62.dp)
+                .clip(RoundedCornerShape(31.dp))
+                .background(colors.cardBackground)
+        ) {
+            val slotWidth = maxWidth / tabs.size
+            val slotWidthPx = with(LocalDensity.current) { slotWidth.toPx() }
+
+            // The travelling pill, drawn under the row. The offset is read in the
+            // lambda overload so the slide is a layout pass per frame rather than
+            // a recomposition per frame.
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset((slotWidthPx * indicator).roundToInt(), 0) }
+                    .width(slotWidth)
+                    .fillMaxHeight()
+                    .padding(6.dp)
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(colors.accentNeonGreen.copy(alpha = 0.14f))
+            )
+
+            Row(modifier = Modifier.fillMaxSize()) {
+                tabs.forEach { tab ->
+                    val isSelected = tab == current
+                    val tint by animateColorAsState(
+                        if (isSelected) colors.accentNeonGreen else colors.textSecondary,
+                        tween(220),
+                        label = "navTint",
+                    )
+                    Row(
+                        modifier = Modifier
+                            .width(slotWidth)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(25.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onSelect(tab) },
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.title,
+                            tint = tint,
+                            modifier = Modifier.size(22.dp),
+                        )
+                        // The label belongs to the selected tab only. With three
+                        // stops there is room for it, and a bar of three permanent
+                        // captions is a strip of buttons again.
+                        AnimatedVisibility(
+                            visible = isSelected,
+                            enter = fadeIn(tween(180)) + expandHorizontally(tween(220)),
+                            exit = fadeOut(tween(120)) + shrinkHorizontally(tween(180)),
+                        ) {
+                            Text(
+                                text = tab.title,
+                                color = tint,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                modifier = Modifier.padding(start = 8.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
     }

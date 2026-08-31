@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Autorenew
@@ -36,6 +37,7 @@ import java.util.UUID
 fun MacrosScreen(
     viewModel: MacroViewModel,
     modifier: Modifier = Modifier,
+    onNavigateBack: (() -> Unit)? = null,
     onNavigateToRoutines: () -> Unit = {},
 ) {
     val colors = LocalOpenDroidColors.current
@@ -67,6 +69,17 @@ fun MacrosScreen(
                         fontSize = 19.sp,
                         letterSpacing = (-0.3).sp
                     )
+                },
+                navigationIcon = {
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colors.textSecondary,
+                            )
+                        }
+                    }
                 },
                 actions = {
                     IconButton(

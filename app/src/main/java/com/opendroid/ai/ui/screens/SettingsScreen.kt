@@ -10,7 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.HelpOutline
@@ -85,6 +88,11 @@ fun SettingsScreen(
     onNavigateToPermissions: () -> Unit = {},
     onNavigateToCrashLog: () -> Unit = {},
     onNavigateToRoutines: () -> Unit = {},
+    // Plan, Macros and Logs were tabs until the bar was cut to three. They are
+    // things you go and look at, so they are reached from here.
+    onNavigateToPlan: () -> Unit = {},
+    onNavigateToMacros: () -> Unit = {},
+    onNavigateToLogs: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val config by viewModel.llmConfig.collectAsState()
@@ -2089,6 +2097,32 @@ fun SettingsScreen(
                 }
             }
 
+            // The three screens that used to be tabs.
+            item {
+                SettingsLinkCard(
+                    icon = Icons.AutoMirrored.Filled.ListAlt,
+                    title = "Plan",
+                    subtitle = "What the agent is doing now, and what it has run.",
+                    onClick = onNavigateToPlan,
+                )
+            }
+            item {
+                SettingsLinkCard(
+                    icon = Icons.Default.Build,
+                    title = "Macros",
+                    subtitle = "Saved sequences you can run again.",
+                    onClick = onNavigateToMacros,
+                )
+            }
+            item {
+                SettingsLinkCard(
+                    icon = Icons.Default.History,
+                    title = "Logs",
+                    subtitle = "Every executed step, and the actions that failed.",
+                    onClick = onNavigateToLogs,
+                )
+            }
+
             // Habits & Routines link card
             item {
                 Card(
@@ -2645,3 +2679,59 @@ private fun SecureApiKeyField(
  */
 private fun String.asActionLabel(): String =
     replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
+
+/**
+ * One row that leads somewhere else: icon, title, a line saying what is there,
+ * and a chevron.
+ *
+ * The navigation rows in this screen were eight copies of the same twenty lines,
+ * which is how five of them ended up wearing the same grey "i".
+ */
+@Composable
+private fun SettingsLinkCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    val colors = LocalOpenDroidColors.current
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = colors.textSecondary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = colors.textSecondary
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = colors.textSecondary
+            )
+        }
+    }
+}

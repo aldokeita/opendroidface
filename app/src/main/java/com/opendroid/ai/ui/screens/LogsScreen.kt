@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -32,7 +33,8 @@ import java.util.Locale
 @Composable
 fun LogsScreen(
     viewModel: HistoryViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     val colors = LocalOpenDroidColors.current
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -67,6 +69,17 @@ fun LogsScreen(
                         fontSize = 19.sp,
                         letterSpacing = (-0.3).sp
                     )
+                },
+                navigationIcon = {
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = colors.textSecondary,
+                            )
+                        }
+                    }
                 },
                 actions = {
                     val hasLogs = if (selectedTab == 0) history.isNotEmpty() else actionErrors.isNotEmpty()
