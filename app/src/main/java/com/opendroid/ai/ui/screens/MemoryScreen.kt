@@ -31,6 +31,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.MoreVert
@@ -101,7 +103,7 @@ fun MemoryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Memory",
+                        text = stringResource(R.string.memory_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -118,7 +120,7 @@ fun MemoryScreen(
                         IconButton(onClick = { showMemoryMenu = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More",
+                                contentDescription = stringResource(R.string.common_more),
                                 tint = colors.textSecondary,
                             )
                         }
@@ -233,7 +235,7 @@ fun MemoryScreen(
                                 IconButton(onClick = { searchQuery = "" }) {
                                     Icon(
                                         Icons.Default.Close,
-                                        contentDescription = "Clear search",
+                                        contentDescription = stringResource(R.string.memory_clear_search),
                                         tint = colors.textSecondary,
                                         modifier = Modifier.size(18.dp),
                                     )
@@ -265,7 +267,7 @@ fun MemoryScreen(
                                 .clip(CircleShape)
                                 .background(colors.accentGreenButton)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Add Memory", tint = colors.background)
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.memory_add), tint = colors.background)
                         }
                     }
                 }
@@ -401,7 +403,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "DEVICE STATE",
+                        text = stringResource(R.string.memory_device_state),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textSecondary
                     )
@@ -442,7 +444,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "ACTIVE PLAN",
+                        text = stringResource(R.string.memory_active_plan),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textSecondary
                     )
@@ -541,7 +543,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No active autonomous plan running.",
+                                text = stringResource(R.string.memory_empty_plan),
                                 color = colors.textSecondary,
                                 fontSize = 12.sp
                             )
@@ -560,7 +562,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "RECENT SESSIONS",
+                        text = stringResource(R.string.memory_recent_sessions),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textSecondary
                     )
@@ -607,7 +609,7 @@ fun WorkingMemoryView(viewModel: MemoryViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No messages in current working session.",
+                                text = stringResource(R.string.memory_empty_session),
                                 color = colors.textSecondary,
                                 fontSize = 12.sp
                             )
@@ -702,7 +704,7 @@ fun EpisodicMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No episodic chat logs recorded.",
+                text = stringResource(R.string.memory_empty_episodic),
                 color = colors.textSecondary,
                 fontSize = 12.sp
             )
@@ -741,7 +743,7 @@ fun SemanticMemoryView(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "New fact",
+                        text = stringResource(R.string.memory_new_fact),
                         style = MaterialTheme.typography.titleMedium,
                         color = colors.textPrimary
                     )
@@ -749,7 +751,7 @@ fun SemanticMemoryView(
                     OutlinedTextField(
                         value = newKey,
                         onValueChange = onNewKeyChange,
-                        label = { Text("Fact Key/Identifier", fontSize = 12.sp) },
+                        label = { Text(stringResource(R.string.memory_fact_key), fontSize = 12.sp) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colors.accentNeonGreen,
@@ -763,7 +765,7 @@ fun SemanticMemoryView(
                     OutlinedTextField(
                         value = newValue,
                         onValueChange = onNewValueChange,
-                        label = { Text("Fact Content/Details", fontSize = 12.sp) },
+                        label = { Text(stringResource(R.string.memory_fact_value), fontSize = 12.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colors.accentNeonGreen,
                             unfocusedBorderColor = colors.borderColor,
@@ -775,7 +777,7 @@ fun SemanticMemoryView(
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { onIsAddingFactChange(false) }) {
-                            Text("Cancel", color = colors.accentRed)
+                            Text(stringResource(R.string.common_cancel), color = colors.accentRed)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -790,7 +792,7 @@ fun SemanticMemoryView(
                             colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Save Fact", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.memory_save_fact), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -820,7 +822,7 @@ fun SemanticMemoryView(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No semantic facts indexed in this category.",
+                    text = stringResource(R.string.memory_empty_facts),
                     color = colors.textSecondary,
                     fontSize = 13.sp
                 )
@@ -873,7 +875,7 @@ fun MemoryItemCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Memory",
+                    contentDescription = stringResource(R.string.memory_delete),
                     tint = colors.textSecondary.copy(alpha = 0.6f)
                 )
             }
@@ -941,7 +943,7 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "STEPS",
+                                text = stringResource(R.string.memory_steps),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -969,7 +971,7 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                             IconButton(onClick = { viewModel.deleteMacro(macro.id) }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete Macro",
+                                    contentDescription = stringResource(R.string.memory_delete_macro),
                                     tint = colors.accentRed.copy(alpha = 0.8f)
                                 )
                             }
@@ -984,7 +986,7 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No custom macros or procedures registered.",
+                text = stringResource(R.string.memory_empty_macros),
                 color = colors.textSecondary,
                 fontSize = 12.sp
             )
@@ -1093,7 +1095,7 @@ fun KnowledgeGraphView(
                 FilterChip(
                     selected = selectedCategoryFilter == null,
                     onClick = { selectedCategoryFilter = null },
-                    label = { Text("All", fontSize = 10.sp) },
+                    label = { Text(stringResource(R.string.memory_filter_all), fontSize = 10.sp) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = colors.textPrimary.copy(alpha = 0.2f),
                         selectedLabelColor = colors.textPrimary,
@@ -1159,13 +1161,13 @@ fun KnowledgeGraphView(
                         FilterChip(
                             selected = !addIsSensitive,
                             onClick = { addIsSensitive = false },
-                            label = { Text("🧠 Long-Term Memory", fontSize = 11.sp) }
+                            label = { Text(stringResource(R.string.memory_long_term), fontSize = 11.sp) }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         FilterChip(
                             selected = addIsSensitive,
                             onClick = { addIsSensitive = true },
-                            label = { Text("🔒 Keystore Encrypted", fontSize = 11.sp) }
+                            label = { Text(stringResource(R.string.memory_keystore), fontSize = 11.sp) }
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -1198,7 +1200,7 @@ fun KnowledgeGraphView(
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = { isAddingKnowledge = false }) {
-                            Text("Cancel", color = colors.accentRed)
+                            Text(stringResource(R.string.common_cancel), color = colors.accentRed)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -1220,7 +1222,7 @@ fun KnowledgeGraphView(
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Save Entry", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.memory_save_entry), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -1251,7 +1253,7 @@ fun KnowledgeGraphView(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No Knowledge Graph entities matching filter.",
+                    text = stringResource(R.string.memory_empty_graph),
                     color = colors.textSecondary,
                     fontSize = 13.sp
                 )
@@ -1337,7 +1339,7 @@ fun KnowledgeNodeCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Node",
+                            contentDescription = stringResource(R.string.memory_delete_node),
                             tint = colors.textSecondary.copy(alpha = 0.6f),
                             modifier = Modifier.size(16.dp)
                         )
@@ -1390,10 +1392,12 @@ fun KnowledgeNodeCard(
                     ) {
                         Icon(Icons.Default.TrendingUp, contentDescription = null, tint = colors.accentNeonGreen, modifier = Modifier.size(12.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Promote to Long-Term", fontSize = 10.sp, color = colors.accentNeonGreen)
+                        Text(stringResource(R.string.memory_promote), fontSize = 10.sp, color = colors.accentNeonGreen)
                     }
                 }
             }
         }
     }
 }
+
+

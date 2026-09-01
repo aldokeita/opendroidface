@@ -149,6 +149,35 @@
     <string name="chat_incomplete">Jawabannya nggak lengkap</string>
     <string name="plan_needs_approval">PERLU PERSETUJUAN</string>
     <string name="plan_not_allowlisted">BELUM KAMU IZINKAN</string>
+
+    <!-- Ingatan -->
+    <string name="memory_title">Ingatan</string>
+    <string name="memory_long_term">🧠 Ingatan jangka panjang</string>
+    <string name="memory_keystore">🔒 Terenkripsi di Keystore</string>
+    <string name="memory_active_plan">RENCANA BERJALAN</string>
+    <string name="memory_device_state">KONDISI PERANGKAT</string>
+    <string name="memory_recent_sessions">SESI TERAKHIR</string>
+    <string name="memory_steps">LANGKAH</string>
+    <string name="memory_add">Tambah ingatan</string>
+    <string name="memory_new_fact">Fakta baru</string>
+    <string name="memory_fact_key">Nama fakta</string>
+    <string name="memory_fact_value">Isi fakta</string>
+    <string name="memory_save_fact">Simpan fakta</string>
+    <string name="memory_save_entry">Simpan</string>
+    <string name="memory_promote">Jadikan jangka panjang</string>
+    <string name="memory_delete">Hapus ingatan</string>
+    <string name="memory_delete_macro">Hapus makro</string>
+    <string name="memory_delete_node">Hapus simpul</string>
+    <string name="memory_clear_search">Bersihkan pencarian</string>
+    <string name="memory_filter_all">Semua</string>
+    <string name="common_more">Lainnya</string>
+    <string name="memory_empty_plan">Tidak ada rencana yang sedang berjalan.</string>
+    <string name="memory_empty_macros">Belum ada makro atau prosedur yang kamu buat.</string>
+    <string name="memory_empty_episodic">Belum ada catatan percakapan.</string>
+    <string name="memory_empty_graph">Tidak ada entitas yang cocok dengan filter ini.</string>
+    <string name="memory_empty_session">Belum ada pesan di sesi yang sedang berjalan.</string>
+    <string name="memory_empty_facts">Belum ada fakta di kategori ini.</string>
 </resources>
+
 
 

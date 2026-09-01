@@ -145,6 +145,35 @@
     <string name="chat_incomplete">Incomplete response</string>
     <string name="plan_needs_approval">NEEDS APPROVAL</string>
     <string name="plan_not_allowlisted">NOT IN YOUR ALLOWLIST</string>
+
+    <!-- Memory -->
+    <string name="memory_title">Memory</string>
+    <string name="memory_long_term">🧠 Long-Term Memory</string>
+    <string name="memory_keystore">🔒 Keystore Encrypted</string>
+    <string name="memory_active_plan">ACTIVE PLAN</string>
+    <string name="memory_device_state">DEVICE STATE</string>
+    <string name="memory_recent_sessions">RECENT SESSIONS</string>
+    <string name="memory_steps">STEPS</string>
+    <string name="memory_add">Add Memory</string>
+    <string name="memory_new_fact">New fact</string>
+    <string name="memory_fact_key">Fact Key/Identifier</string>
+    <string name="memory_fact_value">Fact Content/Details</string>
+    <string name="memory_save_fact">Save Fact</string>
+    <string name="memory_save_entry">Save Entry</string>
+    <string name="memory_promote">Promote to Long-Term</string>
+    <string name="memory_delete">Delete Memory</string>
+    <string name="memory_delete_macro">Delete Macro</string>
+    <string name="memory_delete_node">Delete Node</string>
+    <string name="memory_clear_search">Clear search</string>
+    <string name="memory_filter_all">All</string>
+    <string name="common_more">More</string>
+    <string name="memory_empty_plan">No active autonomous plan running.</string>
+    <string name="memory_empty_macros">No custom macros or procedures registered.</string>
+    <string name="memory_empty_episodic">No episodic chat logs recorded.</string>
+    <string name="memory_empty_graph">No Knowledge Graph entities matching filter.</string>
+    <string name="memory_empty_session">No messages in current working session.</string>
+    <string name="memory_empty_facts">No semantic facts indexed in this category.</string>
 </resources>
+
 
 
