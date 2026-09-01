@@ -34,39 +34,62 @@ object SpokenLanguage {
     }
 
     /**
-     * True when the text carries more Indonesian function words than English
-     * ones. Two matches are required, so a single ambiguous token - a name, a
-     * loanword - cannot decide it, and a text with no evidence either way
-     * returns false rather than guessing.
+     * True when the text carries more Indonesian evidence than English.
+     *
+     * Markers are weighted rather than counted, because a two-word command is
+     * as much a sentence as a paragraph is. "Buka WhatsApp" has one Indonesian
+     * word in it and no doubt about the language; "Meeting di Zoom" also has
+     * one, and is a sentence an English speaker in Jakarta says every day. So
+     * words that only ever appear in Indonesian carry the decision alone, and
+     * words that merely lean that way need company.
      */
     fun looksIndonesian(text: String): Boolean {
         var indonesian = 0
         var english = 0
         for (word in WORD.split(text.lowercase(Locale.ROOT))) {
             if (word.isEmpty()) continue
-            if (word in INDONESIAN_MARKERS) indonesian++
-            if (word in ENGLISH_MARKERS) english++
+            if (word in STRONG_INDONESIAN) indonesian += DECISIVE
+            else if (word in WEAK_INDONESIAN) indonesian += SUPPORTING
+            if (word in ENGLISH_MARKERS) english += DECISIVE
         }
-        return indonesian >= 2 && indonesian > english
+        return indonesian >= DECISIVE && indonesian > english
     }
+
+    private const val DECISIVE = 2
+    private const val SUPPORTING = 1
 
     private val WORD = Regex("[^\\p{L}]+")
 
     /**
-     * Function words, not vocabulary: they appear in almost any sentence of
-     * their language and almost never in the other one. Deliberately excludes
-     * words English also has ("ada" is not here for the same reason "in" is
-     * not - "in" is Indonesian-adjacent noise in English text).
+     * Words that settle it on their own: function words and the imperative
+     * verbs a person gives a phone. None of them is an English word, so one
+     * occurrence is not a coincidence.
      */
-    private val INDONESIAN_MARKERS = setOf(
-        "yang", "dan", "tidak", "saya", "kamu", "aku", "ini", "itu", "untuk",
+    private val STRONG_INDONESIAN = setOf(
+        // function words
+        "yang", "dan", "tidak", "saya", "kamu", "aku", "untuk",
         "dengan", "sudah", "bisa", "akan", "atau", "juga", "kalau", "tapi",
         "karena", "jangan", "kita", "mereka", "adalah", "saja", "lagi", "hanya",
-        "ke", "di", "pada", "dalam", "sedang", "belum", "harus", "mau", "ingin",
-        "banyak", "sekarang", "nanti", "dari", "apa", "siapa", "bagaimana",
+        "pada", "dalam", "sedang", "belum", "harus", "mau", "ingin",
+        "banyak", "sekarang", "nanti", "dari", "siapa", "bagaimana",
         "kenapa", "berapa", "sedikit", "semua", "setiap", "sendiri", "milik",
-        "punya", "buat", "biar", "supaya", "agar", "lalu", "kemudian", "jadi",
+        "punya", "biar", "supaya", "agar", "lalu", "kemudian", "jadi",
         "masih", "pernah", "selalu", "sering", "kadang", "dulu", "tolong",
+        // the commands this app exists to receive
+        "buka", "bukakan", "tutup", "nyalakan", "matikan", "hidupkan",
+        "kirim", "kirimkan", "panggil", "telepon", "hubungi", "putar",
+        "setel", "pasang", "hapus", "cari", "carikan", "tampilkan",
+        "bacakan", "baca", "ambil", "ubah", "naikkan", "turunkan",
+        "buatkan", "catat", "ingatkan", "jadwalkan", "bikin", "sebutkan",
+        "berhenti", "lanjutkan", "ulangi", "batalkan",
+    )
+
+    /**
+     * Words that lean Indonesian but survive in English sentences a bilingual
+     * speaker writes - "Meeting di Zoom", "ada update?". They need company.
+     */
+    private val WEAK_INDONESIAN = setOf(
+        "ke", "di", "ini", "itu", "apa", "ada", "buat",
     )
 
     private val ENGLISH_MARKERS = setOf(

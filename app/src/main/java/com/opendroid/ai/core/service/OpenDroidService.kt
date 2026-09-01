@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.opendroid.ai.core.agent.AgentLoop
+import com.opendroid.ai.core.agent.AgentPhrases
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
 import com.opendroid.ai.core.voice.shouldSpeakReply
@@ -144,12 +145,11 @@ class OpenDroidService : Service() {
                     if (!showFloatingButton) {
                         pendingApprovalListen = true
                     }
-                    // Only for a plan the user asked for out loud. Read over a
-                    // typed request it is the app announcing itself to a room.
-                    speakIfAsked(
-                        "I've planned: ${state.plan.goal}, ${state.plan.estimatedSteps} steps. " +
-                        "Say approve to run, or cancel."
-                    )
+                    // Only for a plan the user asked for out loud, and without
+                    // repeating the request: reading someone's own command back
+                    // to them before asking for a yes spends the seconds they
+                    // need to answer, and the plan is already on screen.
+                    speakIfAsked(AgentPhrases.approvalPrompt(agentLoop.replyInIndonesian))
                 }
             }
         }

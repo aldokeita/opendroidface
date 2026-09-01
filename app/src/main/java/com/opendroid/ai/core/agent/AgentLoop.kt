@@ -224,6 +224,18 @@ class AgentLoop @Inject constructor(
         private set
 
     /**
+     * Whether this turn's own lines should be in Indonesian.
+     *
+     * Read from the user's words. The model already answers in the language it
+     * was asked in; these are the lines the loop writes itself - the alias fast
+     * path, the plan summaries, the approval prompt - and they used to be
+     * English no matter what was asked.
+     */
+    @Volatile
+    var replyInIndonesian: Boolean = false
+        private set
+
+    /**
      * @param askedByVoice true when this query was spoken rather than typed. A
      * typed question gets a typed answer unless the user asked otherwise; the
      * app should not start talking in a room where they chose to be quiet.
@@ -267,6 +279,8 @@ class AgentLoop @Inject constructor(
         // in a contact picker must not silence a conversation held out loud.
         if (!isAnsweringPendingQuestion) {
             this.askedByVoice = askedByVoice
+            this.replyInIndonesian =
+                com.opendroid.ai.core.voice.SpokenLanguage.looksIndonesian(query)
         }
 
         if (waitingSession != null && !isAnsweringPendingQuestion) {
@@ -486,7 +500,7 @@ class AgentLoop @Inject constructor(
         sessionId: String
     ) {
         try {
-            val speechText = humanizePreSpeech(alias.action)
+            val speechText = AgentPhrases.preSpeech(alias.action, replyInIndonesian)
             onSpeakCallback?.invoke(speechText)
 
             // Save agent response
@@ -1542,7 +1556,7 @@ class AgentLoop @Inject constructor(
         )
         conversationRepository.insertMessage(sessionId, traceMsg)
         memoryManager.storeMessage(traceMsg, sessionId)
-        onSpeakCallback?.invoke("Running: ${plan.goal}")
+        onSpeakCallback?.invoke(AgentPhrases.runningPlan(plan.goal, replyInIndonesian))
     }
 
     private suspend fun speakAndSaveSummary(plan: Plan, isSuccess: Boolean, sessionId: String) {
@@ -1560,7 +1574,7 @@ class AgentLoop @Inject constructor(
             if (stepSummaries.isNotEmpty()) {
                 stepSummaries.joinToString(". ")
             } else {
-                humanizeGoalDone(plan.goal)
+                AgentPhrases.goalDone(plan.goal, replyInIndonesian)
             }
         } else {
             // Log the technical errors but DON'T show them to the user
@@ -1583,7 +1597,7 @@ class AgentLoop @Inject constructor(
                 }
             }
             
-            userFacingError ?: humanizeFailure(plan.goal)
+            userFacingError ?: AgentPhrases.failure(plan.goal, replyInIndonesian)
         }
 
         val assistantMsg = ChatMessage(
@@ -1777,69 +1791,8 @@ class AgentLoop @Inject constructor(
     /**
      * Generate a natural pre-execution speech line based on the action.
      */
-    private fun humanizePreSpeech(action: String): String {
-        return when (action) {
-            "TOGGLE_FLASHLIGHT" -> "Got it, toggling your flashlight."
-            "SET_ALARM" -> "Sure, setting that alarm for you."
-            "SET_TIMER" -> "Alright, starting a timer."
-            "TAKE_SCREENSHOT" -> "Taking a screenshot now."
-            "LOCK_SCREEN" -> "Locking your screen."
-            "TOGGLE_WIFI" -> "Alright, switching your WiFi."
-            "TOGGLE_BLUETOOTH" -> "On it, toggling Bluetooth."
-            "TOGGLE_DND" -> "Got it, changing Do Not Disturb."
-            "TOGGLE_HOTSPOT" -> "Sure, toggling your hotspot."
-            "TOGGLE_MOBILE_DATA" -> "Alright, switching mobile data."
-            "SET_VOLUME" -> "Got it, adjusting the volume."
-            "SET_BRIGHTNESS" -> "Sure, adjusting brightness."
-            "OPEN_APP" -> "Opening that for you."
-            "ANALYZE_SCREENSHOT" -> "Let me take a look at your screen."
-            "READ_AND_REMEMBER_SCREEN" -> "Reading your screen and saving the important details."
-            "READ_NOTES" -> "Let me look up your notes."
-            "RECALL_MEMORY" -> "Searching your saved memories."
-            "ADD_NOTE" -> "Saving that note for you."
-            "SET_RINGER_MODE" -> "Changing your ringer mode."
-            "PLAY_MUSIC" -> "Let me play that for you."
-            "MAKE_CALL" -> "Calling now."
-            else -> {
-                val readable = action.lowercase().replace("_", " ")
-                "On it! Let me $readable."
-            }
-        }
-    }
 
     /**
      * Generate a natural success message when no step result is available.
      */
-    private fun humanizeGoalDone(goal: String): String {
-        val lower = goal.lowercase()
-        return when {
-            lower.contains("alarm") -> "All set! Your alarm is ready."
-            lower.contains("flash") || lower.contains("torch") -> "Done! Flashlight's been toggled."
-            lower.contains("wifi") -> "WiFi's been updated."
-            lower.contains("bluetooth") -> "Bluetooth's been switched."
-            lower.contains("volume") -> "Volume's adjusted."
-            lower.contains("brightness") -> "Brightness updated."
-            lower.contains("screenshot") -> "Screenshot taken!"
-            lower.contains("timer") -> "Timer's set and running."
-            lower.contains("open") -> "Done, it should be open now."
-            lower.contains("call") -> "Calling now."
-            lower.contains("message") || lower.contains("whatsapp") -> "Message sent!"
-            else -> "All done!"
-        }
-    }
-
-    /**
-     * Generate a natural failure message. Technical details go to logs only.
-     */
-    private fun humanizeFailure(goal: String): String {
-        val lower = goal.lowercase()
-        return when {
-            lower.contains("alarm") -> "Sorry, I couldn't set that alarm. Maybe check your Clock app?"
-            lower.contains("flash") || lower.contains("torch") -> "Hmm, the flashlight didn't work. Try again?"
-            lower.contains("call") -> "I wasn't able to make that call. Want to try again?"
-            lower.contains("message") || lower.contains("whatsapp") -> "The message didn't go through. Want me to retry?"
-            lower.contains("wifi") || lower.contains("bluetooth") -> "Couldn't change that setting. You might need to do it manually."
-            else -> "Sorry, that didn't work out. Want me to try again?"
-        }
-    }
 }

@@ -52,10 +52,26 @@ class SpokenLanguageTest {
     }
 
     @Test
-    fun `one marker is not enough to decide`() {
-        // "di" alone could be a name, an abbreviation, anything.
+    fun `a word that survives in English needs company`() {
+        // "Meeting di Zoom" is a sentence an English speaker in Jakarta says.
         assertFalse(SpokenLanguage.looksIndonesian("Meeting di Zoom"))
         assertTrue(SpokenLanguage.looksIndonesian("Meeting di Zoom sudah kubatalkan"))
+    }
+
+    @Test
+    fun `a two-word command is enough on its own`() {
+        // The commands this app exists to receive are short. Requiring two
+        // markers made every one of them look like English.
+        assertTrue(SpokenLanguage.looksIndonesian("buka whatsapp"))
+        assertTrue(SpokenLanguage.looksIndonesian("nyalakan senter"))
+        assertTrue(SpokenLanguage.looksIndonesian("Kirim pesan ke Budi"))
+        assertFalse(SpokenLanguage.looksIndonesian("open whatsapp"))
+    }
+
+    @Test
+    fun `a short command picks the Indonesian voice`() {
+        assertEquals("id", SpokenLanguage.localeFor("buka whatsapp", null, english).language)
+        assertEquals(english, SpokenLanguage.localeFor("open whatsapp", null, english))
     }
 
     @Test
