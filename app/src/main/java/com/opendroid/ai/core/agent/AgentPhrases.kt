@@ -97,6 +97,45 @@ object AgentPhrases {
     fun approvalPrompt(indonesian: Boolean): String =
         if (indonesian) "Perlu persetujuanmu." else "This needs your approval."
 
+    /**
+     * Translates a step's own result line, when it recognises one.
+     *
+     * The executors in `actions/` report what they did in English - "WhatsApp
+     * is open!", "Screenshot taken!" - and the plan summary quotes them
+     * verbatim. In an Indonesian conversation that lands as the assistant
+     * switching languages mid-answer.
+     *
+     * Only status lines are translated, and only ones matched exactly or by a
+     * narrow pattern. Anything unrecognised is returned unchanged rather than
+     * dropped: a result that carries real content - a count, a name, an answer
+     * - is worth more in the wrong language than not at all.
+     */
+    fun localizeStatus(result: String, indonesian: Boolean): String {
+        if (!indonesian) return result
+        val trimmed = result.trim()
+        EXACT_STATUS[trimmed]?.let { return it }
+
+        // "<something> is open!" is how every app-launching action reports, and
+        // the something is a proper noun that survives translation untouched.
+        OPENED.matchEntire(trimmed)?.let { match ->
+            return "${match.groupValues[1]} sudah kubuka."
+        }
+        return trimmed
+    }
+
+    private val OPENED = Regex("""(.+?) is open[!.]?""", RegexOption.IGNORE_CASE)
+
+    private val EXACT_STATUS: Map<String, String> = mapOf(
+        "Your email is open!" to "Emailmu sudah kubuka.",
+        "Browser is open!" to "Peramban sudah kubuka.",
+        "Screenshot taken!" to "Tangkapan layarnya sudah kuambil.",
+        "Screen locked!" to "Layarnya sudah kukunci.",
+        "Message sent!" to "Pesannya sudah terkirim.",
+        "Calling now." to "Kutelepon sekarang.",
+        "Done!" to "Selesai.",
+        "All done!" to "Sudah selesai.",
+    )
+
     private enum class Topic {
         ALARM, FLASHLIGHT, WIFI, BLUETOOTH, VOLUME, BRIGHTNESS,
         SCREENSHOT, TIMER, OPEN, CALL, MESSAGE, OTHER

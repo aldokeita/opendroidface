@@ -69,6 +69,28 @@ class AgentPhrasesTest {
     }
 
     @Test
+    fun `an app-launch result is translated, whatever the app is called`() {
+        // Every launching action reports "<app> is open!", and the app name is
+        // a proper noun that survives translation untouched.
+        assertEquals("WhatsApp sudah kubuka.", AgentPhrases.localizeStatus("WhatsApp is open!", true))
+        assertEquals("Spotify sudah kubuka.", AgentPhrases.localizeStatus("Spotify is open!", true))
+        assertEquals("Emailmu sudah kubuka.", AgentPhrases.localizeStatus("Your email is open!", true))
+    }
+
+    @Test
+    fun `an English conversation keeps the executor's own words`() {
+        assertEquals("WhatsApp is open!", AgentPhrases.localizeStatus("WhatsApp is open!", false))
+    }
+
+    @Test
+    fun `a result carrying real content is kept rather than dropped`() {
+        // Wrong language beats missing. A count, a name or an answer is what
+        // the user asked for; a status line is not.
+        val answer = "You have 3 unread messages from Budi and Sari."
+        assertEquals(answer, AgentPhrases.localizeStatus(answer, indonesian = true))
+    }
+
+    @Test
     fun `an unknown action still produces something sayable`() {
         val line = AgentPhrases.preSpeech("SOME_NEW_ACTION", indonesian = true)
 

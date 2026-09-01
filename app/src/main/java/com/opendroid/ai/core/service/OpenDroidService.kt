@@ -10,6 +10,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.opendroid.ai.core.agent.AgentLoop
 import com.opendroid.ai.core.agent.AgentPhrases
+import com.opendroid.ai.core.language.speechTag
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
 import com.opendroid.ai.core.voice.shouldSpeakReply
@@ -52,6 +53,9 @@ class OpenDroidService : Service() {
     @Inject
     lateinit var ttsVoiceStore: com.opendroid.ai.core.voice.TtsVoiceStore
 
+    @Inject
+    lateinit var appLanguageStore: com.opendroid.ai.core.language.AppLanguageStore
+
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var speechRecognitionEngine: SpeechRecognitionEngine
     private lateinit var textToSpeechEngine: TextToSpeechEngine
@@ -93,6 +97,11 @@ class OpenDroidService : Service() {
         serviceScope.launch {
             voiceLanguageStore.tag.collect { tag ->
                 textToSpeechEngine.languageTag = tag
+            }
+        }
+        serviceScope.launch {
+            appLanguageStore.language.collect { language ->
+                textToSpeechEngine.appLanguageTag = language.speechTag()
             }
         }
 

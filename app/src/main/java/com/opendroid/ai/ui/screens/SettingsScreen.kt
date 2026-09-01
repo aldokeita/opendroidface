@@ -14,9 +14,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.opendroid.ai.core.llm.providers.CodexProvider
 import com.opendroid.ai.core.llm.codex.CodexAccountState
+import androidx.compose.ui.text.style.TextAlign
+import com.opendroid.ai.core.language.AppLanguage
 import com.opendroid.ai.core.voice.SpokenLanguage
 import com.opendroid.ai.core.voice.TtsVoicePreview
 import com.opendroid.ai.core.voice.voiceDisplayLabel
+import com.opendroid.ai.ui.face.rememberAppLanguageStore
 import com.opendroid.ai.ui.face.rememberSpeechOutputStore
 import com.opendroid.ai.ui.face.rememberTtsVoiceStore
 import androidx.compose.material.icons.Icons
@@ -1794,6 +1797,7 @@ fun SettingsScreen(
                                 modifier = Modifier.padding(top = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                AppLanguageRow()
                                 SpeakTypedRepliesRow()
                                 IndonesianVoicePicker()
                                 Text(
@@ -2964,6 +2968,59 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
         if (signedIn) {
             TextButton(onClick = { viewModel.signOutOfCodex() }) {
                 Text("Sign out", fontSize = 12.sp, color = colors.textSecondary)
+            }
+        }
+    }
+}
+
+/**
+ * The language the assistant answers in.
+ *
+ * Three segments rather than a dropdown: there are only three, and a choice
+ * this consequential should be readable without opening anything.
+ */
+@Composable
+private fun AppLanguageRow() {
+    val colors = LocalOpenDroidColors.current
+    val store = rememberAppLanguageStore()
+    val selected by store.language.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text("Assistant language", fontSize = 14.sp, color = colors.textPrimary)
+        Text(
+            text = "What it answers and speaks in. The model still reads whatever you write.",
+            fontSize = 11.sp,
+            color = colors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(colors.background)
+                .padding(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            AppLanguage.entries.forEach { option ->
+                val isSelected = option == selected
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isSelected) colors.accentNeonGreen.copy(alpha = 0.16f) else Color.Transparent
+                        )
+                        .clickable { store.select(option) }
+                        .padding(vertical = 9.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = option.label,
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center,
+                        color = if (isSelected) colors.accentNeonGreen else colors.textSecondary,
+                    )
+                }
             }
         }
     }

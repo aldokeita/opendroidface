@@ -1096,102 +1096,166 @@ fun ProposedPlanPrompt(
     // and `blockedActions` because the checkboxes are drawn from that list, so a
     // change to it would otherwise leave ticks referring to rows that are gone.
     var checkedGrants by remember(planId, blockedActions) { mutableStateOf(setOf<String>()) }
-    Card(
+    val colors = LocalOpenDroidColors.current
+
+    // The card arrives while the user is reading. A short rise and fade marks
+    // that something now wants an answer, without a bounce that would pull the
+    // eye away from the sentence it is asking about.
+    val entry = remember(planId) { Animatable(0f) }
+    LaunchedEffect(planId) {
+        entry.animateTo(1f, animationSpec = tween(260, easing = FastOutSlowInEasing))
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .border(1.dp, AccentCyan, RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(containerColor = DarkSurface),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = "Plan Proposed",
-                    tint = AccentCyan,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "AUTONOMOUS PLAN PROPOSED",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AccentCyan
-                )
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .graphicsLayer {
+                alpha = entry.value
+                translationY = (1f - entry.value) * 18.dp.toPx()
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            .clip(RoundedCornerShape(22.dp))
+            .background(colors.surface)
+            .border(1.dp, colors.accentNeonGreen.copy(alpha = 0.35f), RoundedCornerShape(22.dp))
+            .padding(20.dp)
+    ) {
+        // A label, not an alarm. The old card led with a warning triangle and
+        // AUTONOMOUS PLAN PROPOSED in bold caps, which shouted at the user
+        // about something they had just asked for themselves.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                text = "Goal: \"$goal\"",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                text = "NEEDS APPROVAL",
+                fontSize = 10.sp,
+                letterSpacing = 1.6.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.accentNeonGreen,
             )
-            Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "OpenDroid has formulated a sequence of $stepsCount steps to complete this goal. Review the steps in the PLAN tab or approve below to execute.",
-                fontSize = 12.sp,
-                color = TextSecondary
+                text = if (stepsCount == 1) "1 step" else "$stepsCount steps",
+                fontSize = 10.sp,
+                letterSpacing = 0.6.sp,
+                color = colors.textSecondary,
             )
-            if (blockedActions.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "BLOCKED AUTO-RUN — these steps aren't in your allowlist:",
-                    fontSize = 11.sp,
-                    color = AccentRed
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                blockedActions.forEach { action ->
-                    if (action in grantableActions) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = action in checkedGrants,
-                                onCheckedChange = { checked ->
-                                    checkedGrants = if (checked) checkedGrants + action else checkedGrants - action
-                                },
-                                colors = CheckboxDefaults.colors(checkedColor = AccentNeonGreen)
-                            )
-                            Text(
-                                text = "Always allow $action",
-                                fontSize = 13.sp,
-                                color = TextPrimary
-                            )
-                        }
-                    } else {
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // The goal, in the user's own words, is the whole question. It used to
+        // sit at 14sp under a heading, below a paragraph explaining what a plan
+        // is - so the one thing being decided was the smallest thing on screen.
+        Text(
+            text = goal,
+            fontSize = 18.sp,
+            lineHeight = 25.sp,
+            fontWeight = FontWeight.Light,
+            color = colors.textPrimary,
+        )
+
+        if (blockedActions.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(18.dp))
+            HorizontalDivider(color = colors.borderColor.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = "NOT IN YOUR ALLOWLIST",
+                fontSize = 10.sp,
+                letterSpacing = 1.4.sp,
+                fontWeight = FontWeight.Medium,
+                color = colors.accentOrange,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            blockedActions.forEach { action ->
+                val grantable = action in grantableActions
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (grantable) {
+                                Modifier.clickable {
+                                    checkedGrants = if (action in checkedGrants) {
+                                        checkedGrants - action
+                                    } else {
+                                        checkedGrants + action
+                                    }
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .padding(vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "• $action (always asks)",
+                            text = action.asActionLabel(),
                             fontSize = 13.sp,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(start = 12.dp, top = 4.dp)
+                            color = colors.textPrimary,
+                        )
+                        Text(
+                            text = if (grantable) "Remember this choice" else "Always asks",
+                            fontSize = 10.sp,
+                            color = colors.textSecondary,
+                        )
+                    }
+                    if (grantable) {
+                        Switch(
+                            checked = action in checkedGrants,
+                            onCheckedChange = { checked ->
+                                checkedGrants = if (checked) checkedGrants + action else checkedGrants - action
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = colors.accentNeonGreen,
+                                checkedTrackColor = colors.accentNeonGreen.copy(alpha = 0.5f),
+                            ),
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Equal width, because this is a choice and not a form with one obvious
+        // way out. Approve is the filled one; nothing here is destructive
+        // enough for Reject to be the loud colour.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            OutlinedButton(
+                onClick = onReject,
+                shape = RoundedCornerShape(26.dp),
+                border = BorderStroke(1.dp, colors.borderColor),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.textSecondary),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
             ) {
-                OutlinedButton(
-                    onClick = onReject,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AccentRed),
-                    border = BorderStroke(1.dp, AccentRed.copy(alpha = 0.5f)),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Reject", fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Button(
-                    onClick = { onApprove(checkedGrants) },
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentNeonGreen, contentColor = DarkBackground),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Approve & Run", fontWeight = FontWeight.Bold)
-                }
+                Text("Reject", fontSize = 14.sp)
+            }
+            Button(
+                onClick = { onApprove(checkedGrants) },
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.accentGreenButton,
+                    contentColor = colors.background,
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+            ) {
+                Text("Approve", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
 }
+
+/** `SEND_MESSAGE` reads as shouting; `Send message` reads as a thing it does. */
+private fun String.asActionLabel(): String =
+    lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
 
 @Composable
 fun FloatingOrb(

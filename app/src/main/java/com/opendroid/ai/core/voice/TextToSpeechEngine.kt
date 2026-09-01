@@ -52,8 +52,15 @@ class TextToSpeechEngine(
      *
      * Same seam as [SpeechRecognitionEngine.languageTag] and fed from the same
      * setting: what the microphone listens in is what the mouth answers in.
+     *
+     * The app language wins over it when one has been chosen, so a person who
+     * set the assistant to Indonesian is not answered in English because a
+     * hands-free chip was left on something else.
      */
     var languageTag: String? = null
+
+    /** Set from the app language; null while it is following the device. */
+    var appLanguageTag: String? = null
 
     init {
         tts = TextToSpeech(context, this)
@@ -191,7 +198,7 @@ class TextToSpeechEngine(
      */
     private fun applyLanguage(text: String): Boolean {
         val engine = tts ?: return false
-        val wanted = SpokenLanguage.localeFor(text, languageTag)
+        val wanted = SpokenLanguage.localeFor(text, appLanguageTag ?: languageTag)
         val result = engine.setLanguage(wanted)
         if (result.isUsable()) {
             applyPreferredVoice(engine, wanted)

@@ -3,6 +3,7 @@ package com.opendroid.ai.core.agent
 import android.content.Context
 import com.opendroid.ai.actions.ActionDispatcher
 import com.opendroid.ai.actions.base.ActionResult
+import com.opendroid.ai.core.language.wantsIndonesian
 import com.opendroid.ai.core.llm.LLMProviderFactory
 import com.opendroid.ai.core.llm.LLMRequest
 import com.opendroid.ai.core.llm.LLMResponse
@@ -88,7 +89,8 @@ class AgentLoop @Inject constructor(
     private val settingsRepository: com.opendroid.ai.data.repository.SettingsRepository,
     private val reEvalEngine: dagger.Lazy<ReEvaluationEngine>,
     // Optional emotion the model declares alongside a plan; drawn by the robot face.
-    private val faceMood: com.opendroid.ai.core.face.FaceMood
+    private val faceMood: com.opendroid.ai.core.face.FaceMood,
+    private val appLanguageStore: com.opendroid.ai.core.language.AppLanguageStore
 ) {
     private val scope = CoroutineScope(Dispatchers.Default)
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true; isLenient = true }
@@ -279,8 +281,7 @@ class AgentLoop @Inject constructor(
         // in a contact picker must not silence a conversation held out loud.
         if (!isAnsweringPendingQuestion) {
             this.askedByVoice = askedByVoice
-            this.replyInIndonesian =
-                com.opendroid.ai.core.voice.SpokenLanguage.looksIndonesian(query)
+            this.replyInIndonesian = appLanguageStore.language.value.wantsIndonesian(query)
         }
 
         if (waitingSession != null && !isAnsweringPendingQuestion) {
@@ -1567,7 +1568,8 @@ class AgentLoop @Inject constructor(
                 .mapNotNull { step ->
                     val result = step.result ?: return@mapNotNull null
                     when {
-                        result.length > 5 && !result.startsWith("{") -> result
+                        result.length > 5 && !result.startsWith("{") ->
+                            AgentPhrases.localizeStatus(result, replyInIndonesian)
                         else -> null
                     }
                 }
