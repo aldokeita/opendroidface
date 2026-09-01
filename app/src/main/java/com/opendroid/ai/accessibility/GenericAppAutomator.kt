@@ -25,6 +25,23 @@ object GenericAppAutomator {
         }
     }
 
+    /**
+     * Whether OpenDroid can touch the screen at all.
+     *
+     * Android revokes an accessibility service every time its app is
+     * reinstalled, and nothing announces it. Without this check every tap and
+     * every typed field spent five seconds retrying and then reported that the
+     * label was not found - which sends the user looking at the app they were
+     * automating, when the answer is a switch in their own Settings.
+     */
+    fun isReady(): Boolean = OpenDroidAccessibilityService.getInstance() != null
+
+    /** Said whenever [isReady] is false, in place of a misleading "not found". */
+    const val NOT_ENABLED_MESSAGE: String =
+        "I can't touch the screen: OpenDroid's accessibility service is off. " +
+            "Turn it on in Settings > Accessibility > OpenDroid, then ask me again. " +
+            "Android switches it off whenever the app is updated."
+
     suspend fun clickText(text: String): Boolean = retryUntilTimeout {
         OpenDroidAccessibilityService.getInstance()?.findAndClick(text) == true
     }

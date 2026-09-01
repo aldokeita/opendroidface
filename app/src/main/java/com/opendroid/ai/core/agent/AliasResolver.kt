@@ -396,6 +396,14 @@ object AliasResolver {
     }
 
     /**
+     * The whole table, so a test can check every entry points at a real action.
+     * A shortcut that names an action the schema does not carry is a command
+     * that looks instant and then fails - after the user has already been told
+     * it was understood.
+     */
+    fun allAliases(): Map<String, ActionHint> = aliases
+
+    /**
      * Resolve user input to an ActionHint.
      * Returns null if no alias matches.
      */

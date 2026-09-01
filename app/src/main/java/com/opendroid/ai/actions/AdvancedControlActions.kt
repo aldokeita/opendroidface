@@ -474,6 +474,7 @@ class AdvancedControlActions @Inject constructor() {
     private class CloseAppAction : Action {
         override val name: String = "CLOSE_APP"
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.pressHome()
             return ActionResult(success, if (success) "Done, went to the home screen." else "Couldn't close the app.", null)
         }
@@ -483,6 +484,7 @@ class AdvancedControlActions @Inject constructor() {
         override val name: String = "CLICK_TEXT"
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val text = params["text"] ?: return ActionResult(false, null, "text parameter is missing")
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.clickText(text)
             return ActionResult(success, if (success) "Tapped on '$text'!" else "Couldn't find '$text' to tap on.", null)
         }
@@ -492,6 +494,7 @@ class AdvancedControlActions @Inject constructor() {
         override val name: String = "CLICK_ID"
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val viewId = params["viewId"] ?: return ActionResult(false, null, "viewId parameter is missing")
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.clickId(viewId)
             return ActionResult(success, if (success) "Tapped the element!" else "Couldn't find that element.", null)
         }
@@ -502,6 +505,7 @@ class AdvancedControlActions @Inject constructor() {
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val searchText = params["searchText"] ?: return ActionResult(false, null, "searchText parameter is missing")
             val content = params["content"] ?: ""
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.typeText(searchText, content)
             return ActionResult(success, if (success) "Typed it in!" else "Couldn't find that text field.", null)
         }
@@ -512,6 +516,7 @@ class AdvancedControlActions @Inject constructor() {
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val viewId = params["viewId"] ?: return ActionResult(false, null, "viewId parameter is missing")
             val content = params["content"] ?: ""
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.typeId(viewId, content)
             return ActionResult(success, if (success) "Typed it in!" else "Couldn't find that field.", null)
         }
@@ -522,6 +527,7 @@ class AdvancedControlActions @Inject constructor() {
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val direction = params["direction"] ?: "forward"
             val forward = direction.lowercase() == "forward"
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.scroll(forward)
             return ActionResult(success, if (success) "Scrolled $direction!" else "Can't scroll here.", null)
         }
@@ -540,6 +546,7 @@ class AdvancedControlActions @Inject constructor() {
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
             val x = params["x"]?.toFloatOrNull() ?: return ActionResult(false, null, "x coordinate is missing or invalid")
             val y = params["y"]?.toFloatOrNull() ?: return ActionResult(false, null, "y coordinate is missing or invalid")
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.clickCoordinates(x, y)
             return ActionResult(success, if (success) "Tapped there!" else "Couldn't tap at that spot.", null)
         }
@@ -548,6 +555,7 @@ class AdvancedControlActions @Inject constructor() {
     private class PressEnterAction : Action {
         override val name: String = "PRESS_ENTER"
         override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            if (!GenericAppAutomator.isReady()) return ActionResult(false, null, GenericAppAutomator.NOT_ENABLED_MESSAGE)
             val success = GenericAppAutomator.pressEnter()
             return ActionResult(success, if (success) "Submitted!" else "Couldn't find a focused field to submit.", null)
         }
@@ -762,4 +770,5 @@ class AdvancedControlActions @Inject constructor() {
         }
     }
 }
+
 
