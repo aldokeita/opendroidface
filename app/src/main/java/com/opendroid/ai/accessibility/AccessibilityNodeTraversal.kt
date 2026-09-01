@@ -50,29 +50,84 @@ class AccessibilityNodeTraversal @Inject constructor() {
      * for leaves that aren't themselves clickable) and performs ACTION_CLICK on it.
      * Returns whether a click was dispatched.
      */
+    /**
+     * Clicks the best match for [text], not the first one.
+     *
+     * `findAccessibilityNodeInfosByText` matches contentDescription as well as
+     * text, and returns nodes in tree order. In a WhatsApp chat list the avatar
+     * is described "Foto profil Istri" and is itself clickable, so it came
+     * first and opening a conversation opened the profile picture instead.
+     *
+     * So every match is scored and the best one wins: a node whose own text is
+     * the label beats one that merely describes a picture of it.
+     */
     fun findAndClick(root: AccessibilityNodeInfo?, text: String): Boolean {
         if (root == null) return false
         val nodes = root.findAccessibilityNodeInfosByText(text)
-        for (node in nodes) {
-            if (node.isClickable) {
-                node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                node.recycle()
-                return true
+        if (nodes.isEmpty()) return false
+
+        val best = nodes.maxByOrNull { scoreMatch(it, text) }
+        var clicked = false
+        if (best != null && scoreMatch(best, text) > REJECT_BELOW) {
+            clicked = clickSelfOrAncestor(best)
+        }
+        nodes.forEach { runCatching { it.recycle() } }
+        return clicked
+    }
+
+    private fun clickSelfOrAncestor(node: AccessibilityNodeInfo): Boolean {
+        if (node.isClickable) return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        var parent = node.parent
+        while (parent != null) {
+            if (parent.isClickable) {
+                val done = parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                runCatching { parent?.recycle() }
+                return done
             }
-            var parent = node.parent
-            while (parent != null) {
-                if (parent.isClickable) {
-                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    parent.recycle()
-                    node.recycle()
-                    return true
-                }
-                parent = parent.parent
-            }
-            node.recycle()
+            val next = parent.parent
+            runCatching { parent?.recycle() }
+            parent = next
         }
         return false
     }
+
+    /**
+     * How well a node answers "the thing labelled [text]".
+     *
+     * Own text outranks a description, an exact label outranks a fragment, and
+     * an image is pushed below both: a picture described with someone's name is
+     * a picture of them, not the row that opens their conversation.
+     */
+    private fun scoreMatch(node: AccessibilityNodeInfo, text: String): Int {
+        val wanted = text.trim().lowercase()
+        val own = node.text?.toString()?.trim()?.lowercase()
+        val described = node.contentDescription?.toString()?.trim()?.lowercase()
+        val className = node.className?.toString().orEmpty()
+
+        var score = when {
+            own == wanted -> 100
+            own?.startsWith(wanted) == true -> 80
+            own?.contains(wanted) == true -> 60
+            described == wanted -> 40
+            described?.contains(wanted) == true -> 20
+            else -> 0
+        }
+        if (IMAGE_CLASSES.any { className.contains(it) }) score -= 50
+        if (described != null && PICTURE_WORDS.any { described.contains(it) }) score -= 40
+        if (!node.isVisibleToUser) score -= 30
+        return score
+    }
+
+    /** Below this nothing on screen actually carries the label. */
+    private val REJECT_BELOW = 0
+
+    private val IMAGE_CLASSES = listOf("ImageView", "ImageButton")
+
+    /** In both languages the app is used in. */
+    private val PICTURE_WORDS = listOf(
+        "photo", "picture", "avatar", "image",
+        "foto", "gambar", "profil",
+    )
 
     /**
      * Walks the tree depth-first for a clickable node whose text or

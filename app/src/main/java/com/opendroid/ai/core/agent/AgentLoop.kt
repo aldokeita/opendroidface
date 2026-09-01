@@ -1244,6 +1244,18 @@ class AgentLoop @Inject constructor(
                 continue
             }
 
+            // Nothing has gone wrong and nothing ahead is waiting on this
+            // step's output, so there is nothing to re-decide. Asking the model
+            // anyway costs a whole round trip between every pair of steps -
+            // three taps became three taps and two reasoning calls, and the
+            // phone sat there while a plan it had already made was confirmed.
+            //
+            // Failures still replan: that path is above, and it is the one
+            // re-evaluation exists for.
+            if (failed.isEmpty() && remaining.none { it.dependsOn.isNotEmpty() }) {
+                continue
+            }
+
             val reEval = try {
                 reEvalEngine.get().evaluateStepResult(
                     originalGoal = currentPlanState.goal,
