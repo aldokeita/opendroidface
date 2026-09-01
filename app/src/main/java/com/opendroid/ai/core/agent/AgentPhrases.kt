@@ -157,7 +157,7 @@ object AgentPhrases {
     private val EXACT_STATUS: Map<String, String> = mapOf(
         // ── Already covered by the generic "<app> is open!" pattern ──────
         "Your email is open!" to "Emailmu sudah kubuka.",
-        "Browser is open!" to "Peramban sudah kubuka.",
+        "Browser is open!" to "Browser sudah kubuka.",
         "Telegram is open!" to "Telegram sudah kubuka.",
 
         // ── Success ─────────────────────────────────────────────────────
@@ -175,8 +175,8 @@ object AgentPhrases {
         "Music resumed!" to "Musiknya kulanjutkan.",
         "Skipped to the next song!" to "Lanjut ke lagu berikutnya.",
         "Going back to the previous song!" to "Balik ke lagu sebelumnya.",
-        "Clipboard cleared!" to "Papan klip sudah kubersihkan.",
-        "Clipboard is empty." to "Papan klipnya kosong.",
+        "Clipboard cleared!" to "Clipboard sudah kubersihkan.",
+        "Clipboard is empty." to "Clipboardnya kosong.",
         "Here are your messages!" to "Ini pesan-pesanmu.",
         "Here's your calendar for today." to "Ini jadwalmu hari ini.",
         "Here's your week at a glance." to "Ini gambaran satu minggumu.",
@@ -184,7 +184,7 @@ object AgentPhrases {
         "Opening that page for you!" to "Kubukakan halamannya.",
         "Opening Google Translate for you!" to "Kubukakan Google Translate.",
         "Opened Chrome in incognito mode!" to "Chrome kubuka dalam mode samaran.",
-        "Opened Telegram Web in browser." to "Telegram Web kubuka di peramban.",
+        "Opened Telegram Web in browser." to "Telegram Web kubuka di browser.",
         "Opened the wallpaper picker for you." to "Pemilih wallpaper sudah kubuka.",
         "No notifications found." to "Tidak ada notifikasi.",
         "No matching notifications found." to "Tidak ada notifikasi yang cocok.",
@@ -193,19 +193,19 @@ object AgentPhrases {
         "That page isn't on this phone, so I opened Settings." to
             "Halaman itu tidak ada di HP ini, jadi kubuka Setelan.",
         "Browser is open — you can switch to private/incognito mode manually." to
-            "Peramban sudah kubuka. Mode samarannya nyalakan sendiri, ya.",
+            "Browser sudah kubuka. Mode samarannya nyalakan sendiri, ya.",
         "App settings are open — find your browser and clear its data." to
-            "Setelan aplikasi sudah kubuka. Cari peramban kamu lalu hapus datanya.",
+            "Setelan aplikasi sudah kubuka. Cari browser kamu lalu hapus datanya.",
 
         // ── Things that are not installed ───────────────────────────────
         "Maps app isn't installed, but I opened it in your browser!" to
-            "Aplikasi peta tidak terpasang, jadi kubuka lewat peramban.",
+            "Aplikasi peta tidak terpasang, jadi kubuka lewat browser.",
         "Uber isn't installed, but I opened the website for you!" to
             "Uber tidak terpasang, jadi kubuka situsnya.",
         "Amazon isn't installed, but I opened the search in your browser!" to
-            "Amazon tidak terpasang, jadi pencariannya kubuka di peramban.",
+            "Amazon tidak terpasang, jadi pencariannya kubuka di browser.",
         "Flipkart isn't installed, but I opened it in your browser!" to
-            "Flipkart tidak terpasang, jadi kubuka lewat peramban.",
+            "Flipkart tidak terpasang, jadi kubuka lewat browser.",
         "Ola isn't installed — I'll take you to the Play Store to get it!" to
             "Ola tidak terpasang. Kuantar ke Play Store buat memasangnya.",
         "Google Home isn't installed, so I searched for it instead." to
@@ -233,7 +233,7 @@ object AgentPhrases {
         "Couldn't open the camera." to "Kameranya tidak bisa kubuka.",
         "Couldn't open the camera app." to "Aplikasi kameranya tidak bisa kubuka.",
         "Couldn't open the video camera." to "Kamera videonya tidak bisa kubuka.",
-        "Couldn't open the browser." to "Peramban tidak bisa kubuka.",
+        "Couldn't open the browser." to "Browser tidak bisa kubuka.",
         "Couldn't open that link right now." to "Tautannya belum bisa kubuka.",
         "Couldn't open that URL." to "Alamat itu tidak bisa kubuka.",
         "Couldn't open the settings." to "Setelannya tidak bisa kubuka.",
@@ -249,9 +249,9 @@ object AgentPhrases {
         "Couldn't open your calendar." to "Kalendermu tidak bisa kubuka.",
         "Couldn't open YouTube right now." to "YouTube belum bisa kubuka.",
         "Couldn't open the wallpaper picker." to "Pemilih wallpaper tidak bisa kubuka.",
-        "Couldn't read the clipboard." to "Papan klipnya tidak bisa kubaca.",
-        "Couldn't copy to clipboard." to "Tidak bisa menyalin ke papan klip.",
-        "Couldn't clear the clipboard." to "Papan klipnya tidak bisa kubersihkan.",
+        "Couldn't read the clipboard." to "Clipboardnya tidak bisa kubaca.",
+        "Couldn't copy to clipboard." to "Tidak bisa menyalin ke clipboard.",
+        "Couldn't clear the clipboard." to "Clipboardnya tidak bisa kubersihkan.",
         "Couldn't read your contacts." to "Kontakmu tidak bisa kubaca.",
         "Couldn't read your notes right now." to "Catatanmu belum bisa kubaca.",
         "Couldn't save that note." to "Catatannya tidak bisa kusimpan.",
@@ -270,9 +270,9 @@ object AgentPhrases {
         "Couldn't get system info right now." to "Info sistemnya belum bisa kuambil.",
         "Couldn't go back." to "Tidak bisa kembali.",
         "Couldn't list the apps right now." to "Daftar aplikasinya belum bisa kuambil.",
-        "Couldn't list your macros." to "Daftar makromu tidak bisa kuambil.",
-        "Couldn't create that macro." to "Makronya tidak bisa kubuat.",
-        "Couldn't schedule that macro." to "Makronya tidak bisa kujadwalkan.",
+        "Couldn't list your macros." to "Daftar macro-mu tidak bisa kuambil.",
+        "Couldn't create that macro." to "Macro-nya tidak bisa kubuat.",
+        "Couldn't schedule that macro." to "Macro-nya tidak bisa kujadwalkan.",
         "Couldn't retrieve memory right now." to "Ingatannya belum bisa kuambil.",
         "Couldn't update auto-reply settings." to "Setelan balas otomatisnya tidak bisa kuubah.",
         "This device doesn't have a camera." to "HP ini tidak punya kamera.",
