@@ -81,9 +81,7 @@ class HabitRoutineEngineTest {
     @Test
     fun `detects repeated weekday morning pattern for Gmail, Calendar, and Slack`() = runBlocking {
         // Simulate 4 weekday mornings around 9:00 AM where user opens Gmail -> Calendar -> Slack -> Chrome
-        val baseCal = Calendar.getInstance().apply {
-            set(2026, Calendar.AUGUST, 17, 9, 0, 0) // Monday Aug 17 2026
-        }
+        val baseCal = recentMondayMorning()
 
         for (dayOffset in 0..3) {
             val cal = Calendar.getInstance().apply {
@@ -147,6 +145,29 @@ class HabitRoutineEngineTest {
         assertTrue(steps.any { it.description.contains("notifications", ignoreCase = true) })
         assertTrue(steps.any { it.description.contains("task list", ignoreCase = true) })
         assertTrue(steps.any { it.description.contains("morning briefing", ignoreCase = true) })
+    }
+
+    /**
+     * A Monday 9:00 AM that is at least four days old, and so at most ten days
+     * old - inside [HabitRoutineEngine.detectRoutines]'s fourteen-day window
+     * with Monday through Thursday all in the past.
+     *
+     * This used to be a literal date in August 2026. That works until the
+     * calendar walks past the window, and then the test fails on the date
+     * rather than on anything about routine detection.
+     */
+    private fun recentMondayMorning(): Calendar {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val fourDaysAgo = System.currentTimeMillis() - 4 * 24 * 60 * 60 * 1000L
+        do {
+            cal.add(Calendar.DAY_OF_YEAR, -1)
+        } while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY || cal.timeInMillis > fourDaysAgo)
+        return cal
     }
 
     @Test
