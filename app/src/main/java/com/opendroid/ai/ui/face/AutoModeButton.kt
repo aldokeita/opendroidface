@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.ui.theme.LocalOpenDroidColors
@@ -54,10 +56,11 @@ fun AutoModeButton(
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = "Hands-free",
+            text = stringResource(R.string.chat_hands_free),
             color = colors.accentCyan,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold
         )
     }
 }
+

@@ -144,13 +144,13 @@ fun AutoReplySettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "SYSTEM PERMISSIONS REQUIRED",
+                                text = stringResource(R.string.auto_reply_perms_title),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = themeColors.accentRed
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Auto-Reply needs notification access to monitor incoming messages and accessibility access to automate typing & sending replies.",
+                                text = stringResource(R.string.auto_reply_perms_body),
                                 fontSize = 13.sp,
                                 color = themeColors.textPrimary
                             )
@@ -172,7 +172,7 @@ fun AutoReplySettingsScreen(
                                         colors = ButtonDefaults.buttonColors(containerColor = themeColors.accentRed),
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Text("Grant Notification Access", fontSize = 10.sp, color = Color.White)
+                                        Text(stringResource(R.string.auto_reply_grant_notif), fontSize = 10.sp, color = Color.White)
                                     }
                                 }
                                 if (!isAccessibilityPermissionGranted) {
@@ -187,7 +187,7 @@ fun AutoReplySettingsScreen(
                                         colors = ButtonDefaults.buttonColors(containerColor = themeColors.accentPurple),
                                         modifier = Modifier.weight(1f)
                                     ) {
-                                        Text("Grant Accessibility Access", fontSize = 10.sp, color = Color.White)
+                                        Text(stringResource(R.string.auto_reply_grant_acc), fontSize = 10.sp, color = Color.White)
                                     }
                                 }
                             }
@@ -218,7 +218,7 @@ fun AutoReplySettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "Auto-Reply",
+                                stringResource(R.string.auto_reply_short),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = themeColors.textPrimary
@@ -245,7 +245,7 @@ fun AutoReplySettingsScreen(
                 if (config.globalEnabled) {
                     // Per-App Toggles
                     Text(
-                        "Enabled Apps",
+                        stringResource(R.string.auto_reply_apps),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColors.textPrimary
@@ -275,7 +275,7 @@ fun AutoReplySettingsScreen(
 
                     // Reply Delay Slider
                     Text(
-                        "Reply Delay",
+                        stringResource(R.string.auto_reply_delay),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColors.textPrimary
@@ -294,7 +294,7 @@ fun AutoReplySettingsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Wait before replying",
+                                    stringResource(R.string.auto_reply_wait),
                                     fontSize = 14.sp,
                                     color = themeColors.textSecondary
                                 )
@@ -322,15 +322,15 @@ fun AutoReplySettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("1 min", fontSize = 12.sp, color = themeColors.textSecondary.copy(alpha = 0.6f))
-                                Text("60 min", fontSize = 12.sp, color = themeColors.textSecondary.copy(alpha = 0.6f))
+                                Text(stringResource(R.string.auto_reply_min_short), fontSize = 12.sp, color = themeColors.textSecondary.copy(alpha = 0.6f))
+                                Text(stringResource(R.string.auto_reply_max_short), fontSize = 12.sp, color = themeColors.textSecondary.copy(alpha = 0.6f))
                             }
                         }
                     }
 
                     // Rate Limit
                     Text(
-                        "Rate Limit",
+                        stringResource(R.string.auto_reply_rate),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColors.textPrimary
@@ -349,7 +349,7 @@ fun AutoReplySettingsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Max replies per contact/hour",
+                                    stringResource(R.string.auto_reply_max),
                                     fontSize = 14.sp,
                                     color = themeColors.textSecondary
                                 )
@@ -424,7 +424,7 @@ fun AutoReplySettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 placeholder = {
                                     Text(
-                                        "e.g., casual and friendly, use emojis",
+                                        stringResource(R.string.auto_reply_tone_example),
                                         color = themeColors.textSecondary.copy(alpha = 0.5f)
                                     )
                                 },
@@ -676,6 +676,9 @@ private fun LongTextSection(
         }
     }
 }
+
+
+
 
 
 

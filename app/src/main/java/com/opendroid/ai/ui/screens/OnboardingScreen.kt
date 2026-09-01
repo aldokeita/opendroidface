@@ -150,8 +150,7 @@ fun IntroductionPanel(
         if (profileMustBeReentered) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Your saved details could not be unlocked on this device, so they were " +
-                        "not kept. Nothing was stored unencrypted - please enter them again.",
+                text = stringResource(R.string.onb_unlock_failed),
                 color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -352,4 +351,5 @@ fun PermissionPromptPanel(
         }
     }
 }
+
 

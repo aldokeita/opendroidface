@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.models.Plan
@@ -56,7 +58,7 @@ fun PlanScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Plan",
+                        text = stringResource(R.string.plan_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -69,7 +71,7 @@ fun PlanScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.common_back),
                                 tint = colors.textSecondary,
                             )
                         }
@@ -104,7 +106,7 @@ fun PlanScreen(
 
                 item {
                     Text(
-                        text = "STEPS",
+                        text = stringResource(R.string.memory_steps),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textSecondary,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -134,7 +136,7 @@ fun PlanScreen(
             if (planHistory.isNotEmpty()) {
                 item {
                     Text(
-                        text = "HISTORY",
+                        text = stringResource(R.string.plan_history),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textSecondary,
                         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
@@ -209,7 +211,7 @@ fun PlanHeaderCard(
                 }
                 if (!isCurrentActive) {
                     Text(
-                        text = "VIEWING PAST RUN",
+                        text = stringResource(R.string.plan_viewing_past),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.accentPurple,
                         modifier = Modifier
@@ -220,7 +222,7 @@ fun PlanHeaderCard(
                     )
                 } else {
                     Text(
-                        text = "ACTIVE RUN",
+                        text = stringResource(R.string.plan_active_run),
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.accentNeonGreen,
                         modifier = Modifier
@@ -245,11 +247,11 @@ fun PlanHeaderCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Steps", fontSize = 10.sp, color = colors.textSecondary)
+                    Text(stringResource(R.string.plan_steps_label), fontSize = 10.sp, color = colors.textSecondary)
                     Text("${plan.steps.size} scheduled", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Estimated duration", fontSize = 10.sp, color = colors.textSecondary)
+                    Text(stringResource(R.string.plan_duration), fontSize = 10.sp, color = colors.textSecondary)
                     Text(plan.estimatedDuration, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colors.textPrimary)
                 }
             }
@@ -271,7 +273,7 @@ fun PlanHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Stop task",
+                        text = stringResource(R.string.plan_stop),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -307,13 +309,13 @@ fun EmptyPlanPlaceholder() {
         }
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "Nothing running",
+            text = stringResource(R.string.plan_nothing),
             style = MaterialTheme.typography.titleMedium,
             color = colors.textPrimary
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "When you give the agent a task, the steps it plans appear here as it works through them.",
+            text = stringResource(R.string.plan_empty_hint),
             fontSize = 13.sp,
             lineHeight = 18.sp,
             color = colors.textSecondary,
@@ -391,7 +393,7 @@ fun PastPlanRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Plan",
+                    contentDescription = stringResource(R.string.plan_delete),
                     tint = colors.textSecondary.copy(alpha = 0.5f),
                     modifier = Modifier.size(16.dp)
                 )
@@ -399,3 +401,5 @@ fun PastPlanRow(
         }
     }
 }
+
+

@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.db.entities.TaskHistoryEntity
@@ -65,7 +67,7 @@ fun LogsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Logs",
+                        text = stringResource(R.string.logs_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -78,7 +80,7 @@ fun LogsScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.common_back),
                                 tint = colors.textSecondary,
                             )
                         }
@@ -98,7 +100,7 @@ fun LogsScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Clear logs",
+                                contentDescription = stringResource(R.string.logs_clear),
                                 tint = colors.accentRed
                             )
                         }
@@ -222,11 +224,11 @@ fun LogsScreen(
                 selectedPlanForMacro = null
                 macroSaveError = null
             },
-            title = { Text("Save completed task as macro") },
+            title = { Text(stringResource(R.string.logs_save_macro)) },
             text = {
                 Column {
                     Text(
-                        "Only successful steps will be recorded. Credential, API-key, and token values are removed.",
+                        stringResource(R.string.logs_macro_hint),
                         fontSize = 12.sp,
                         color = colors.textSecondary
                     )
@@ -234,7 +236,7 @@ fun LogsScreen(
                     OutlinedTextField(
                         value = macroName,
                         onValueChange = { macroName = it },
-                        label = { Text("Macro name") },
+                        label = { Text(stringResource(R.string.logs_macro_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -261,12 +263,12 @@ fun LogsScreen(
                     },
                     enabled = macroName.isNotBlank()
                 ) {
-                    Text("Save macro")
+                    Text(stringResource(R.string.macros_save_short))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { selectedPlanForMacro = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
@@ -408,7 +410,7 @@ fun UnknownActionCard(error: UnknownActionEntity) {
                     Divider(color = colors.borderColor, modifier = Modifier.padding(vertical = 4.dp))
                     
                     Text(
-                        text = "System Status Details:",
+                        text = stringResource(R.string.logs_status),
                         fontSize = 11.sp,
                         color = colors.textSecondary
                     )
@@ -433,7 +435,7 @@ fun UnknownActionCard(error: UnknownActionEntity) {
             ) {
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Expand info",
+                    contentDescription = stringResource(R.string.logs_expand),
                     tint = colors.textSecondary,
                     modifier = Modifier.size(16.dp)
                 )
@@ -511,7 +513,7 @@ fun HistoryLogCard(
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentPurple),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Save completed task as macro", fontSize = 11.sp)
+                    Text(stringResource(R.string.logs_save_macro), fontSize = 11.sp)
                 }
             }
 
@@ -520,7 +522,7 @@ fun HistoryLogCard(
                     Divider(color = colors.borderColor, modifier = Modifier.padding(vertical = 4.dp))
                     
                     if (log.paramsJson.isNotBlank() && log.paramsJson != "{}") {
-                        Text("Parameters:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(stringResource(R.string.logs_params), fontSize = 11.sp, color = colors.textSecondary)
                         Text(
                             text = log.paramsJson,
                             fontSize = 11.sp,
@@ -535,7 +537,7 @@ fun HistoryLogCard(
                     }
 
                     if (log.resultData != null) {
-                        Text("Execution Result Data:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(stringResource(R.string.logs_result), fontSize = 11.sp, color = colors.textSecondary)
                         Text(
                             text = log.resultData,
                             fontSize = 11.sp,
@@ -549,7 +551,7 @@ fun HistoryLogCard(
                     }
 
                     if (log.errorMessage != null) {
-                        Text("Diagnostic Error Log:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(stringResource(R.string.logs_error), fontSize = 11.sp, color = colors.textSecondary)
                         Text(
                             text = log.errorMessage,
                             fontSize = 11.sp,
@@ -571,7 +573,7 @@ fun HistoryLogCard(
             ) {
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Expand info",
+                    contentDescription = stringResource(R.string.logs_expand),
                     tint = colors.textSecondary,
                     modifier = Modifier.size(16.dp)
                 )
@@ -579,3 +581,6 @@ fun HistoryLogCard(
         }
     }
 }
+
+
+

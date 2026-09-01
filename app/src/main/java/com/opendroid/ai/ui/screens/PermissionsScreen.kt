@@ -432,7 +432,7 @@ private fun ManualSettingsHeader() {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Android does not allow these to be granted from inside an app. " +
+            text = stringResource(R.string.perm_manual_hint) + " " +
                 "\"Grant all permissions\" cannot cover them → open each one yourself.",
             fontSize = 12.sp,
             color = colors.textSecondary,
@@ -756,5 +756,6 @@ private fun cardDescription(card: PermissionCardId): String = when (card) {
     PermissionCardId.ACCESSIBILITY ->
         "Enables full agent screen automation (clicks & inputs)."
 }
+
 
 

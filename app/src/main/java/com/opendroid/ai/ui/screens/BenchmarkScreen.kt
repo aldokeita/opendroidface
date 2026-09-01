@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.core.llm.ConnectionTestPlanner
@@ -44,7 +46,7 @@ fun BenchmarkScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Benchmark",
+                        text = stringResource(R.string.settings_benchmark_short),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -56,7 +58,7 @@ fun BenchmarkScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary,
                         )
                     }
@@ -64,7 +66,7 @@ fun BenchmarkScreen(
                 actions = {
                     if (batchProgress != null) {
                         TextButton(onClick = { viewModel.cancelConnectionTests() }) {
-                            Text("Cancel", fontSize = 11.sp, color = AppTheme.colors.accentRed)
+                            Text(stringResource(R.string.common_cancel), fontSize = 11.sp, color = AppTheme.colors.accentRed)
                         }
                     } else {
                         Button(
@@ -78,11 +80,11 @@ fun BenchmarkScreen(
                         ) {
                             Icon(
                                 Icons.Default.PlayArrow,
-                                contentDescription = "Run Test",
+                                contentDescription = stringResource(R.string.bench_run),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Test all configured", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.bench_test_all), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 },
@@ -96,7 +98,7 @@ fun BenchmarkScreen(
             val configuredCount = ConnectionTestPlanner.configuredProviders(config).size
             AlertDialog(
                 onDismissRequest = { showConfirm = false },
-                title = { Text("Test all configured?") },
+                title = { Text(stringResource(R.string.bench_test_all_title)) },
                 text = {
                     Text(
                         "This will send $configuredCount sequential provider requests. " +
@@ -109,10 +111,10 @@ fun BenchmarkScreen(
                             showConfirm = false
                             viewModel.testAllConfigured()
                         }
-                    ) { Text("Continue") }
+                    ) { Text(stringResource(R.string.common_continue)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showConfirm = false }) { Text("Cancel") }
+                    TextButton(onClick = { showConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
                 }
             )
         }
@@ -134,7 +136,7 @@ fun BenchmarkScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "DIAGNOSTIC REPORT SUMMARY",
+                            text = stringResource(R.string.bench_summary),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
@@ -209,7 +211,7 @@ fun ProviderConnectionRow(
                     color = AppTheme.colors.textPrimary
                 )
                 TextButton(onClick = onTest) {
-                    Text("Test", fontSize = 11.sp)
+                    Text(stringResource(R.string.bench_test), fontSize = 11.sp)
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -258,3 +260,5 @@ private fun connectionFailureLabel(error: LLMError): String = when (error) {
     LLMError.SafeFallbackUnavailable -> "No safe fallback"
     LLMError.Unknown -> "Failed"
 }
+
+

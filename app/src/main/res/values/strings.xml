@@ -232,7 +232,187 @@
     <string name="common_continue">Continue</string>
     <string name="perm_continue_hint">You can continue now and grant the rest later in Settings → Permissions.</string>
     <string name="perm_batch_intro">Android will ask for the remaining runtime permissions in one batch:</string>
+
+    <!-- Settings: on-device models and endpoints -->
+    <string name="settings_cloud_ai">CLOUD AI</string>
+    <string name="settings_offline_ai">OFFLINE AI</string>
+    <string name="settings_on_device">On-Device AI</string>
+    <string name="settings_on_device_status">ON-DEVICE AI STATUS</string>
+    <string name="settings_ai_core">ANDROID AI CORE</string>
+    <string name="settings_litert">LITERT-LM (FALLBACK)</string>
+    <string name="settings_custom_litert">CUSTOM LITERT MODELS</string>
+    <string name="settings_custom_openai">CUSTOM OPENAI ENDPOINT</string>
+    <string name="settings_ollama_endpoint">OLLAMA LOCAL ENDPOINT</string>
+    <string name="settings_copilot_endpoint">COPILOT LOCAL ENDPOINT</string>
+    <string name="settings_ollama_url">Ollama Server URL</string>
+    <string name="settings_copilot_url">Copilot Server URL</string>
+    <string name="settings_base_url">Base URL (e.g. https://api.openai.com/v1)</string>
+    <string name="settings_base_url_hint">Provide the custom OpenAI-compatible API base URL (e.g. from Pollination, Aqua Dev, Portkey, etc.)</string>
+    <string name="settings_lan_hint_ollama">Use local LAN IP (e.g. http://192.168.1.50:11434) if testing from a physical Android device.</string>
+    <string name="settings_lan_hint_copilot">Use local LAN IP (e.g. http://192.168.1.50:4141) if testing from a physical Android device.</string>
+    <string name="settings_hf_section">HUGGING FACE TOKEN (GATED MODELS ONLY)</string>
+    <string name="settings_hf_token">Hugging Face Access Token</string>
+    <string name="settings_hf_validate">Validate Token</string>
+    <string name="settings_hf_remove">Remove Token</string>
+    <string name="settings_auth_required">Authentication Required</string>
+    <string name="settings_storage_cleanup">STORAGE CLEANUP</string>
+    <string name="settings_delete_unused">Delete Unused Models</string>
+    <string name="settings_storage_encrypted">Storage: Encrypted</string>
+    <string name="settings_import_litert">Import custom LiteRT model</string>
+    <string name="settings_open_model_page">Open Model Page</string>
+    <string name="settings_import_progress">Copying and verifying the model file. This may take a minute…</string>
+    <string name="settings_import_done">The model was imported and verified successfully. You can now load it.</string>
+    <string name="settings_cellular_title">Cellular Network Warning</string>
+    <string name="settings_cellular_body">You are downloading model on cellular network, data charges may apply.</string>
+    <string name="settings_yolo_title">Enable YOLO mode?</string>
+    <string name="settings_yolo_confirm">I understand, enable</string>
+    <string name="settings_auto_mode_hint">Auto runs plans whose every step you\'ve allowed. YOLO runs everything without asking.</string>
+    <string name="settings_fallback_hint">Only selected providers may receive a retry after an unusable low-impact local plan. High-impact plans never switch automatically.</string>
+    <string name="settings_creds_reenter">CREDENTIALS MUST BE RE-ENTERED</string>
+    <string name="settings_creds_unsaved">CREDENTIALS WERE NOT SAVED</string>
+    <string name="settings_creds_clear">Clear unavailable credentials</string>
+    <string name="settings_integration_perms">SYSTEM INTEGRATION PERMISSIONS</string>
+    <string name="settings_theme_hint">Switch between dark and light appearance.</string>
+    <string name="settings_about_opendroid">About OpenDroid</string>
+    <string name="settings_benchmark_short">Benchmark</string>
+    <string name="settings_elevenlabs_hint">If ElevenLabs key is not set, OpenDroid automatically falls back to native offline Android Text-to-Speech.</string>
+    <string name="settings_assistant_language_hint">What it answers and speaks in. The model still reads whatever you write.</string>
+
+    <!-- Settings: model manager hints -->
+    <string name="settings_dl_gemma3n">Download Gemma 3n (AI Core)</string>
+    <string name="settings_dl_gemma4">Download Gemma 4 (AI Core)</string>
+    <string name="settings_import_hint">Import any .task or .litertlm file as its own model (not tied to a catalog slot). GGUF is not supported yet.</string>
+    <string name="settings_hf_hint">Needed only for gated Hugging Face downloads (the Google-hosted Gemma 3n LiteRT builds). Public models such as Qwen 2.5 and the Gemma 4 community mirrors download without a token. Not used for cloud API providers.</string>
+    <string name="settings_litert_hint">Runs without Google AI Core. Models tagged PUBLIC (Qwen, the Gemma 4 community mirrors) need no HF token; models tagged GATED (the Google-hosted Gemma 3n builds) do. Or import your own .task / .litertlm file.</string>
+    <string name="settings_accessibility_hint">To allow OpenDroid to operate other applications autonomously (e.g. WhatsApp, Calendar), verify that the accessibility service \'OpenDroid\' is active in Settings -> Accessibility -> Installed Services.</string>
+    <string name="settings_creds_unreadable">Saved provider credentials cannot be read on this device. Clear unavailable records, then enter your API keys again.</string>
+    <string name="settings_creds_storage_down">Secure credential storage is unavailable. Existing settings were preserved; check device storage and try again.</string>
+    <string name="settings_yolo_body">YOLO runs EVERY plan without asking — including actions that spend money (UPI payments, food and cab orders) and irreversible ones (installing apps, deleting files, restarting the device).</string>
+    <string name="settings_codex_hint">Signs in with your ChatGPT account and uses its plan. No computer and no key involved.</string>
+    <string name="common_paste">📋 Paste</string>
+    <string name="common_clear">❌ Clear</string>
+    <string name="settings_gated_model">This model is gated on Hugging Face and needs an Access Token to download.</string>
+
+    <!-- Bridge, logs, about, plan steps, auto-reply -->
+    <string name="bridge_title">Desktop bridge</string>
+    <string name="bridge_point_client">Point the client at:</string>
+    <string name="common_copy">Copy</string>
+    <string name="bridge_copy_command">Copy command</string>
+    <string name="bridge_regenerate">Regenerate</string>
+    <string name="bridge_regenerate_title">Regenerate the token?</string>
+    <string name="bridge_regenerate_body">Every desktop client using the current token stops working until you paste the new one.</string>
+    <string name="bridge_expose_title">Expose the bridge to your network?</string>
+    <string name="bridge_expose_confirm">Expose it</string>
+    <string name="bridge_keep_local">Keep it local</string>
+    <string name="bridge_reachable">Reachable from your Wi-Fi</string>
+    <string name="common_close">Close</string>
+    <string name="logs_title">Logs</string>
+    <string name="logs_clear">Clear logs</string>
+    <string name="logs_error">Diagnostic Error Log:</string>
+    <string name="logs_result">Execution Result Data:</string>
+    <string name="logs_status">System Status Details:</string>
+    <string name="logs_params">Parameters:</string>
+    <string name="logs_expand">Expand info</string>
+    <string name="logs_save_macro">Save completed task as macro</string>
+    <string name="macros_save_short">Save macro</string>
+    <string name="logs_macro_name">Macro name</string>
+    <string name="logs_macro_hint">Only successful steps will be recorded. Credential, API-key, and token values are removed.</string>
+    <string name="about_tagline">Autonomous AI Agent for Android</string>
+    <string name="about_what">WHAT IS OPENDROID?</string>
+    <string name="about_capabilities">KEY CAPABILITIES</string>
+    <string name="about_providers">SUPPORTED LLM PROVIDERS</string>
+    <string name="about_stack">TECHNOLOGY STACK</string>
+    <string name="about_open_source">OPEN SOURCE</string>
+    <string name="about_open_source_body">OpenDroid is open source software. Contributions, bug reports, and feature requests are welcome.</string>
+    <string name="about_made_with">Made with ❤ for the Android community</string>
+    <string name="about_icon">OpenDroid app icon</string>
+    <string name="plan_edit_step">Edit step</string>
+    <string name="plan_delete_step">Delete step</string>
+    <string name="plan_params">Parameters</string>
+    <string name="plan_add_param">Add Parameter</string>
+    <string name="plan_remove_param">Remove parameter</string>
+    <string name="plan_param_key">Key</string>
+    <string name="plan_param_value">Value</string>
+    <string name="plan_result">Execution Result:</string>
+    <string name="plan_fallback">Fallback Routine:</string>
+    <string name="plan_parallel">Parallel execution supported</string>
+    <string name="auto_reply_short">Auto-Reply</string>
+    <string name="auto_reply_apps">Enabled Apps</string>
+    <string name="auto_reply_delay">Reply Delay</string>
+    <string name="auto_reply_wait">Wait before replying</string>
+    <string name="auto_reply_rate">Rate Limit</string>
+    <string name="auto_reply_max">Max replies per contact/hour</string>
+    <string name="auto_reply_perms_title">SYSTEM PERMISSIONS REQUIRED</string>
+    <string name="auto_reply_perms_body">Auto-Reply needs notification access to monitor incoming messages and accessibility access to automate typing &amp; sending replies.</string>
+    <string name="auto_reply_grant_notif">Grant Notification Access</string>
+    <string name="auto_reply_grant_acc">Grant Accessibility Access</string>
+    <string name="auto_reply_tone_example">e.g., casual and friendly, use emojis</string>
+
+    <!-- Crash log, plan, benchmark, notifications, legal, splash -->
+    <string name="crash_title">Crash Log</string>
+    <string name="crash_none">No crashes recorded</string>
+    <string name="crash_hint">Crashes are captured automatically and kept on this device.</string>
+    <string name="common_share">Share</string>
+    <string name="crash_share_all">Share all crash reports</string>
+    <string name="crash_delete_all">Delete all crash reports</string>
+    <string name="crash_delete_all_title">Delete all crash reports?</string>
+    <string name="crash_delete_all_body">This removes every stored crash report from this device. It cannot be undone.</string>
+    <string name="plan_title">Plan</string>
+    <string name="plan_active_run">ACTIVE RUN</string>
+    <string name="plan_history">HISTORY</string>
+    <string name="plan_viewing_past">VIEWING PAST RUN</string>
+    <string name="plan_nothing">Nothing running</string>
+    <string name="plan_empty_hint">When you give the agent a task, the steps it plans appear here as it works through them.</string>
+    <string name="plan_duration">Estimated duration</string>
+    <string name="plan_steps_label">Steps</string>
+    <string name="plan_stop">Stop task</string>
+    <string name="plan_delete">Delete Plan</string>
+    <string name="bench_summary">DIAGNOSTIC REPORT SUMMARY</string>
+    <string name="bench_run">Run Test</string>
+    <string name="bench_test">Test</string>
+    <string name="bench_test_all">Test all configured</string>
+    <string name="bench_test_all_title">Test all configured?</string>
+    <string name="notif_title">Notification History</string>
+    <string name="notif_clear_all">Clear All</string>
+    <string name="notif_none">No notifications captured yet</string>
+    <string name="notif_grant">Grant notification access in Settings</string>
+    <string name="license_title">Open Source License</string>
+    <string name="license_apache">Apache License 2.0</string>
+    <string name="terms_short">Terms</string>
+    <string name="terms_effective">Effective: May 2026</string>
+    <string name="privacy_short">Privacy</string>
+    <string name="privacy_heading">Your Privacy Matters</string>
+    <string name="privacy_updated">Last updated: August 2026</string>
+    <string name="help_short">Help</string>
+    <string name="help_heading">How can we help?</string>
+    <string name="help_sub">Quick answers to common questions</string>
+    <string name="splash_tagline">Your open autonomous Android agent</string>
+    <string name="contact_pick_hint">Tap to select, or type the number (1, 2, 3…)</string>
+    <string name="chat_hands_free">Hands-free</string>
+    <string name="bridge_forward_hint">Forward the port to your computer, then point an MCP client at the forwarded address. Nothing leaves the cable.</string>
+    <string name="bridge_token_hint">Every request must carry this as the X-OpenDroid-Token header. Treat it as a password: it is the only thing standing between a request and this phone.</string>
+    <string name="bridge_network_hint">Off by default. The bridge can run shell commands and drive the screen, so anyone who has the token and shares your network has this phone.</string>
+    <string name="bridge_no_address">No network address yet — this phone does not appear to be on a Wi-Fi network.</string>
+    <string name="bridge_expose_body">Anything on this Wi-Fi will be able to reach the bridge. With the token it can run shell commands, tap and type on this screen, and read what is on it.</string>
+    <string name="about_body">OpenDroid is an advanced autonomous AI assistant that runs directly on your Android device. It can understand natural language commands, create multi-step execution plans, and automate virtually any task on your phone — from sending messages and making calls to controlling system settings and managing files.</string>
+    <string name="onb_unlock_failed">Your saved details could not be unlocked on this device, so they were not kept. Nothing was stored unencrypted — please enter them again.</string>
+    <string name="perm_manual_hint">Android does not allow these to be granted from inside an app.</string>
+    <string name="gallery_use">Use</string>
+    <string name="gallery_in_use">In use</string>
+    <string name="gallery_close">Close expression gallery</string>
+    <string name="auto_reply_min_short">1 min</string>
+    <string name="auto_reply_max_short">60 min</string>
+    <string name="macros_trigger_prefix">Trigger: </string>
 </resources>
+
+
+
+
+
+
+
+
+
 
 
 

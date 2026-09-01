@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.core.agent.maskPhone
@@ -83,7 +85,7 @@ fun ContactPickerCard(
 
             // Hint
             Text(
-                text = "Tap to select, or type the number (1, 2, 3...)",
+                text = stringResource(R.string.contact_pick_hint),
                 color = TextSecondary,
                 fontSize = 11.sp
             )
@@ -149,3 +151,4 @@ fun ContactOptionRow(
         )
     }
 }
+

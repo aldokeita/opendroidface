@@ -449,7 +449,7 @@ fun SuggestedRoutineCard(
                     border = androidx.compose.foundation.BorderStroke(1.dp, AppTheme.colors.borderColor)
                 ) {
                     Text(
-                        text = "Dismiss",
+                        text = stringResource(R.string.common_dismiss),
                         color = AppTheme.colors.textSecondary,
                         fontSize = 13.sp
                     )
@@ -618,5 +618,6 @@ fun RoutineTemplateCard(
         }
     }
 }
+
 
 

@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.ui.theme.*
@@ -29,7 +31,7 @@ fun TermsOfUseScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Terms of use",
+                        text = stringResource(R.string.settings_terms),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -41,7 +43,7 @@ fun TermsOfUseScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary
                         )
                     }
@@ -75,20 +77,20 @@ fun TermsOfUseScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Description,
-                            contentDescription = "Terms",
+                            contentDescription = stringResource(R.string.terms_short),
                             tint = AppTheme.colors.accentNeonGreen,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Terms of Use",
+                                text = stringResource(R.string.settings_terms),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppTheme.colors.textPrimary
                             )
                             Text(
-                                text = "Effective: May 2026",
+                                text = stringResource(R.string.terms_effective),
                                 fontSize = 12.sp,
                                 color = AppTheme.colors.textSecondary
                             )
@@ -196,3 +198,6 @@ fun TermsOfUseScreen(
         }
     }
 }
+
+
+

@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.ui.face.rememberReduceMotion
@@ -156,7 +158,7 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Your open autonomous Android agent",
+                text = stringResource(R.string.splash_tagline),
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 letterSpacing = 0.2.sp,
@@ -170,3 +172,4 @@ fun SplashScreen(onNavigateNext: () -> Unit) {
         }
     }
 }
+

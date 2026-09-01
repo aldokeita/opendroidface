@@ -236,7 +236,187 @@
     <string name="common_continue">Lanjut</string>
     <string name="perm_continue_hint">Kamu bisa lanjut sekarang dan memberikan sisanya nanti di Setelan → Izin.</string>
     <string name="perm_batch_intro">Android akan meminta sisa izinnya sekaligus:</string>
+
+    <!-- Settings: on-device models and endpoints -->
+    <string name="settings_cloud_ai">AI AWAN</string>
+    <string name="settings_offline_ai">AI LURING</string>
+    <string name="settings_on_device">AI di perangkat</string>
+    <string name="settings_on_device_status">STATUS AI DI PERANGKAT</string>
+    <string name="settings_ai_core">ANDROID AI CORE</string>
+    <string name="settings_litert">LITERT-LM (CADANGAN)</string>
+    <string name="settings_custom_litert">MODEL LITERT SENDIRI</string>
+    <string name="settings_custom_openai">ENDPOINT OPENAI SENDIRI</string>
+    <string name="settings_ollama_endpoint">ENDPOINT OLLAMA LOKAL</string>
+    <string name="settings_copilot_endpoint">ENDPOINT COPILOT LOKAL</string>
+    <string name="settings_ollama_url">Alamat server Ollama</string>
+    <string name="settings_copilot_url">Alamat server Copilot</string>
+    <string name="settings_base_url">Base URL (mis. https://api.openai.com/v1)</string>
+    <string name="settings_base_url_hint">Isi base URL API yang sesuai OpenAI (mis. dari Pollination, Aqua Dev, Portkey, dan sejenisnya).</string>
+    <string name="settings_lan_hint_ollama">Pakai IP LAN (mis. http://192.168.1.50:11434) kalau mengujinya dari HP asli.</string>
+    <string name="settings_lan_hint_copilot">Pakai IP LAN (mis. http://192.168.1.50:4141) kalau mengujinya dari HP asli.</string>
+    <string name="settings_hf_section">TOKEN HUGGING FACE (KHUSUS MODEL TERKUNCI)</string>
+    <string name="settings_hf_token">Token akses Hugging Face</string>
+    <string name="settings_hf_validate">Cek token</string>
+    <string name="settings_hf_remove">Hapus token</string>
+    <string name="settings_auth_required">Butuh token dulu</string>
+    <string name="settings_storage_cleanup">BERES-BERES PENYIMPANAN</string>
+    <string name="settings_delete_unused">Hapus model tak terpakai</string>
+    <string name="settings_storage_encrypted">Penyimpanan: terenkripsi</string>
+    <string name="settings_import_litert">Impor model LiteRT sendiri</string>
+    <string name="settings_open_model_page">Buka halaman model</string>
+    <string name="settings_import_progress">Menyalin dan memeriksa berkas modelnya. Bisa makan waktu semenit…</string>
+    <string name="settings_import_done">Modelnya berhasil diimpor dan diperiksa. Sekarang sudah bisa dipakai.</string>
+    <string name="settings_cellular_title">Peringatan kuota</string>
+    <string name="settings_cellular_body">Kamu mengunduh model lewat data seluler. Kuotanya bisa terpakai banyak.</string>
+    <string name="settings_yolo_title">Nyalakan mode YOLO?</string>
+    <string name="settings_yolo_confirm">Aku paham, nyalakan</string>
+    <string name="settings_auto_mode_hint">Auto menjalankan rencana yang semua langkahnya sudah kamu izinkan. YOLO menjalankan semuanya tanpa bertanya.</string>
+    <string name="settings_fallback_hint">Hanya provider yang kamu pilih yang boleh mencoba ulang setelah rencana lokal gagal dan dampaknya kecil. Rencana berdampak besar tidak pernah berpindah sendiri.</string>
+    <string name="settings_creds_reenter">KREDENSIAL HARUS DIISI ULANG</string>
+    <string name="settings_creds_unsaved">KREDENSIAL BELUM TERSIMPAN</string>
+    <string name="settings_creds_clear">Bersihkan kredensial yang tidak terbaca</string>
+    <string name="settings_integration_perms">IZIN INTEGRASI SISTEM</string>
+    <string name="settings_theme_hint">Ganti antara tampilan gelap dan terang.</string>
+    <string name="settings_about_opendroid">Tentang OpenDroid</string>
+    <string name="settings_benchmark_short">Uji kecepatan</string>
+    <string name="settings_elevenlabs_hint">Kalau API key ElevenLabs kosong, OpenDroid otomatis memakai suara bawaan Android yang jalan tanpa internet.</string>
+    <string name="settings_assistant_language_hint">Bahasa jawaban, suara, dan seluruh tampilan aplikasi ini.</string>
+
+    <!-- Settings: model manager hints -->
+    <string name="settings_dl_gemma3n">Unduh Gemma 3n (AI Core)</string>
+    <string name="settings_dl_gemma4">Unduh Gemma 4 (AI Core)</string>
+    <string name="settings_import_hint">Impor berkas .task atau .litertlm apa pun sebagai model tersendiri (tidak terikat slot katalog). GGUF belum didukung.</string>
+    <string name="settings_hf_hint">Hanya perlu untuk unduhan Hugging Face yang terkunci (build LiteRT Gemma 3n dari Google). Model publik seperti Qwen 2.5 dan cermin komunitas Gemma 4 bisa diunduh tanpa token. Tidak dipakai untuk provider API awan.</string>
+    <string name="settings_litert_hint">Jalan tanpa Google AI Core. Model bertanda PUBLIC (Qwen, cermin komunitas Gemma 4) tidak butuh token HF; yang bertanda GATED (build Gemma 3n dari Google) butuh. Atau impor berkas .task / .litertlm milikmu sendiri.</string>
+    <string name="settings_accessibility_hint">Supaya OpenDroid bisa mengoperasikan aplikasi lain sendiri (mis. WhatsApp, Calendar), pastikan layanan aksesibilitas \'OpenDroid\' aktif di Setelan -> Aksesibilitas -> Layanan terpasang.</string>
+    <string name="settings_creds_unreadable">Kredensial provider yang tersimpan tidak bisa dibaca di HP ini. Bersihkan yang rusak, lalu isi lagi API key-mu.</string>
+    <string name="settings_creds_storage_down">Penyimpanan kredensial aman sedang tidak bisa dipakai. Setelanmu yang lama tetap utuh; cek penyimpanan HP lalu coba lagi.</string>
+    <string name="settings_yolo_body">YOLO menjalankan SEMUA rencana tanpa bertanya — termasuk yang mengeluarkan uang (pembayaran UPI, pesan makanan dan taksi) dan yang tidak bisa dibatalkan (memasang aplikasi, menghapus berkas, menyalakan ulang HP).</string>
+    <string name="settings_codex_hint">Masuk pakai akun ChatGPT-mu dan memakai langganannya. Tanpa komputer, tanpa key.</string>
+    <string name="common_paste">📋 Tempel</string>
+    <string name="common_clear">❌ Bersihkan</string>
+    <string name="settings_gated_model">Model ini terkunci di Hugging Face dan butuh token akses untuk diunduh.</string>
+
+    <!-- Bridge, logs, about, plan steps, auto-reply -->
+    <string name="bridge_title">Jembatan desktop</string>
+    <string name="bridge_point_client">Arahkan klien ke:</string>
+    <string name="common_copy">Salin</string>
+    <string name="bridge_copy_command">Salin perintah</string>
+    <string name="bridge_regenerate">Buat ulang</string>
+    <string name="bridge_regenerate_title">Buat ulang tokennya?</string>
+    <string name="bridge_regenerate_body">Semua klien desktop yang memakai token lama akan berhenti bekerja sampai kamu menempelkan yang baru.</string>
+    <string name="bridge_expose_title">Buka jembatan ke jaringan?</string>
+    <string name="bridge_expose_confirm">Buka</string>
+    <string name="bridge_keep_local">Biarkan lokal</string>
+    <string name="bridge_reachable">Bisa dijangkau dari Wi-Fi-mu</string>
+    <string name="common_close">Tutup</string>
+    <string name="logs_title">Log</string>
+    <string name="logs_clear">Bersihkan log</string>
+    <string name="logs_error">Catatan error:</string>
+    <string name="logs_result">Hasil eksekusi:</string>
+    <string name="logs_status">Rincian status sistem:</string>
+    <string name="logs_params">Parameter:</string>
+    <string name="logs_expand">Buka rincian</string>
+    <string name="logs_save_macro">Simpan tugas ini jadi makro</string>
+    <string name="macros_save_short">Simpan makro</string>
+    <string name="logs_macro_name">Nama makro</string>
+    <string name="logs_macro_hint">Hanya langkah yang berhasil yang dicatat. Kredensial, API key, dan token dibuang.</string>
+    <string name="about_tagline">Agen AI otonom untuk Android</string>
+    <string name="about_what">APA ITU OPENDROID?</string>
+    <string name="about_capabilities">KEMAMPUAN UTAMA</string>
+    <string name="about_providers">PROVIDER LLM YANG DIDUKUNG</string>
+    <string name="about_stack">TEKNOLOGI YANG DIPAKAI</string>
+    <string name="about_open_source">SUMBER TERBUKA</string>
+    <string name="about_open_source_body">OpenDroid adalah perangkat lunak sumber terbuka. Kontribusi, laporan bug, dan usulan fitur terbuka untuk siapa saja.</string>
+    <string name="about_made_with">Dibuat dengan ❤ untuk komunitas Android</string>
+    <string name="about_icon">Ikon aplikasi OpenDroid</string>
+    <string name="plan_edit_step">Ubah langkah</string>
+    <string name="plan_delete_step">Hapus langkah</string>
+    <string name="plan_params">Parameter</string>
+    <string name="plan_add_param">Tambah parameter</string>
+    <string name="plan_remove_param">Hapus parameter</string>
+    <string name="plan_param_key">Nama</string>
+    <string name="plan_param_value">Isi</string>
+    <string name="plan_result">Hasil:</string>
+    <string name="plan_fallback">Rutinitas cadangan:</string>
+    <string name="plan_parallel">Bisa dijalankan bersamaan</string>
+    <string name="auto_reply_short">Balas otomatis</string>
+    <string name="auto_reply_apps">Aplikasi yang aktif</string>
+    <string name="auto_reply_delay">Jeda balasan</string>
+    <string name="auto_reply_wait">Tunggu dulu sebelum membalas</string>
+    <string name="auto_reply_rate">Batas jumlah</string>
+    <string name="auto_reply_max">Balasan maksimal per kontak/jam</string>
+    <string name="auto_reply_perms_title">BUTUH IZIN SISTEM</string>
+    <string name="auto_reply_perms_body">Balas otomatis butuh akses notifikasi untuk memantau pesan masuk, dan akses aksesibilitas untuk mengetik dan mengirim balasannya.</string>
+    <string name="auto_reply_grant_notif">Beri akses notifikasi</string>
+    <string name="auto_reply_grant_acc">Beri akses aksesibilitas</string>
+    <string name="auto_reply_tone_example">mis. santai dan akrab, pakai emoji</string>
+
+    <!-- Crash log, plan, benchmark, notifications, legal, splash -->
+    <string name="crash_title">Catatan error</string>
+    <string name="crash_none">Belum ada error yang tercatat</string>
+    <string name="crash_hint">Error direkam otomatis dan disimpan di HP ini saja.</string>
+    <string name="common_share">Bagikan</string>
+    <string name="crash_share_all">Bagikan semua laporan error</string>
+    <string name="crash_delete_all">Hapus semua laporan error</string>
+    <string name="crash_delete_all_title">Hapus semua laporan error?</string>
+    <string name="crash_delete_all_body">Semua laporan error yang tersimpan di HP ini akan hilang. Tidak bisa dibatalkan.</string>
+    <string name="plan_title">Rencana</string>
+    <string name="plan_active_run">SEDANG BERJALAN</string>
+    <string name="plan_history">RIWAYAT</string>
+    <string name="plan_viewing_past">MELIHAT RIWAYAT</string>
+    <string name="plan_nothing">Tidak ada yang berjalan</string>
+    <string name="plan_empty_hint">Waktu kamu memberi tugas, langkah-langkah yang direncanakannya muncul di sini sambil dikerjakan.</string>
+    <string name="plan_duration">Perkiraan waktu</string>
+    <string name="plan_steps_label">Langkah</string>
+    <string name="plan_stop">Hentikan tugas</string>
+    <string name="plan_delete">Hapus rencana</string>
+    <string name="bench_summary">RINGKASAN LAPORAN</string>
+    <string name="bench_run">Jalankan tes</string>
+    <string name="bench_test">Tes</string>
+    <string name="bench_test_all">Tes semua yang terpasang</string>
+    <string name="bench_test_all_title">Tes semua yang terpasang?</string>
+    <string name="notif_title">Riwayat notifikasi</string>
+    <string name="notif_clear_all">Bersihkan semua</string>
+    <string name="notif_none">Belum ada notifikasi yang tertangkap</string>
+    <string name="notif_grant">Beri akses notifikasi di Setelan</string>
+    <string name="license_title">Lisensi sumber terbuka</string>
+    <string name="license_apache">Apache License 2.0</string>
+    <string name="terms_short">Ketentuan</string>
+    <string name="terms_effective">Berlaku sejak: Mei 2026</string>
+    <string name="privacy_short">Privasi</string>
+    <string name="privacy_heading">Privasimu penting</string>
+    <string name="privacy_updated">Diperbarui: Agustus 2026</string>
+    <string name="help_short">Bantuan</string>
+    <string name="help_heading">Ada yang bisa dibantu?</string>
+    <string name="help_sub">Jawaban cepat untuk pertanyaan yang sering muncul</string>
+    <string name="splash_tagline">Agen Android otonom yang terbuka</string>
+    <string name="contact_pick_hint">Ketuk untuk memilih, atau ketik nomornya (1, 2, 3…)</string>
+    <string name="bridge_forward_hint">Teruskan port-nya ke komputermu, lalu arahkan klien MCP ke alamat hasil penerusan itu. Tidak ada yang keluar dari kabel.</string>
+    <string name="bridge_token_hint">Setiap permintaan wajib membawa ini sebagai header X-OpenDroid-Token. Perlakukan seperti kata sandi: cuma ini yang berdiri antara sebuah permintaan dan HP ini.</string>
+    <string name="bridge_network_hint">Mati secara bawaan. Jembatan ini bisa menjalankan perintah shell dan mengendalikan layar, jadi siapa pun yang punya tokennya dan satu jaringan denganmu berarti memegang HP ini.</string>
+    <string name="bridge_no_address">Belum ada alamat jaringan — HP ini sepertinya tidak sedang tersambung ke Wi-Fi.</string>
+    <string name="bridge_expose_body">Semua yang ada di Wi-Fi ini akan bisa menjangkau jembatannya. Dengan tokennya, ia bisa menjalankan perintah shell, menekan dan mengetik di layar ini, serta membaca isinya.</string>
+    <string name="about_body">OpenDroid adalah asisten AI otonom yang berjalan langsung di HP Android-mu. Ia paham perintah bahasa sehari-hari, menyusun rencana berlangkah banyak, dan bisa mengotomatiskan hampir semua hal di HP-mu — dari mengirim pesan dan menelepon sampai mengatur setelan sistem dan mengelola berkas.</string>
+    <string name="onb_unlock_failed">Datamu yang tersimpan tidak bisa dibuka di HP ini, jadi tidak disimpan. Tidak ada yang pernah disimpan tanpa enkripsi — silakan isi lagi.</string>
+    <string name="perm_manual_hint">Android tidak mengizinkan ini diberikan dari dalam aplikasi.</string>
+    <string name="gallery_use">Pakai</string>
+    <string name="gallery_in_use">Sedang dipakai</string>
+    <string name="gallery_close">Tutup galeri ekspresi</string>
+    <string name="auto_reply_min_short">1 mnt</string>
+    <string name="auto_reply_max_short">60 mnt</string>
+    <string name="macros_trigger_prefix">Pemicu: </string>
+    <string name="chat_hands_free">Tanpa tangan</string>
 </resources>
+
+
+
+
+
+
+
+
+
 
 
 

@@ -21,10 +21,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.BuildConfig
-import com.opendroid.ai.R
 import com.opendroid.ai.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +38,7 @@ fun AboutScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "About",
+                        text = stringResource(R.string.settings_about),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -49,7 +50,7 @@ fun AboutScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary
                         )
                     }
@@ -97,7 +98,7 @@ fun AboutScreen(
                             // transparent padding overflows into the Box's circle clip.
                             Image(
                                 painter = painterResource(id = R.drawable.bot),
-                                contentDescription = "OpenDroid app icon",
+                                contentDescription = stringResource(R.string.about_icon),
                                 modifier = Modifier.requiredSize(150.dp)
                             )
                         }
@@ -115,7 +116,7 @@ fun AboutScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = "Autonomous AI Agent for Android",
+                            text = stringResource(R.string.about_tagline),
                             fontSize = 14.sp,
                             color = AppTheme.colors.accentCyan,
                             fontWeight = FontWeight.Medium
@@ -142,16 +143,13 @@ fun AboutScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "WHAT IS OPENDROID?",
+                            text = stringResource(R.string.about_what),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "OpenDroid is an advanced autonomous AI assistant that runs directly on your Android device. " +
-                                    "It can understand natural language commands, create multi-step execution plans, and automate " +
-                                    "virtually any task on your phone — from sending messages and making calls to controlling " +
-                                    "system settings and managing files.\n\n" +
+                            text = stringResource(R.string.about_body) + "\n\n" +
                                     "Powered by your choice of LLM provider (Gemini, OpenAI, Claude, Groq, local Ollama, and more), " +
                                     "OpenDroid combines intelligent planning with real device automation through Android's Accessibility framework.",
                             fontSize = 13.sp,
@@ -172,7 +170,7 @@ fun AboutScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "KEY CAPABILITIES",
+                            text = stringResource(R.string.about_capabilities),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
@@ -200,7 +198,7 @@ fun AboutScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "TECHNOLOGY STACK",
+                            text = stringResource(R.string.about_stack),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
@@ -228,7 +226,7 @@ fun AboutScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "SUPPORTED LLM PROVIDERS",
+                            text = stringResource(R.string.about_providers),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
@@ -277,13 +275,13 @@ fun AboutScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "OPEN SOURCE",
+                            text = stringResource(R.string.about_open_source),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppTheme.colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "OpenDroid is open source software. Contributions, bug reports, and feature requests are welcome.",
+                            text = stringResource(R.string.about_open_source_body),
                             fontSize = 13.sp,
                             color = AppTheme.colors.textPrimary,
                             textAlign = TextAlign.Center,
@@ -303,7 +301,7 @@ fun AboutScreen(
             // Footer
             item {
                 Text(
-                    text = "Made with ❤ for the Android community",
+                    text = stringResource(R.string.about_made_with),
                     fontSize = 12.sp,
                     color = AppTheme.colors.textSecondary,
                     textAlign = TextAlign.Center,
@@ -368,3 +366,6 @@ private fun TechItem(label: String, value: String) {
         )
     }
 }
+
+
+

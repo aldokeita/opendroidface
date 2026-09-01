@@ -29,6 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.core.crash.CrashLogRecord
@@ -73,18 +75,18 @@ fun CrashLogScreen(
     if (showClearConfirmation) {
         AlertDialog(
             onDismissRequest = { showClearConfirmation = false },
-            title = { Text("Delete all crash reports?") },
-            text = { Text("This removes every stored crash report from this device. It cannot be undone.") },
+            title = { Text(stringResource(R.string.crash_delete_all_title)) },
+            text = { Text(stringResource(R.string.crash_delete_all_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearAll()
                     showClearConfirmation = false
                 }) {
-                    Text("Delete", color = themeColors.accentRed)
+                    Text(stringResource(R.string.common_delete), color = themeColors.accentRed)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirmation = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearConfirmation = false }) { Text(stringResource(R.string.common_cancel)) }
             },
             containerColor = themeColors.surface,
             titleContentColor = themeColors.textPrimary,
@@ -95,10 +97,10 @@ fun CrashLogScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Crash Log", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.crash_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
@@ -108,7 +110,7 @@ fun CrashLogScreen(
                     ) {
                         Icon(
                             Icons.Default.Share,
-                            contentDescription = "Share all crash reports",
+                            contentDescription = stringResource(R.string.crash_share_all),
                             tint = if (crashes.isEmpty()) {
                                 themeColors.textSecondary.copy(alpha = 0.4f)
                             } else {
@@ -122,7 +124,7 @@ fun CrashLogScreen(
                     ) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = "Delete all crash reports",
+                            contentDescription = stringResource(R.string.crash_delete_all),
                             tint = if (crashes.isEmpty()) {
                                 themeColors.textSecondary.copy(alpha = 0.4f)
                             } else {
@@ -152,13 +154,13 @@ fun CrashLogScreen(
                     Text("✅", fontSize = 48.sp)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        "No crashes recorded",
+                        stringResource(R.string.crash_none),
                         fontSize = 16.sp,
                         color = themeColors.textSecondary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        "Crashes are captured automatically and kept on this device.",
+                        stringResource(R.string.crash_hint),
                         fontSize = 13.sp,
                         color = themeColors.textSecondary.copy(alpha = 0.6f)
                     )
@@ -279,7 +281,7 @@ private fun CrashCard(
                                 tint = themeColors.accentCyan
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Share", fontSize = 13.sp, color = themeColors.accentCyan)
+                            Text(stringResource(R.string.common_share), fontSize = 13.sp, color = themeColors.accentCyan)
                         }
                         TextButton(onClick = onCopy) {
                             Icon(
@@ -289,7 +291,7 @@ private fun CrashCard(
                                 tint = themeColors.accentCyan
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Copy", fontSize = 13.sp, color = themeColors.accentCyan)
+                            Text(stringResource(R.string.common_copy), fontSize = 13.sp, color = themeColors.accentCyan)
                         }
                     }
                 }
@@ -297,3 +299,6 @@ private fun CrashCard(
         }
     }
 }
+
+
+

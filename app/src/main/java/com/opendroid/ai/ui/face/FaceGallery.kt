@@ -44,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
@@ -86,7 +88,7 @@ fun FaceGallery(
                 IconButton(onClick = onClose) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close expression gallery",
+                        contentDescription = stringResource(R.string.gallery_close),
                         tint = colors.textSecondary,
                     )
                 }
@@ -185,13 +187,13 @@ private fun StyleTab(
         if (inUse) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "In use",
+                contentDescription = stringResource(R.string.gallery_in_use),
                 tint = colors.accentNeonGreen,
                 modifier = Modifier.height(16.dp),
             )
         } else {
             Text(
-                text = "Use",
+                text = stringResource(R.string.gallery_use),
                 color = colors.accentCyan,
                 fontSize = 12.sp,
                 modifier = Modifier.clickable(onClick = onUse),
@@ -199,3 +201,7 @@ private fun StyleTab(
         }
     }
 }
+
+
+
+

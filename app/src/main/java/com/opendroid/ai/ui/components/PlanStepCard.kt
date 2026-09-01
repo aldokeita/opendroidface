@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.models.PlanStep
@@ -119,7 +121,7 @@ fun PlanStepCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit step",
+                                contentDescription = stringResource(R.string.plan_edit_step),
                                 tint = colors.accentCyan,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -130,7 +132,7 @@ fun PlanStepCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete step",
+                                contentDescription = stringResource(R.string.plan_delete_step),
                                 tint = colors.accentRed,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -166,7 +168,7 @@ fun PlanStepCard(
                     OutlinedTextField(
                         value = editDescription,
                         onValueChange = { editDescription = it },
-                        label = { Text("Step Description", fontSize = 11.sp) },
+                        label = { Text(stringResource(R.string.macros_step_desc), fontSize = 11.sp) },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colors.accentNeonGreen,
                             unfocusedBorderColor = colors.borderColor,
@@ -177,7 +179,7 @@ fun PlanStepCard(
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text("Parameters", fontSize = 11.sp, color = colors.textSecondary)
+                    Text(stringResource(R.string.plan_params), fontSize = 11.sp, color = colors.textSecondary)
 
                     editParams.forEachIndexed { index, (key, value) ->
                         Row(
@@ -191,7 +193,7 @@ fun PlanStepCard(
                                 onValueChange = { newKey ->
                                     editParams = editParams.toMutableList().also { it[index] = newKey to value }
                                 },
-                                label = { Text("Key", fontSize = 10.sp) },
+                                label = { Text(stringResource(R.string.plan_param_key), fontSize = 10.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -207,7 +209,7 @@ fun PlanStepCard(
                                 onValueChange = { newValue ->
                                     editParams = editParams.toMutableList().also { it[index] = key to newValue }
                                 },
-                                label = { Text("Value", fontSize = 10.sp) },
+                                label = { Text(stringResource(R.string.plan_param_value), fontSize = 10.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -223,7 +225,7 @@ fun PlanStepCard(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Remove parameter",
+                                    contentDescription = stringResource(R.string.plan_remove_param),
                                     tint = colors.accentRed,
                                     modifier = Modifier.size(14.dp)
                                 )
@@ -242,7 +244,7 @@ fun PlanStepCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Add Parameter", fontSize = 11.sp, color = colors.accentCyan)
+                        Text(stringResource(R.string.plan_add_param), fontSize = 11.sp, color = colors.accentCyan)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -251,7 +253,7 @@ fun PlanStepCard(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = { isEditing = false }) {
-                            Text("Cancel", color = colors.textSecondary)
+                            Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -267,7 +269,7 @@ fun PlanStepCard(
                             colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Save", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(stringResource(R.string.common_save), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
@@ -281,7 +283,7 @@ fun PlanStepCard(
                     
                     if (step.params.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Parameters:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(stringResource(R.string.logs_params), fontSize = 11.sp, color = colors.textSecondary)
                         step.params.forEach { (key, valStr) ->
                             Text("- $key: $valStr", fontSize = 11.sp, color = colors.textPrimary, fontFamily = FontFamily.Monospace)
                         }
@@ -294,12 +296,12 @@ fun PlanStepCard(
 
                     if (step.canParallelize) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Parallel execution supported", fontSize = 11.sp, color = colors.accentCyan)
+                        Text(stringResource(R.string.plan_parallel), fontSize = 11.sp, color = colors.accentCyan)
                     }
 
                     if (step.fallback.isNotBlank()) {
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Fallback Routine:", fontSize = 11.sp, color = colors.textSecondary)
+                        Text(stringResource(R.string.plan_fallback), fontSize = 11.sp, color = colors.textSecondary)
                         Text(step.fallback, fontSize = 11.sp, color = colors.textPrimary, fontFamily = FontFamily.Monospace)
                     }
 
@@ -313,7 +315,7 @@ fun PlanStepCard(
                                 .padding(8.dp)
                         ) {
                             Column {
-                                Text("Execution Result:", fontSize = 10.sp, color = colors.accentNeonGreen, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.plan_result), fontSize = 10.sp, color = colors.accentNeonGreen, fontWeight = FontWeight.Bold)
                                 Text(step.result!!, fontSize = 11.sp, color = colors.textPrimary)
                             }
                         }
@@ -350,3 +352,5 @@ fun PlanStepCard(
         }
     }
 }
+
+

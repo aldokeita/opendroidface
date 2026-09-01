@@ -206,14 +206,13 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "CREDENTIALS MUST BE RE-ENTERED",
+                                text = stringResource(R.string.settings_creds_reenter),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Saved provider credentials cannot be read on this device. " +
-                                    "Clear unavailable records, then enter your API keys again.",
+                                text = stringResource(R.string.settings_creds_unreadable),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
@@ -222,7 +221,7 @@ fun SettingsScreen(
                                 onClick = viewModel::resetProviderCredentialsForReentry,
                                 colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                             ) {
-                                Text("Clear unavailable credentials", color = colors.background)
+                                Text(stringResource(R.string.settings_creds_clear), color = colors.background)
                             }
                         }
                     }
@@ -241,14 +240,13 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "CREDENTIALS WERE NOT SAVED",
+                                text = stringResource(R.string.settings_creds_unsaved),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Secure credential storage is unavailable. Existing settings " +
-                                    "were preserved; check device storage and try again.",
+                                text = stringResource(R.string.settings_creds_storage_down),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
@@ -325,7 +323,7 @@ fun SettingsScreen(
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = "OFFLINE AI",
+                                            text = stringResource(R.string.settings_offline_ai),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = colors.textSecondary
                                         ) 
@@ -334,7 +332,7 @@ fun SettingsScreen(
                                     onClick = {}
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("On-Device AI", color = colors.textPrimary, modifier = Modifier.padding(start = 8.dp)) },
+                                    text = { Text(stringResource(R.string.settings_on_device), color = colors.textPrimary, modifier = Modifier.padding(start = 8.dp)) },
                                     onClick = {
                                         viewModel.updateActiveProvider("On-Device AI")
                                         providerDropdownExpanded = false
@@ -346,7 +344,7 @@ fun SettingsScreen(
                                 DropdownMenuItem(
                                     text = { 
                                         Text(
-                                            text = "CLOUD AI",
+                                            text = stringResource(R.string.settings_cloud_ai),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = colors.textSecondary
                                         ) 
@@ -601,7 +599,7 @@ fun SettingsScreen(
                                 )
                                 TextButton(onClick = { viewModel.testConnection(config.activeProvider) }) {
                                     Text(
-                                        "Test connection",
+                                        stringResource(R.string.settings_test_connection),
                                         fontSize = 12.sp,
                                         color = colors.accentNeonGreen
                                     )
@@ -637,7 +635,7 @@ fun SettingsScreen(
                         AnimatedVisibility(visible = fallbacksExpanded) {
                             Column {
                                 Text(
-                                    text = "Only selected providers may receive a retry after an unusable low-impact local plan. High-impact plans never switch automatically.",
+                                    text = stringResource(R.string.settings_fallback_hint),
                                     fontSize = 11.sp,
                                     lineHeight = 16.sp,
                                     color = colors.textSecondary,
@@ -691,7 +689,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Speed,
-                            contentDescription = "Benchmark",
+                            contentDescription = stringResource(R.string.settings_benchmark_short),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -723,7 +721,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "OLLAMA LOCAL ENDPOINT",
+                                text = stringResource(R.string.settings_ollama_endpoint),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -731,7 +729,7 @@ fun SettingsScreen(
                             OutlinedTextField(
                                 value = config.ollamaUrl,
                                 onValueChange = { viewModel.updateOllamaUrl(it) },
-                                label = { Text("Ollama Server URL", fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.settings_ollama_url), fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -743,7 +741,7 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Use local LAN IP (e.g. http://192.168.1.50:11434) if testing from a physical Android device.",
+                                text = stringResource(R.string.settings_lan_hint_ollama),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -762,7 +760,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "ON-DEVICE AI STATUS",
+                                text = stringResource(R.string.settings_on_device_status),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -788,7 +786,7 @@ fun SettingsScreen(
                             
                             // ─── AI Core Backend Section ───
                             Text(
-                                text = "ANDROID AI CORE",
+                                text = stringResource(R.string.settings_ai_core),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentCyan
@@ -877,7 +875,7 @@ fun SettingsScreen(
                                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Download Gemma 4 (AI Core)", color = colors.background)
+                                    Text(stringResource(R.string.settings_dl_gemma4), color = colors.background)
                                 }
                             }
                             
@@ -922,7 +920,7 @@ fun SettingsScreen(
                                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentCyan),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Download Gemma 3n (AI Core)", color = colors.background)
+                                    Text(stringResource(R.string.settings_dl_gemma3n), color = colors.background)
                                 }
                             }
                             
@@ -932,14 +930,14 @@ fun SettingsScreen(
 
                             // ─── Hugging Face Section ───
                             Text(
-                                text = "HUGGING FACE TOKEN (GATED MODELS ONLY)",
+                                text = stringResource(R.string.settings_hf_section),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Needed only for gated Hugging Face downloads (the Google-hosted Gemma 3n LiteRT builds). Public models such as Qwen 2.5 and the Gemma 4 community mirrors download without a token. Not used for cloud API providers.",
+                                text = stringResource(R.string.settings_hf_hint),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -958,7 +956,7 @@ fun SettingsScreen(
                                     OutlinedTextField(
                                         value = hfToken,
                                         onValueChange = { viewModel.updateHuggingFaceToken(it) },
-                                        label = { Text("Hugging Face Access Token", fontSize = 12.sp) },
+                                        label = { Text(stringResource(R.string.settings_hf_token), fontSize = 12.sp) },
                                         singleLine = true,
                                         visualTransformation = if (showToken) VisualTransformation.None else PasswordVisualTransformation(),
                                         placeholder = { Text("hf_...", fontSize = 12.sp, color = colors.textSecondary) },
@@ -1001,14 +999,14 @@ fun SettingsScreen(
                                                 },
                                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                             ) {
-                                                Text("📋 Paste", fontSize = 11.sp, color = colors.accentOrange)
+                                                Text(stringResource(R.string.common_paste), fontSize = 11.sp, color = colors.accentOrange)
                                             }
 
                                             TextButton(
                                                 onClick = { viewModel.updateHuggingFaceToken("") },
                                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                                             ) {
-                                                Text("❌ Clear", fontSize = 11.sp, color = colors.accentRed)
+                                                Text(stringResource(R.string.common_clear), fontSize = 11.sp, color = colors.accentRed)
                                             }
                                         }
                                     }
@@ -1040,7 +1038,7 @@ fun SettingsScreen(
                                         Column {
                                             Text("Status: $statusDisplay", fontSize = 11.sp, color = statusColor, fontWeight = FontWeight.Bold)
                                             Text("Last Verified: $lastVerified", fontSize = 9.sp, color = colors.textSecondary)
-                                            Text("Storage: Encrypted", fontSize = 9.sp, color = colors.textSecondary)
+                                            Text(stringResource(R.string.settings_storage_encrypted), fontSize = 9.sp, color = colors.textSecondary)
                                         }
 
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1050,7 +1048,7 @@ fun SettingsScreen(
                                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                                                 modifier = Modifier.height(28.dp)
                                             ) {
-                                                Text("Validate Token", fontSize = 10.sp, color = colors.background, fontWeight = FontWeight.Bold)
+                                                Text(stringResource(R.string.settings_hf_validate), fontSize = 10.sp, color = colors.background, fontWeight = FontWeight.Bold)
                                             }
 
                                             if (hfToken.isNotBlank()) {
@@ -1060,7 +1058,7 @@ fun SettingsScreen(
                                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                                                     modifier = Modifier.height(28.dp)
                                                 ) {
-                                                    Text("Remove Token", fontSize = 10.sp, color = colors.accentRed, fontWeight = FontWeight.Bold)
+                                                    Text(stringResource(R.string.settings_hf_remove), fontSize = 10.sp, color = colors.accentRed, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -1074,14 +1072,14 @@ fun SettingsScreen(
                             
                             // ─── LiteRT-LM Backend Section ───
                             Text(
-                                text = "LITERT-LM (FALLBACK)",
+                                text = stringResource(R.string.settings_litert),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Runs without Google AI Core. Models tagged PUBLIC (Qwen, the Gemma 4 community mirrors) need no HF token; models tagged GATED (the Google-hosted Gemma 3n builds) do. Or import your own .task / .litertlm file.",
+                                text = stringResource(R.string.settings_litert_hint),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -1316,7 +1314,7 @@ fun SettingsScreen(
                                                     modifier = Modifier.fillMaxWidth().height(28.dp),
                                                     contentPadding = PaddingValues(vertical = 2.dp)
                                                 ) {
-                                                    Text("Open Model Page", color = colors.accentOrange, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                                    Text(stringResource(R.string.settings_open_model_page), color = colors.accentOrange, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                                 }
                                             }
                                         }
@@ -1418,14 +1416,14 @@ fun SettingsScreen(
                             Divider(color = colors.borderColor, thickness = 1.dp)
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "CUSTOM LITERT MODELS",
+                                text = stringResource(R.string.settings_custom_litert),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Import any .task or .litertlm file as its own model (not tied to a catalog slot). GGUF is not supported yet.",
+                                text = stringResource(R.string.settings_import_hint),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -1439,7 +1437,7 @@ fun SettingsScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = colors.accentCyan),
                                 modifier = Modifier.fillMaxWidth().height(36.dp)
                             ) {
-                                Text("Import custom LiteRT model", fontSize = 12.sp, color = colors.background)
+                                Text(stringResource(R.string.settings_import_litert), fontSize = 12.sp, color = colors.background)
                             }
 
                             val customModels = dbModels.filter {
@@ -1556,7 +1554,7 @@ fun SettingsScreen(
 
                             // ─── Storage Cleanup Section ───
                             Text(
-                                text = "STORAGE CLEANUP",
+                                text = stringResource(R.string.settings_storage_cleanup),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentOrange
@@ -1606,7 +1604,7 @@ fun SettingsScreen(
                                  modifier = Modifier.fillMaxWidth(),
                                  shape = RoundedCornerShape(8.dp)
                              ) {
-                                 Text("Delete Unused Models", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                 Text(stringResource(R.string.settings_delete_unused), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                              }
                         }
                     }
@@ -1623,7 +1621,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "COPILOT LOCAL ENDPOINT",
+                                text = stringResource(R.string.settings_copilot_endpoint),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -1631,7 +1629,7 @@ fun SettingsScreen(
                             OutlinedTextField(
                                 value = config.copilotUrl,
                                 onValueChange = { viewModel.updateCopilotUrl(it) },
-                                label = { Text("Copilot Server URL", fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.settings_copilot_url), fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -1643,7 +1641,7 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Use local LAN IP (e.g. http://192.168.1.50:4141) if testing from a physical Android device.",
+                                text = stringResource(R.string.settings_lan_hint_copilot),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -1662,7 +1660,7 @@ fun SettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "CUSTOM OPENAI ENDPOINT",
+                                text = stringResource(R.string.settings_custom_openai),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -1670,7 +1668,7 @@ fun SettingsScreen(
                             OutlinedTextField(
                                 value = config.customEndpoints["Custom OpenAI Compatible"] ?: "",
                                 onValueChange = { viewModel.updateCustomEndpoint("Custom OpenAI Compatible", it) },
-                                label = { Text("Base URL (e.g. https://api.openai.com/v1)", fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.settings_base_url), fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -1682,7 +1680,7 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Provide the custom OpenAI-compatible API base URL (e.g. from Pollination, Aqua Dev, Portkey, etc.)",
+                                text = stringResource(R.string.settings_base_url_hint),
                                 fontSize = 10.sp,
                                 color = colors.textSecondary
                             )
@@ -1826,7 +1824,7 @@ fun SettingsScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 Text(
-                                    text = "If ElevenLabs key is not set, OpenDroid automatically falls back to native offline Android Text-to-Speech.",
+                                    text = stringResource(R.string.settings_elevenlabs_hint),
                                     fontSize = 10.sp,
                                     color = colors.textSecondary
                                 )
@@ -1876,7 +1874,7 @@ fun SettingsScreen(
                             color = colors.textPrimary
                         )
                         Text(
-                            text = "Auto runs plans whose every step you've allowed. YOLO runs everything without asking.",
+                            text = stringResource(R.string.settings_auto_mode_hint),
                             fontSize = 12.sp,
                             color = colors.textSecondary
                         )
@@ -1913,12 +1911,10 @@ fun SettingsScreen(
                             AlertDialog(
                                 onDismissRequest = { showYoloWarning = false },
                                 containerColor = colors.surface,
-                                title = { Text("Enable YOLO mode?", color = colors.accentRed, fontWeight = FontWeight.Bold) },
+                                title = { Text(stringResource(R.string.settings_yolo_title), color = colors.accentRed, fontWeight = FontWeight.Bold) },
                                 text = {
                                     Text(
-                                        "YOLO runs EVERY plan without asking — including actions that " +
-                                        "spend money (UPI payments, food and cab orders) and irreversible " +
-                                        "ones (installing apps, deleting files, restarting the device). " +
+                                        stringResource(R.string.settings_yolo_body) + " " +
                                         "No approval gate remains.",
                                         color = colors.textPrimary
                                     )
@@ -1927,7 +1923,7 @@ fun SettingsScreen(
                                     TextButton(onClick = {
                                         showYoloWarning = false
                                         viewModel.setAutoMode(AutoMode.YOLO)
-                                    }) { Text("I understand, enable", color = colors.accentRed) }
+                                    }) { Text(stringResource(R.string.settings_yolo_confirm), color = colors.accentRed) }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { showYoloWarning = false }) {
@@ -2071,7 +2067,7 @@ fun SettingsScreen(
                                     color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "Switch between dark and light appearance.",
+                                    text = stringResource(R.string.settings_theme_hint),
                                     fontSize = 12.sp,
                                     color = colors.textSecondary
                                 )
@@ -2265,7 +2261,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Autorenew,
-                            contentDescription = "Habits and routines",
+                            contentDescription = stringResource(R.string.settings_routines),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -2358,7 +2354,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Privacy policy",
+                                text = stringResource(R.string.settings_privacy),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
@@ -2401,7 +2397,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Terms of use",
+                                text = stringResource(R.string.settings_terms),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
@@ -2437,7 +2433,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Help Center",
+                            contentDescription = stringResource(R.string.settings_help),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -2530,7 +2526,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "About OpenDroid",
+                                text = stringResource(R.string.settings_about_opendroid),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
@@ -2559,13 +2555,13 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "SYSTEM INTEGRATION PERMISSIONS",
+                            text = stringResource(R.string.settings_integration_perms),
                             style = MaterialTheme.typography.labelSmall,
                             color = colors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "To allow OpenDroid to operate other applications autonomously (e.g. WhatsApp, Calendar), verify that the accessibility service 'OpenDroid' is active in Settings -> Accessibility -> Installed Services.",
+                            text = stringResource(R.string.settings_accessibility_hint),
                             fontSize = 12.sp,
                             color = colors.textSecondary
                         )
@@ -2580,10 +2576,10 @@ fun SettingsScreen(
     if (showAuthRequiredDialog != null) {
         AlertDialog(
             onDismissRequest = { showAuthRequiredDialog = null },
-            title = { Text("Authentication Required", color = colors.textPrimary) },
+            title = { Text(stringResource(R.string.settings_auth_required), color = colors.textPrimary) },
             text = {
                 Text(
-                    text = "This model is gated on Hugging Face and needs an Access Token to download.\n\n" +
+                    text = stringResource(R.string.settings_gated_model) + "\n\n" +
                         "Models tagged PUBLIC (for example Qwen 2.5 and the Gemma 4 community mirrors) do not need a token — only the ones tagged GATED do. " +
                         "Add a read-only token in the Hugging Face section above, or pick a PUBLIC model.",
                     color = colors.textSecondary
@@ -2612,10 +2608,10 @@ fun SettingsScreen(
         val modelIdToDownload = showCellularWarningDialog!!
         AlertDialog(
             onDismissRequest = { showCellularWarningDialog = null },
-            title = { Text("Cellular Network Warning", color = colors.textPrimary) },
+            title = { Text(stringResource(R.string.settings_cellular_title), color = colors.textPrimary) },
             text = {
                 Text(
-                    text = "You are downloading model on cellular network, data charges may apply.",
+                    text = stringResource(R.string.settings_cellular_body),
                     color = colors.textSecondary
                 )
             },
@@ -2645,10 +2641,10 @@ fun SettingsScreen(
         val modelIdToResume = pendingCellularResumeModelId!!
         AlertDialog(
             onDismissRequest = { pendingCellularResumeModelId = null },
-            title = { Text("Cellular Network Warning", color = colors.textPrimary) },
+            title = { Text(stringResource(R.string.settings_cellular_title), color = colors.textPrimary) },
             text = {
                 Text(
-                    text = "You are downloading model on cellular network, data charges may apply.",
+                    text = stringResource(R.string.settings_cellular_body),
                     color = colors.textSecondary
                 )
             },
@@ -2699,10 +2695,10 @@ fun SettingsScreen(
                         isImporting -> {
                             CircularProgressIndicator(color = colors.accentOrange)
                             Spacer(modifier = Modifier.height(12.dp))
-                            Text("Copying and verifying the model file. This may take a minute...", color = colors.textSecondary)
+                            Text(stringResource(R.string.settings_import_progress), color = colors.textSecondary)
                         }
                         isSuccess -> {
-                            Text("The model was imported and verified successfully. You can now load it.", color = colors.textSecondary)
+                            Text(stringResource(R.string.settings_import_done), color = colors.textSecondary)
                         }
                         else -> {
                             Text(
@@ -2947,8 +2943,7 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
 
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-        text = "Signs in with your ChatGPT account and uses its plan. No computer " +
-            "and no key involved.",
+        text = stringResource(R.string.settings_codex_hint),
         fontSize = 11.sp,
         lineHeight = 16.sp,
         color = colors.textSecondary,
@@ -2990,7 +2985,7 @@ private fun AppLanguageRow() {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.settings_assistant_language), fontSize = 14.sp, color = colors.textPrimary)
         Text(
-            text = "What it answers and speaks in. The model still reads whatever you write.",
+            text = stringResource(R.string.settings_assistant_language_hint),
             fontSize = 11.sp,
             color = colors.textSecondary
         )
@@ -3188,4 +3183,8 @@ private fun CodexAccountState.SignedIn.describe(): String {
         ?: return who
     return "$who · ChatGPT $plan"
 }
+
+
+
+
 

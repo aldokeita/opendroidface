@@ -936,7 +936,7 @@ fun ProceduralMemoryView(viewModel: MemoryViewModel, searchQuery: String) {
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Trigger: \"${macro.trigger}\"",
+                                text = stringResource(R.string.macros_trigger_prefix) + "\"${macro.trigger}\"",
                                 fontSize = 12.sp,
                                 color = colors.textPrimary,
                                 fontWeight = FontWeight.SemiBold
@@ -1399,5 +1399,6 @@ fun KnowledgeNodeCard(
         }
     }
 }
+
 
 

@@ -448,7 +448,7 @@ fun MacroCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Trigger: \"${macro.trigger}\"",
+                        text = stringResource(R.string.macros_trigger_prefix) + "\"${macro.trigger}\"",
                         fontSize = 12.sp,
                         color = colors.accentNeonGreen
                     )
@@ -522,5 +522,6 @@ fun MacroCard(
         }
     }
 }
+
 
 

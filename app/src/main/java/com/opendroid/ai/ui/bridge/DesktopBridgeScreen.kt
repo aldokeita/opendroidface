@@ -51,6 +51,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.core.bridge.MCP_PORT
@@ -98,7 +100,7 @@ fun DesktopBridgeScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Desktop bridge",
+                        stringResource(R.string.bridge_title),
                         color = colors.textPrimary,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -111,7 +113,7 @@ fun DesktopBridgeScreen(
                     )
                 }
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = colors.textSecondary)
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.common_close), tint = colors.textSecondary)
                 }
             }
 
@@ -119,8 +121,7 @@ fun DesktopBridgeScreen(
 
             Section(title = "Over USB") {
                 Text(
-                    "Forward the port to your computer, then point an MCP client at the " +
-                        "forwarded address. Nothing leaves the cable.",
+                    stringResource(R.string.bridge_forward_hint),
                     color = colors.textSecondary,
                     fontSize = 13.sp,
                 )
@@ -130,7 +131,7 @@ fun DesktopBridgeScreen(
                 Mono(mcpEndpointUrl("127.0.0.1"))
                 Spacer(Modifier.height(10.dp))
                 TextButton(onClick = { copy(context, "adb forward tcp:$MCP_PORT tcp:$MCP_PORT") }) {
-                    Text("Copy command", color = colors.accentCyan)
+                    Text(stringResource(R.string.bridge_copy_command), color = colors.accentCyan)
                 }
             }
 
@@ -138,9 +139,7 @@ fun DesktopBridgeScreen(
 
             Section(title = "Access token") {
                 Text(
-                    "Every request must carry this as the X-OpenDroid-Token header. " +
-                        "Treat it as a password: it is the only thing standing between a " +
-                        "request and this phone.",
+                    stringResource(R.string.bridge_token_hint),
                     color = colors.textSecondary,
                     fontSize = 13.sp,
                 )
@@ -154,10 +153,10 @@ fun DesktopBridgeScreen(
                         Text(if (revealed) "Hide" else "Reveal", color = colors.accentCyan)
                     }
                     TextButton(onClick = { copy(context, token, sensitive = true) }) {
-                        Text("Copy", color = colors.accentCyan)
+                        Text(stringResource(R.string.common_copy), color = colors.accentCyan)
                     }
                     TextButton(onClick = { confirmRotate = true }) {
-                        Text("Regenerate", color = colors.accentRed)
+                        Text(stringResource(R.string.bridge_regenerate), color = colors.accentRed)
                     }
                 }
             }
@@ -168,14 +167,12 @@ fun DesktopBridgeScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            "Reachable from your Wi-Fi",
+                            stringResource(R.string.bridge_reachable),
                             color = colors.textPrimary,
                             fontSize = 15.sp,
                         )
                         Text(
-                            "Off by default. The bridge can run shell commands and drive " +
-                                "the screen, so anyone who has the token and shares your " +
-                                "network has this phone.",
+                            stringResource(R.string.bridge_network_hint),
                             color = colors.textSecondary,
                             fontSize = 13.sp,
                         )
@@ -198,13 +195,12 @@ fun DesktopBridgeScreen(
                     Spacer(Modifier.height(12.dp))
                     if (addresses.isEmpty()) {
                         Text(
-                            "No network address yet — this phone does not appear to be on " +
-                                "a Wi-Fi network.",
+                            stringResource(R.string.bridge_no_address),
                             color = colors.textSecondary,
                             fontSize = 13.sp,
                         )
                     } else {
-                        Text("Point the client at:", color = colors.textSecondary, fontSize = 13.sp)
+                        Text(stringResource(R.string.bridge_point_client), color = colors.textSecondary, fontSize = 13.sp)
                         Spacer(Modifier.height(6.dp))
                         addresses.forEach { address ->
                             Mono(mcpEndpointUrl(address))
@@ -221,12 +217,10 @@ fun DesktopBridgeScreen(
     if (confirmExposure) {
         AlertDialog(
             onDismissRequest = { confirmExposure = false },
-            title = { Text("Expose the bridge to your network?") },
+            title = { Text(stringResource(R.string.bridge_expose_title)) },
             text = {
                 Text(
-                    "Anything on this Wi-Fi will be able to reach the bridge. With the " +
-                        "token it can run shell commands, tap and type on this screen, and " +
-                        "read what is on it.\n\n" +
+                    stringResource(R.string.bridge_expose_body) + "\n\n" +
                         "Only do this on a network you trust, and regenerate the token if " +
                         "it has ever been shown to anyone."
                 )
@@ -239,12 +233,12 @@ fun DesktopBridgeScreen(
                     // switch means nothing until the server is re-opened.
                     server.restart()
                 }) {
-                    Text("Expose it", color = colors.accentRed)
+                    Text(stringResource(R.string.bridge_expose_confirm), color = colors.accentRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmExposure = false }) {
-                    Text("Keep it local", color = colors.textSecondary)
+                    Text(stringResource(R.string.bridge_keep_local), color = colors.textSecondary)
                 }
             },
         )
@@ -253,20 +247,20 @@ fun DesktopBridgeScreen(
     if (confirmRotate) {
         AlertDialog(
             onDismissRequest = { confirmRotate = false },
-            title = { Text("Regenerate the token?") },
-            text = { Text("Every desktop client using the current token stops working until you paste the new one.") },
+            title = { Text(stringResource(R.string.bridge_regenerate_title)) },
+            text = { Text(stringResource(R.string.bridge_regenerate_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmRotate = false
                     token = configStore.rotateAccessToken()
                     revealed = false
                 }) {
-                    Text("Regenerate", color = colors.accentRed)
+                    Text(stringResource(R.string.bridge_regenerate), color = colors.accentRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmRotate = false }) {
-                    Text("Cancel", color = colors.textSecondary)
+                    Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                 }
             },
         )
@@ -320,3 +314,11 @@ private fun copy(context: Context, text: String, sensitive: Boolean = false) {
     }
     clipboard.setPrimaryClip(clip)
 }
+
+
+
+
+
+
+
+

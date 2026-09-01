@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.db.dao.NotificationDao
@@ -53,17 +55,17 @@ fun NotificationHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notification History", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.notif_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = {
                         scope.launch { notificationDao.clearAll() }
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear All", tint = themeColors.textSecondary)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.notif_clear_all), tint = themeColors.textSecondary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -140,13 +142,13 @@ fun NotificationHistoryScreen(
                         Text("🔔", fontSize = 48.sp)
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            "No notifications captured yet",
+                            stringResource(R.string.notif_none),
                             fontSize = 16.sp,
                             color = themeColors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            "Grant notification access in Settings",
+                            stringResource(R.string.notif_grant),
                             fontSize = 13.sp,
                             color = themeColors.textSecondary.copy(alpha = 0.6f)
                         )
@@ -278,3 +280,6 @@ private fun NotificationCard(
         }
     }
 }
+
+
+

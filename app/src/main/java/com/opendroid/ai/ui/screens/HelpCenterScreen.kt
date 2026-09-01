@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.ui.theme.*
@@ -29,7 +31,7 @@ fun HelpCenterScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Help center",
+                        text = stringResource(R.string.settings_help),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -41,7 +43,7 @@ fun HelpCenterScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary
                         )
                     }
@@ -75,20 +77,20 @@ fun HelpCenterScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.HelpOutline,
-                            contentDescription = "Help",
+                            contentDescription = stringResource(R.string.help_short),
                             tint = AppTheme.colors.accentCyan,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "How can we help?",
+                                text = stringResource(R.string.help_heading),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppTheme.colors.textPrimary
                             )
                             Text(
-                                text = "Quick answers to common questions",
+                                text = stringResource(R.string.help_sub),
                                 fontSize = 12.sp,
                                 color = AppTheme.colors.textSecondary
                             )
@@ -201,3 +203,5 @@ fun HelpCenterScreen(
         }
     }
 }
+
+

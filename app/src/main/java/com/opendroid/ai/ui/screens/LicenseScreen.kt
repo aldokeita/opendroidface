@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.ui.theme.*
@@ -29,7 +31,7 @@ fun LicenseScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "License",
+                        text = stringResource(R.string.settings_license),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -41,7 +43,7 @@ fun LicenseScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary
                         )
                     }
@@ -75,20 +77,20 @@ fun LicenseScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Code,
-                            contentDescription = "License",
+                            contentDescription = stringResource(R.string.settings_license),
                             tint = AppTheme.colors.accentPurple,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Open Source License",
+                                text = stringResource(R.string.license_title),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AppTheme.colors.textPrimary
                             )
                             Text(
-                                text = "Apache License 2.0",
+                                text = stringResource(R.string.license_apache),
                                 fontSize = 12.sp,
                                 color = AppTheme.colors.accentPurple
                             )
@@ -154,3 +156,5 @@ fun LicenseScreen(
         }
     }
 }
+
+
