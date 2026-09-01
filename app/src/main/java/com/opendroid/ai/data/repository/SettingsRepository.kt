@@ -260,6 +260,10 @@ class SettingsRepository internal constructor(
     private val autoReplyWhitelistKey = stringSetPreferencesKey("auto_reply_whitelist")
     private val autoReplyCustomPromptKey = stringPreferencesKey("auto_reply_custom_prompt")
     private val autoReplyMaxPerHourKey = intPreferencesKey("auto_reply_max_per_hour")
+    private val autoReplyPersonaKey = stringPreferencesKey("auto_reply_persona_notes")
+    private val autoReplyStyleKey = stringPreferencesKey("auto_reply_style_notes")
+    // Preferences has no map type, so the per-contact notes travel as JSON.
+    private val autoReplyContactNotesKey = stringPreferencesKey("auto_reply_contact_notes")
 
     val llmConfig: Flow<LLMConfig> = dataStore.data
         .map { preferences -> mergeSecretsForRead(decodeConfig(preferences[llmConfigKey])) }
@@ -276,9 +280,23 @@ class SettingsRepository internal constructor(
             replyDelayMinutes = preferences[autoReplyDelayKey] ?: 15,
             blacklistedContacts = preferences[autoReplyBlacklistKey] ?: emptySet(),
             whitelistedContacts = preferences[autoReplyWhitelistKey] ?: emptySet(),
+            personaNotes = preferences[autoReplyPersonaKey],
+            styleNotes = preferences[autoReplyStyleKey],
+            contactNotes = decodeContactNotes(preferences[autoReplyContactNotesKey]),
             customPrompt = preferences[autoReplyCustomPromptKey],
             maxRepliesPerContactPerHour = preferences[autoReplyMaxPerHourKey] ?: 3
         )
+    }
+
+    private fun decodeContactNotes(raw: String?): Map<String, String> {
+        if (raw.isNullOrBlank()) return emptyMap()
+        return try {
+            json.decodeFromString<Map<String, String>>(raw)
+        } catch (_: Exception) {
+            // A note is a convenience; a malformed one must not cost the user
+            // their allowlist, which lives in its own key.
+            emptyMap()
+        }
     }
 
     suspend fun updateConfig(
@@ -346,6 +364,42 @@ class SettingsRepository internal constructor(
                 preferences.remove(autoReplyCustomPromptKey)
             }
             preferences[autoReplyMaxPerHourKey] = config.maxRepliesPerContactPerHour
+            putOrRemove(preferences, autoReplyPersonaKey, config.personaNotes)
+            putOrRemove(preferences, autoReplyStyleKey, config.styleNotes)
+            putOrRemove(
+                preferences,
+                autoReplyContactNotesKey,
+                config.contactNotes.takeIf { it.isNotEmpty() }?.let { json.encodeToString(it) }
+            )
         }
     }
+
+    private fun putOrRemove(
+        preferences: androidx.datastore.preferences.core.MutablePreferences,
+        key: androidx.datastore.preferences.core.Preferences.Key<String>,
+        value: String?,
+    ) {
+        if (value.isNullOrBlank()) preferences.remove(key) else preferences[key] = value
+    }
+
+    /**
+     * Saves without the caller having to stay alive.
+     *
+     * The auto-reply screen debounced its writes on a scope tied to the
+     * composition, so leaving the screen cancelled the write that was still
+     * waiting - and a long "how you write" note typed carefully and then backed
+     * out of was simply gone. Whether a setting is stored must not depend on
+     * whether the person kept looking at it.
+     */
+    fun saveAutoReplyConfigAsync(config: AutoReplyConfig) {
+        writeScope.launch {
+            try {
+                updateAutoReplyConfig(config)
+            } catch (error: Exception) {
+                android.util.Log.e("SettingsRepository", "Auto-reply save failed: ${error.message}", error)
+            }
+        }
+    }
+
+    private val writeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 }

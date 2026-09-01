@@ -67,18 +67,29 @@ fun AutoReplySettingsScreen(
 
     var dbWriteJob by remember { mutableStateOf<Job?>(null) }
 
+    // The debounce used to run on this composable's own scope, so leaving the
+    // screen cancelled the write that had not fired yet - a long note typed
+    // carefully and then backed out of was simply gone. The repository owns the
+    // write now, and leaving flushes whatever is still pending.
     fun saveConfig(newConfig: AutoReplyConfig, debounce: Boolean = false) {
         config = newConfig
         dbWriteJob?.cancel()
+        if (!debounce) {
+            settingsRepository.saveAutoReplyConfigAsync(newConfig)
+            return
+        }
         dbWriteJob = scope.launch {
-            if (debounce) {
-                delay(1000)
-            }
-            try {
-                settingsRepository.updateAutoReplyConfig(newConfig)
-            } catch (e: Exception) {
-                android.util.Log.e("AutoReplySettings", "Failed to save config: ${e.message}", e)
-            }
+            delay(600)
+            settingsRepository.saveAutoReplyConfigAsync(newConfig)
+        }
+    }
+
+    // Whatever the last keystroke left behind goes to disk on the way out,
+    // whether that is the back button, a task switch, or the screen going off.
+    DisposableEffect(Unit) {
+        onDispose {
+            dbWriteJob?.cancel()
+            settingsRepository.saveAutoReplyConfigAsync(config)
         }
     }
 
@@ -113,6 +124,10 @@ fun AutoReplySettingsScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
+                    // Without this the keyboard covered whatever was being
+                    // typed into: the long fields sit near the bottom, and a
+                    // field you cannot see while writing into it is unusable.
+                    .imePadding()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -365,7 +380,7 @@ fun AutoReplySettingsScreen(
                         title = "About you",
                         hint = "Who you are, what you do, anything the assistant should know " +
                             "before it writes as you. Never quoted into a reply.",
-                        placeholder = "e.g. Aldo, 29, builds Android apps. Married to Nabila.",
+                        placeholder = "e.g. I'm a software engineer with two kids, and I keep replies short when I'm at work.",
                         value = config.personaNotes,
                         onChange = { saveConfig(config.copy(personaNotes = it), debounce = true) },
                     )
@@ -374,7 +389,7 @@ fun AutoReplySettingsScreen(
                         title = "How you write",
                         hint = "Paste two or three of your own messages, exactly as you sent them. " +
                             "An example is imitated far better than an adjective is followed.",
-                        placeholder = "e.g. \"otw ya sayang, 10 menit lagi 🫶🏻\"\n\"iya nanti aku cek dulu\"",
+                        placeholder = "Paste your own messages here, exactly as you sent them.",
                         value = config.styleNotes,
                         onChange = { saveConfig(config.copy(styleNotes = it), debounce = true) },
                     )
@@ -560,7 +575,7 @@ private fun AllowlistSection(
                 onValueChange = { newContact = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Contact name, exactly as WhatsApp shows it", fontSize = 12.sp) },
-                placeholder = { Text("Sayangku 🫶🏻", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                placeholder = { Text("The name as it appears in your chat list", color = colors.textSecondary.copy(alpha = 0.5f)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.accentNeonGreen,
@@ -577,7 +592,7 @@ private fun AllowlistSection(
                 onValueChange = { newNote = it },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Who they are to you (optional)", fontSize = 12.sp) },
-                placeholder = { Text("my wife", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                placeholder = { Text("partner, colleague, family…", color = colors.textSecondary.copy(alpha = 0.5f)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.accentNeonGreen,
@@ -661,4 +676,5 @@ private fun LongTextSection(
         }
     }
 }
+
 
