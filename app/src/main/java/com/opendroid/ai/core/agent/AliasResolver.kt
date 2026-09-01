@@ -437,6 +437,39 @@ object AliasResolver {
             }
         }
 
+        // 2b. The same two, in Indonesian. Without this "kecerahan 40" and
+        //     "volume suara 70" went to the planner and came back seconds
+        //     later - for a command whose English twin answers instantly.
+        if (lower.contains("kecerahan") || lower.contains("cerah")) {
+            Regex("""\d+""").find(lower)?.let { match ->
+                val level = match.value.toIntOrNull()?.coerceIn(0, 100) ?: 50
+                return ActionHint("SET_BRIGHTNESS", mapOf("level" to level.toString()))
+            }
+        }
+        if (lower.contains("suara") && !lower.contains("sentuh") && !lower.contains("musik")) {
+            Regex("""\d+""").find(lower)?.let { match ->
+                val level = match.value.toIntOrNull()?.coerceIn(0, 100) ?: 50
+                return ActionHint("SET_VOLUME", mapOf("type" to "media", "level" to level.toString()))
+            }
+        }
+        if (lower.contains("tulisan") || lower.contains("teks") || lower.contains("huruf")) {
+            Regex("""\d+""").find(lower)?.let { match ->
+                val percent = match.value.toIntOrNull()?.coerceIn(50, 200) ?: 100
+                return ActionHint("SET_FONT_SCALE", mapOf("percent" to percent.toString()))
+            }
+        }
+        if (lower.contains("layar mati") || lower.contains("timeout") || lower.contains("mati layar")) {
+            Regex("""(\d+)\s*(detik|menit|second|minute|min|sec)""").find(lower)?.let { match ->
+                val amount = match.groupValues[1].toIntOrNull() ?: return@let
+                val seconds = if (match.groupValues[2].startsWith("me") || match.groupValues[2].startsWith("min")) {
+                    amount * 60
+                } else {
+                    amount
+                }
+                return ActionHint("SET_SCREEN_TIMEOUT", mapOf("seconds" to seconds.toString()))
+            }
+        }
+
         // 3. Dynamic volume extraction — "set volume to 40", "volume 70", etc.
         if (lower.contains("volume") && !lower.contains("music")) {
             val numberMatch = Regex("""\d+""").find(lower)
