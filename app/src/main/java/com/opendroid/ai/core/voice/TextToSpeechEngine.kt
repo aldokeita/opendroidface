@@ -196,6 +196,23 @@ class TextToSpeechEngine(
      * not act on the result beyond that; it exists so the failure is visible in
      * debug builds rather than being a mystery on one phone.
      */
+    /**
+     * Waits, briefly, for the engine to finish connecting.
+     *
+     * [onInit] arrives asynchronously and can land after the first thing the
+     * agent wants to say - which on a fresh install is the greeting, spoken the
+     * moment hands-free opens. Without this that first utterance was dropped in
+     * silence.
+     */
+    private suspend fun awaitEngineReady(): Boolean {
+        if (isInitialized) return true
+        val deadline = SystemClock.uptimeMillis() + ENGINE_READY_TIMEOUT_MS
+        while (!isInitialized && SystemClock.uptimeMillis() < deadline) {
+            kotlinx.coroutines.delay(50)
+        }
+        return isInitialized
+    }
+
     private fun applyLanguage(text: String): Boolean {
         val engine = tts ?: return false
         val wanted = SpokenLanguage.localeFor(text, appLanguageTag ?: languageTag)
@@ -238,7 +255,10 @@ class TextToSpeechEngine(
         // speaker, keeps what is stored and shown exactly as the model wrote it.
         val text = SpeechText.forSpeech(raw)
         if (text.isBlank()) {
-            onCompletionListener?.invoke()
+            // Still reported done. Whoever is waiting on this - the agent state,
+            // the hands-free microphone - is waiting on the utterance, not on
+            // whether there turned out to be anything worth saying.
+            mainHandler.post { onCompletionListener?.invoke() }
             return
         }
         scope.launch {
@@ -256,11 +276,19 @@ class TextToSpeechEngine(
             }
 
             // Local fallback — must run on main thread
-            if (isInitialized) {
+            if (awaitEngineReady()) {
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     applyLanguage(text)
                     tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "opendroid_tts")
                 }
+            } else {
+                // Nothing is going to speak, and with nothing speaking there is
+                // no utterance to report done - so the agent would sit in
+                // Speaking forever and hands-free would never reopen the
+                // microphone. Report it here instead: a silent answer is a
+                // disappointment, a deadlocked assistant is a broken one.
+                Log.w(TAG, "No speech engine available; completing the utterance without audio.")
+                mainHandler.post { onCompletionListener?.invoke() }
             }
         }
     }
@@ -345,5 +373,8 @@ class TextToSpeechEngine(
         /** Roughly 15fps: fast enough to look like speech, cheap enough to ignore. */
         const val MOUTH_TICK_MS = 65L
         const val TAG = "TextToSpeechEngine"
+
+        /** How long to let the engine finish connecting before giving up on it. */
+        const val ENGINE_READY_TIMEOUT_MS = 3_000L
     }
 }
