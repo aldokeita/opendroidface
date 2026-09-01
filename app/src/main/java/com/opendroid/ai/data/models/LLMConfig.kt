@@ -106,12 +106,28 @@ fun LLMConfig.selectedModelFor(providerName: String): String {
         ?: (if (selectedModels == null) legacySelection else null)
         ?: ProviderCatalog.defaultModel(provider)
 
-    return if (provider == "Anthropic Claude") {
-        resolveClaudeModelId(selected)
-    } else {
-        selected.trim()
+    return when {
+        provider == "Anthropic Claude" -> resolveClaudeModelId(selected)
+        // "codex" was a placeholder written by the build that reached Codex
+        // through a bridge, where the model was the bridge's business. The
+        // phone picks the model now, so that value has to become a real id.
+        provider == "Codex" && selected.trim() == LEGACY_CODEX_MODEL ->
+            ProviderCatalog.defaultModel(provider)
+        else -> selected.trim()
     }
 }
+
+private const val LEGACY_CODEX_MODEL = "codex"
+
+/**
+ * [LLMConfig.activeModel] as the request path resolves it.
+ *
+ * The Settings field shows `activeModel` verbatim, so without this a value that
+ * the resolver silently replaces - a retired Claude id, the bridge-era Codex
+ * placeholder - stays on screen while a different model answers.
+ */
+fun LLMConfig.withResolvedActiveModel(): LLMConfig =
+    copy(activeModel = selectedModelFor(activeProvider))
 
 fun LLMConfig.withSelectedModel(providerName: String, model: String): LLMConfig {
     val provider = ProviderCatalog.canonicalName(providerName)

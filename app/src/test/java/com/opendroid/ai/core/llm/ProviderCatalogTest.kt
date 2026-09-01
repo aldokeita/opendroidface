@@ -59,6 +59,18 @@ class ProviderCatalogTest {
     }
 
     @Test
+    fun `the bridge-era Codex placeholder resolves to a real model id`() {
+        val config = LLMConfig(
+            activeProvider = "Codex",
+            activeModel = "codex",
+            selectedModels = mapOf("Codex" to "codex")
+        )
+
+        assertEquals(ProviderCatalog.defaultModel("Codex"), config.selectedModelFor("Codex"))
+        assertEquals("gpt-5-codex", config.selectedModelFor("Codex"))
+    }
+
+    @Test
     fun `untrusted persisted Claude ids never cross the provider boundary`() {
         val config = LLMConfig(
             activeProvider = "Anthropic Claude",

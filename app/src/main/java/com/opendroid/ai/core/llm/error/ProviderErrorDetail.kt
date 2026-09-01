@@ -53,6 +53,7 @@ class ProviderErrorDetail private constructor(
         OPENROUTER("OpenRouter"),
         TOGETHER_AI("Together AI"),
         CUSTOM_OPENAI("Custom OpenAI Compatible"),
+        CODEX("Codex"),
         COPILOT("Copilot API"),
         OLLAMA("Ollama")
     }

@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.opendroid.ai.core.llm.providers.CodexProvider
-import com.opendroid.ai.ui.viewmodel.CodexAuthState
+import com.opendroid.ai.core.llm.codex.CodexAccountState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -559,49 +559,11 @@ fun SettingsScreen(
                         // here and then scrolling past everything else to find
                         // where to paste the key - three separate places for one
                         // job. The other providers' keys are still down there.
-                        // Codex is reached through the bridge on the owner's
-                        // computer, so it needs that machine's address before a
-                        // token means anything.
-                        if (config.activeProvider == CodexProvider.PROVIDER_NAME) {
-                            Spacer(modifier = Modifier.height(18.dp))
-                            Text(
-                                text = "BRIDGE ADDRESS",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colors.textSecondary
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            TextField(
-                                value = config.customEndpoints[CodexProvider.PROVIDER_NAME].orEmpty(),
-                                onValueChange = {
-                                    viewModel.updateCustomEndpoint(CodexProvider.PROVIDER_NAME, it)
-                                },
-                                placeholder = {
-                                    Text(
-                                        "http://192.168.1.5:8787/v1",
-                                        color = colors.textSecondary,
-                                        fontSize = 15.sp,
-                                    )
-                                },
-                                textStyle = LocalTextStyle.current.copy(fontSize = 15.sp),
-                                singleLine = true,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = colors.background,
-                                    unfocusedContainerColor = colors.background,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    focusedTextColor = colors.textPrimary,
-                                    unfocusedTextColor = colors.textPrimary,
-                                    cursorColor = colors.accentNeonGreen,
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                            )
-                        }
-
-                        val providerNeedsKey =
-                            config.activeProvider != "Ollama" && config.activeProvider != "On-Device AI"
+                        // Codex is absent from this: it signs in instead, and
+                        // its section is below.
+                        val providerNeedsKey = config.activeProvider != "Ollama" &&
+                            config.activeProvider != "On-Device AI" &&
+                            config.activeProvider != CodexProvider.PROVIDER_NAME
                         if (providerNeedsKey) {
                             Spacer(modifier = Modifier.height(18.dp))
                             Text(
@@ -613,14 +575,7 @@ fun SettingsScreen(
                             SecureApiKeyField(
                                 value = config.apiKeys[config.activeProvider] ?: "",
                                 onValueChange = { viewModel.updateApiKey(config.activeProvider, it) },
-                                // Codex's key is the bridge's shared secret, not a
-                                // key any provider issued, and calling it an API
-                                // key sends people looking for one they cannot get.
-                                label = if (config.activeProvider == CodexProvider.PROVIDER_NAME) {
-                                    "Bridge token"
-                                } else {
-                                    "${config.activeProvider} API key"
-                                }
+                                label = "${config.activeProvider} API key"
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
@@ -2941,20 +2896,19 @@ private fun AccentPicker() {
 }
 
 /**
- * Signing in to Codex - which happens on the computer, not here.
+ * Signing in to Codex, on this phone.
  *
- * The button is honest about that in its label rather than in fine print
- * underneath it: a ChatGPT Plus plan is not an API credential, no Android app
- * can spend one, and what actually holds the session is the Codex CLI on the
- * machine running the bridge. So the button asks that machine to start its own
- * browser login, and the line above it says what that machine last reported.
+ * There is no address and no token to type: the button opens the ChatGPT
+ * consent page in a browser tab, the redirect comes back to a listener inside
+ * this app, and the session that results is the credential. It is stored in the
+ * Keystore, refreshed on its own, and can be dropped again from here.
  */
 @Composable
 private fun CodexSignIn(viewModel: SettingsViewModel) {
     val colors = LocalOpenDroidColors.current
     val auth by viewModel.codexAuth.collectAsState()
 
-    LaunchedEffect(Unit) { viewModel.checkCodexSignIn() }
+    LaunchedEffect(Unit) { viewModel.refreshCodexState() }
 
     Spacer(modifier = Modifier.height(16.dp))
     Text(
@@ -2965,18 +2919,18 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
     Spacer(modifier = Modifier.height(8.dp))
 
     val (status, statusColor) = when (val state = auth) {
-        CodexAuthState.Unknown -> "Checking the bridge…" to colors.textSecondary
-        CodexAuthState.Working -> "Waiting for the browser on your computer…" to colors.textSecondary
-        is CodexAuthState.SignedIn -> state.detail to colors.accentNeonGreen
-        is CodexAuthState.SignedOut -> state.detail to colors.accentOrange
-        is CodexAuthState.Failed -> state.message to colors.accentRed
+        CodexAccountState.Unknown -> "Checking…" to colors.textSecondary
+        CodexAccountState.Working -> "Finish the sign-in in your browser…" to colors.textSecondary
+        CodexAccountState.SignedOut -> "Not signed in." to colors.accentOrange
+        is CodexAccountState.SignedIn -> state.describe() to colors.accentNeonGreen
+        is CodexAccountState.Failed -> state.message to colors.accentRed
     }
     Text(text = status, fontSize = 12.sp, lineHeight = 17.sp, color = statusColor)
 
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-        text = "The plan belongs to the Codex CLI on your computer. This opens its " +
-            "login there; finish it in the browser on that machine.",
+        text = "Signs in with your ChatGPT account and uses its plan. No computer " +
+            "and no key involved.",
         fontSize = 11.sp,
         lineHeight = 16.sp,
         color = colors.textSecondary,
@@ -2984,14 +2938,29 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
 
     Spacer(modifier = Modifier.height(10.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        val signedIn = auth is CodexAccountState.SignedIn
         TextButton(
             onClick = { viewModel.startCodexSignIn() },
-            enabled = auth != CodexAuthState.Working,
+            enabled = auth != CodexAccountState.Working,
         ) {
-            Text("Sign in on computer", fontSize = 12.sp, color = colors.accentNeonGreen)
+            Text(
+                text = if (signedIn) "Sign in again" else "Sign in with ChatGPT",
+                fontSize = 12.sp,
+                color = colors.accentNeonGreen
+            )
         }
-        TextButton(onClick = { viewModel.checkCodexSignIn() }) {
-            Text("Re-check", fontSize = 12.sp, color = colors.textSecondary)
+        if (signedIn) {
+            TextButton(onClick = { viewModel.signOutOfCodex() }) {
+                Text("Sign out", fontSize = 12.sp, color = colors.textSecondary)
+            }
         }
     }
+}
+
+private fun CodexAccountState.SignedIn.describe(): String {
+    val who = email.ifBlank { "Signed in" }
+    val plan = planType.takeIf { it.isNotBlank() }
+        ?.replaceFirstChar { it.uppercase() }
+        ?: return who
+    return "$who · ChatGPT $plan"
 }

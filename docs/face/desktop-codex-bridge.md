@@ -1,5 +1,13 @@
 # Menghubungkan OpenDroidFace ke GPT lewat Codex CLI
 
+> **Tidak lagi diperlukan untuk provider Codex.** Provider **Codex** di layar Settings kini
+> masuk lewat OAuth langsung di HP — tanpa PC, tanpa alamat, tanpa token. Lihat
+> `docs/face/codex-sign-in.md`.
+>
+> Dokumen ini tetap ada untuk kasus lain: menjalankan Codex CLI milik PC sebagai endpoint
+> **Custom OpenAI Compatible**, misalnya supaya jawaban dihasilkan di mesin yang punya akses
+> ke repo di PC itu.
+
 Ringkasnya: PC menjalankan jembatan kecil yang bicara protokol OpenAI (`POST /v1/chat/completions`)
 dan meneruskan tiap permintaan ke `codex exec`. HP memakai provider **Custom OpenAI Compatible**
 dan menunjuk ke IP LAN PC. Tidak butuh API key OpenAI — memakai akun ChatGPT yang sudah

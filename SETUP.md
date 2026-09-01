@@ -50,7 +50,7 @@ sdk.dir=C\:\\Users\\ALDO\\Android\\Sdk
 API key provider cloud diisi dari dalam aplikasi (layar Settings), bukan dari Gradle.
 
 Provider yang praktis untuk pengembangan wajah:
-- **Codex bridge** di PC — lihat `docs/face/desktop-codex-bridge.md`
+- **Codex** — masuk dengan akun ChatGPT langsung dari HP, lihat `docs/face/codex-sign-in.md`
 - **Ollama** di PC — base URL `http://10.0.2.2:11434` (emulator) atau IP LAN (perangkat fisik)
 - **On-device** (`Gemma 3n E2B`) — tanpa jaringan sama sekali, butuh perangkat ≥6GB RAM
 

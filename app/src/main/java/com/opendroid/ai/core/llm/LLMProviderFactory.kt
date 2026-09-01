@@ -6,6 +6,7 @@ import com.opendroid.ai.core.agent.ActionSchema
 import com.opendroid.ai.core.agent.DeviceStateProvider
 import com.opendroid.ai.core.agent.IntentClassifier
 import com.opendroid.ai.core.agent.QueryComplexity
+import com.opendroid.ai.core.llm.codex.CodexAuthManager
 import com.opendroid.ai.core.llm.prompts.SystemPrompts
 import com.opendroid.ai.core.llm.error.LLMErrorMapper
 import com.opendroid.ai.core.llm.error.SecretRegistry
@@ -41,6 +42,7 @@ class LLMProviderFactory @Inject constructor(
     private val copilotProvider: Provider<CopilotProvider>,
     private val customOpenAIProvider: Provider<CustomOpenAIProvider>,
     private val codexProvider: Provider<CodexProvider>,
+    private val codexAuthManager: CodexAuthManager,
     private val gemmaProvider: Provider<GemmaProvider>,
     private val liteRTLMProvider: Provider<LiteRTLMProvider>,
     private val hybridOnDeviceProvider: Provider<HybridOnDeviceProvider>,
@@ -121,7 +123,9 @@ class LLMProviderFactory @Inject constructor(
         return when (provider) {
             "Ollama" -> config.ollamaUrl.isNotBlank()
             "Copilot API" -> config.copilotUrl.isNotBlank()
-            "Codex",
+            // Nothing is typed in for Codex; what makes it usable is a stored
+            // ChatGPT session.
+            "Codex" -> codexAuthManager.isSignedIn()
             "Custom OpenAI Compatible" ->
                 config.customEndpoints[provider].orEmpty().isNotBlank() &&
                     config.apiKeys[provider].orEmpty().isNotBlank()
