@@ -15,7 +15,9 @@
 
 package com.opendroid.ai.core.llm.providers
 
+import android.util.Log
 import com.google.gson.Gson
+import com.opendroid.ai.BuildConfig
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.opendroid.ai.core.llm.LLMProvider
@@ -167,11 +169,30 @@ class CodexProvider @Inject constructor(
         request: LLMRequest,
         bearer: String,
         model: String
+    ): Throwable {
+        if (BuildConfig.DEBUG) {
+            // Debug builds only. The Codex backend answers a rejected client
+            // identity and an out-of-reach model with the same status, and the
+            // difference is only in the body - which the safe detail strips.
+            val peeked = runCatching { response.peekBody(2048).string() }.getOrDefault("")
+            Log.w(TAG, "Codex HTTP ${response.code}: ${peeked.take(1000)}")
+        }
+        return failureFor(response, request, bearer, model)
+    }
+
+    private fun failureFor(
+        response: Response,
+        request: LLMRequest,
+        bearer: String,
+        model: String
     ): Throwable = when (response.code) {
-        // The session is real but the backend will not take it: an expired
-        // grant, or a plan that does not include Codex. Either way the fix is
-        // to sign in again, which is what AuthMissing tells the UI to say.
-        401, 403 -> LLMErrorMapper.authMissing(name, model)
+        // An expired or revoked grant. Signing in again is the only fix, which
+        // is what AuthMissing tells the UI to say.
+        401 -> LLMErrorMapper.authMissing(name, model)
+        // 403 is NOT routed here: the backend uses it for a rejected client
+        // identity and for a model the account may not call, and collapsing
+        // those into "sign in again" sends people to a screen that will not
+        // help. The safe detail carries the vendor's own code instead.
         else -> response.toSafeProviderException(
             provider = ProviderErrorDetail.Provider.CODEX,
             request = request,
@@ -194,10 +215,10 @@ class CodexProvider @Inject constructor(
             "input" to request.messages.map(::toInputItem),
             "store" to false,
             "stream" to true,
-            "include" to listOf("reasoning.encrypted_content"),
-            "max_output_tokens" to request.maxTokens
+            "include" to listOf("reasoning.encrypted_content")
         )
-        // No temperature: the Codex models are reasoning models and reject it.
+        // Neither temperature nor max_output_tokens: this endpoint answers
+        // "Unsupported parameter" for both. Length is the model's to decide.
     }
 
     private fun toInputItem(message: ChatMessage): Map<String, Any> {
@@ -250,5 +271,6 @@ class CodexProvider @Inject constructor(
         private const val DATA_PREFIX = "data:"
         private const val READ_TIMEOUT_SECONDS = 180L
         private const val DEFAULT_INSTRUCTIONS = "You are a helpful assistant."
+        private const val TAG = "CodexProvider"
     }
 }
