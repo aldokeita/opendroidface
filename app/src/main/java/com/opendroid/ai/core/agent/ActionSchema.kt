@@ -184,6 +184,35 @@ object ActionSchema {
             category = ActionCategory.SYSTEM
         ),
         ActionDefinition(
+            name = "TOGGLE_AUTO_ROTATE",
+            description = "Turns screen auto-rotate on or off. Omit state to flip whatever it is now.",
+            params = listOf(
+                ParamDefinition("state", ParamType.ENUM, false, "on, off or toggle", listOf("on", "off", "toggle"), "toggle")
+            ),
+            examples = listOf("turn on auto rotate", "disable rotation", "nyalakan rotasi layar", "matikan putar otomatis"),
+            category = ActionCategory.SYSTEM,
+            isSimple = true
+        ),
+        ActionDefinition(
+            name = "SET_FONT_SCALE",
+            description = "Sets the system text size as a percentage of normal, between 50 and 200.",
+            params = listOf(
+                ParamDefinition("percent", ParamType.INT, true, "Text size, 100 being normal")
+            ),
+            examples = listOf("make the text bigger", "set text size to 130", "perbesar tulisan", "besarkan teks jadi 150"),
+            category = ActionCategory.SYSTEM
+        ),
+        ActionDefinition(
+            name = "TOGGLE_HAPTIC_FEEDBACK",
+            description = "Turns touch vibration on or off. Omit state to flip whatever it is now.",
+            params = listOf(
+                ParamDefinition("state", ParamType.ENUM, false, "on, off or toggle", listOf("on", "off", "toggle"), "toggle")
+            ),
+            examples = listOf("turn off touch vibration", "enable haptics", "matikan getar sentuh"),
+            category = ActionCategory.SYSTEM,
+            isSimple = true
+        ),
+        ActionDefinition(
             name = "SET_SCREEN_TIMEOUT",
             description = "Sets how long the screen stays on before sleeping. Convert whatever the user says into seconds.",
             params = listOf(

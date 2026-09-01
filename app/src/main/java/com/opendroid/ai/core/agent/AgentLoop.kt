@@ -1577,6 +1577,7 @@ class AgentLoop @Inject constructor(
             // Build a natural, human-sounding summary from step results
             val stepSummaries = plan.steps
                 .filter { it.status == StepStatus.COMPLETED && !it.result.isNullOrBlank() }
+                .filterNot { AgentPhrases.isPlumbing(it.action, plan.steps.size) }
                 .mapNotNull { step ->
                     val result = step.result ?: return@mapNotNull null
                     when {

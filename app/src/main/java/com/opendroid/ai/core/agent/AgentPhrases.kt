@@ -98,6 +98,24 @@ object AgentPhrases {
         if (indonesian) "Perlu persetujuanmu." else "This needs your approval."
 
     /**
+     * Whether a step's result is machinery rather than an answer.
+     *
+     * The summary quotes what each step reported, and the interface primitives
+     * report to a log, not to a person: "Waited 2000ms", "Tapped on
+     * 'Sayangku'!". Read aloud that is the assistant narrating its own hands.
+     * Nobody asked how it did it.
+     *
+     * Opening an app counts as plumbing only inside a longer plan, where it is
+     * a means to somewhere else. On its own it IS the request.
+     */
+    fun isPlumbing(action: String, stepsInPlan: Int): Boolean = when (action) {
+        "WAIT", "CLICK_TEXT", "CLICK_ID", "CLICK_COORDINATES",
+        "TYPE_TEXT", "TYPE_ID", "SCROLL", "PRESS_ENTER" -> true
+        "OPEN_APP" -> stepsInPlan > 1
+        else -> false
+    }
+
+    /**
      * Translates a step's own result line, when it recognises one.
      *
      * The executors in `actions/` report what they did in English - "WhatsApp

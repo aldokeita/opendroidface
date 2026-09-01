@@ -59,10 +59,22 @@ class SpeechRecognitionEngine(
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, tag)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            // Prolong listening limits to avoid early cut-offs
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+            // Two different waits, pulling in opposite directions.
+            //
+            // The minimum length is how long the recognizer keeps listening
+            // before it will consider anything final, and it was three seconds
+            // - so "nyalakan senter" sat there for three seconds after the
+            // sentence had ended. It is the shorter one now.
+            //
+            // The silence lengths are how long a PAUSE has to last before the
+            // recognizer decides the sentence is over, and those are the ones
+            // that were cutting people off mid-thought. They are longer.
+            //
+            // Both are advisory: Google's recognizer honours them on some
+            // builds and ignores them on others.
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1200L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 4500L)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4500L)
         }
     }
 

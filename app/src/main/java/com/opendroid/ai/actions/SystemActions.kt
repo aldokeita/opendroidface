@@ -161,6 +161,9 @@ class SystemActions @Inject constructor(
         SetVolumeAction(),
         SetBrightnessAction(),
         SetScreenTimeoutAction(),
+        ToggleAutoRotateAction(),
+        SetFontScaleAction(),
+        ToggleHapticFeedbackAction(),
         OpenAppAction(),
         LockScreenAction(),
         RestartDeviceAction(),
@@ -404,6 +407,79 @@ class SystemActions @Inject constructor(
             seconds == 60 -> "1 minute"
             seconds % 60 == 0 -> "${seconds / 60} minutes"
             else -> "$seconds seconds"
+        }
+    }
+
+    /**
+     * Screen rotation. One of the settings people reach for most and one of the
+     * few this app can actually write: WRITE_SETTINGS covers it, where airplane
+     * mode, NFC and location all need permissions no sideloaded app can hold.
+     */
+    private class ToggleAutoRotateAction : Action {
+        override val name: String = "TOGGLE_AUTO_ROTATE"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            val requested = params["state"]?.lowercase()
+            return writeSystemSetting(context, "auto-rotate") {
+                val current = Settings.System.getInt(
+                    context.contentResolver,
+                    Settings.System.ACCELEROMETER_ROTATION,
+                    0
+                ) == 1
+                val target = when (requested) {
+                    "on", "true", "enable", "nyala", "hidup" -> true
+                    "off", "false", "disable", "mati" -> false
+                    else -> !current
+                }
+                Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.ACCELEROMETER_ROTATION,
+                    if (target) 1 else 0
+                )
+                "Auto-rotate is ${if (target) "on" else "off"}."
+            }
+        }
+    }
+
+    /** Text size, for eyes that need it larger. */
+    private class SetFontScaleAction : Action {
+        override val name: String = "SET_FONT_SCALE"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            val percent = params["percent"]?.toIntOrNull()?.coerceIn(50, 200)
+                ?: return ActionResult(false, null, "No text size was given.")
+            return writeSystemSetting(context, "text size") {
+                Settings.System.putFloat(
+                    context.contentResolver,
+                    Settings.System.FONT_SCALE,
+                    percent / 100f
+                )
+                "Text size is set to $percent%."
+            }
+        }
+    }
+
+    /** Whether the keyboard and buttons buzz under the finger. */
+    private class ToggleHapticFeedbackAction : Action {
+        override val name: String = "TOGGLE_HAPTIC_FEEDBACK"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            val requested = params["state"]?.lowercase()
+            return writeSystemSetting(context, "touch vibration") {
+                val current = Settings.System.getInt(
+                    context.contentResolver,
+                    Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                    1
+                ) == 1
+                val target = when (requested) {
+                    "on", "true", "enable", "nyala", "hidup" -> true
+                    "off", "false", "disable", "mati" -> false
+                    else -> !current
+                }
+                Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                    if (target) 1 else 0
+                )
+                "Touch vibration is ${if (target) "on" else "off"}."
+            }
         }
     }
 
@@ -1339,4 +1415,37 @@ class SystemActions @Inject constructor(
             }
         }
     }
+}
+
+/**
+ * The shared shape of every WRITE_SETTINGS change: do it, or send the user to
+ * the one switch that would let it happen and say so plainly.
+ *
+ * Top level rather than a method, because the actions are nested classes and a
+ * nested class cannot reach its outer class's members.
+ */
+private inline fun writeSystemSetting(
+    context: Context,
+    what: String,
+    write: () -> String,
+): ActionResult = try {
+    if (Settings.System.canWrite(context)) {
+        ActionResult(true, write(), null)
+    } else {
+        val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+            data = "package:${context.packageName}".toUri()
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        ActionResult(
+            false,
+            "I need your permission to change system settings. I've opened the settings page — " +
+                "just flip the switch to allow OpenDroid, then try again!",
+            null,
+            true
+        )
+    }
+} catch (e: Exception) {
+    Log.e("SystemSetting", "Failed to change $what: ${e.localizedMessage}")
+    ActionResult(false, null, "Couldn't change the $what right now. Please try again.")
 }

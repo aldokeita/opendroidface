@@ -91,6 +91,27 @@ class AgentPhrasesTest {
     }
 
     @Test
+    fun `the interface primitives never reach the spoken summary`() {
+        // "Waited 2000ms", "Tapped on 'Sayangku'!" - the assistant narrating
+        // its own hands. Nobody asked how it did it.
+        listOf("WAIT", "CLICK_TEXT", "TYPE_TEXT", "SCROLL", "PRESS_ENTER", "CLICK_ID")
+            .forEach { action -> assertTrue(action, AgentPhrases.isPlumbing(action, stepsInPlan = 3)) }
+    }
+
+    @Test
+    fun `opening an app is plumbing only when it leads somewhere else`() {
+        // On its own it IS the request; inside a longer plan it is a means.
+        assertFalse(AgentPhrases.isPlumbing("OPEN_APP", stepsInPlan = 1))
+        assertTrue(AgentPhrases.isPlumbing("OPEN_APP", stepsInPlan = 3))
+    }
+
+    @Test
+    fun `an action that answers something is never filtered out`() {
+        listOf("GET_SCREEN_TEXT", "READ_MESSAGES", "GET_WEATHER", "SET_ALARM")
+            .forEach { action -> assertFalse(action, AgentPhrases.isPlumbing(action, stepsInPlan = 3)) }
+    }
+
+    @Test
     fun `an unknown action still produces something sayable`() {
         val line = AgentPhrases.preSpeech("SOME_NEW_ACTION", indonesian = true)
 

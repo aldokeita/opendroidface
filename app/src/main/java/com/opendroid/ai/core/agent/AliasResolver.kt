@@ -210,6 +210,46 @@ object AliasResolver {
         "whatsapp"          to ActionHint("OPEN_APP", mapOf("appName" to "WhatsApp")),
         "open whatsapp"     to ActionHint("OPEN_APP", mapOf("appName" to "WhatsApp")),
 
+        // ── DEVICE SETTINGS, IN BOTH LANGUAGES ───────────
+        // These resolve without an LLM round trip, which is the difference
+        // between an assistant that answers and one that is waited for. It
+        // matters most for the people who need this app most: someone driving
+        // their phone entirely by voice cannot also tap "try again".
+        "auto rotate"        to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "toggle")),
+        "rotate screen"      to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "toggle")),
+        "turn on auto rotate" to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "on")),
+        "turn off auto rotate" to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "off")),
+        "rotasi layar"       to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "toggle")),
+        "putar otomatis"     to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "toggle")),
+        "nyalakan rotasi layar" to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "on")),
+        "matikan rotasi layar" to ActionHint("TOGGLE_AUTO_ROTATE", mapOf("state" to "off")),
+
+        "touch vibration"    to ActionHint("TOGGLE_HAPTIC_FEEDBACK", mapOf("state" to "toggle")),
+        "haptics"            to ActionHint("TOGGLE_HAPTIC_FEEDBACK", mapOf("state" to "toggle")),
+        "getar sentuh"       to ActionHint("TOGGLE_HAPTIC_FEEDBACK", mapOf("state" to "toggle")),
+        "matikan getar sentuh" to ActionHint("TOGGLE_HAPTIC_FEEDBACK", mapOf("state" to "off")),
+
+        "nyalakan senter"    to ActionHint("TOGGLE_FLASHLIGHT", mapOf("state" to "on")),
+        "matikan senter"     to ActionHint("TOGGLE_FLASHLIGHT", mapOf("state" to "off")),
+        "senter"             to ActionHint("TOGGLE_FLASHLIGHT", mapOf("state" to "toggle")),
+        "nyalakan wifi"      to ActionHint("TOGGLE_WIFI", mapOf("state" to "on")),
+        "matikan wifi"       to ActionHint("TOGGLE_WIFI", mapOf("state" to "off")),
+        "nyalakan bluetooth" to ActionHint("TOGGLE_BLUETOOTH", mapOf("state" to "on")),
+        "matikan bluetooth"  to ActionHint("TOGGLE_BLUETOOTH", mapOf("state" to "off")),
+        "nyalakan hotspot"   to ActionHint("TOGGLE_HOTSPOT", mapOf("state" to "on")),
+        "matikan hotspot"    to ActionHint("TOGGLE_HOTSPOT", mapOf("state" to "off")),
+        "nyalakan data"      to ActionHint("TOGGLE_MOBILE_DATA", mapOf("state" to "on")),
+        "matikan data"       to ActionHint("TOGGLE_MOBILE_DATA", mapOf("state" to "off")),
+        "mode senyap"        to ActionHint("TOGGLE_DND", mapOf("state" to "on")),
+        "jangan ganggu"      to ActionHint("TOGGLE_DND", mapOf("state" to "toggle")),
+        "kunci layar"        to ActionHint("LOCK_SCREEN", emptyMap()),
+        "tangkapan layar"    to ActionHint("TAKE_SCREENSHOT", emptyMap()),
+        "screenshot layar"   to ActionHint("TAKE_SCREENSHOT", emptyMap()),
+        "buka pengaturan"    to ActionHint("OPEN_APP", mapOf("appName" to "Settings")),
+        "buka kamera"        to ActionHint("OPEN_APP", mapOf("appName" to "Camera")),
+        "buka whatsapp"      to ActionHint("OPEN_APP", mapOf("appName" to "WhatsApp")),
+        "buka peta"          to ActionHint("OPEN_APP", mapOf("appName" to "Google Maps")),
+
         // ── CLIPBOARD ────────────────────────────────────
         "clear clipboard"   to ActionHint("CLEAR_CLIPBOARD", emptyMap()),
         "empty clipboard"   to ActionHint("CLEAR_CLIPBOARD", emptyMap()),
