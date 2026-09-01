@@ -173,7 +173,44 @@
     <string name="memory_empty_graph">No Knowledge Graph entities matching filter.</string>
     <string name="memory_empty_session">No messages in current working session.</string>
     <string name="memory_empty_facts">No semantic facts indexed in this category.</string>
+
+    <!-- Macros and routines -->
+    <string name="macros_title">Macros</string>
+    <string name="macros_new">New macro</string>
+    <string name="macros_create">Create Macro</string>
+    <string name="macros_save">Save Macro</string>
+    <string name="macros_name">Macro Name</string>
+    <string name="macros_trigger_phrase">Voice TriggerPhrase</string>
+    <string name="macros_step_desc">Step Description</string>
+    <string name="macros_action_type">Action Type (e.g. system/brightness)</string>
+    <string name="macros_param_key">Param Key</string>
+    <string name="macros_param_value">Param Value</string>
+    <string name="macros_fallback">Fallback Action (optional)</string>
+    <string name="macros_fallback_hint">Runs once if the primary action fails.</string>
+    <string name="macros_add_step_details">Add step details:</string>
+    <string name="macros_add_step">Add Step to List</string>
+    <string name="macros_expand">Expand steps</string>
+    <string name="macros_delete">Delete Macro</string>
+    <string name="macros_none">No macros yet</string>
+    <string name="macros_none_hint">Save a completed task from Logs, or add one with the + button.</string>
+    <string name="common_discard">Discard</string>
+    <string name="macros_view_routines">View Routines</string>
+    <string name="routines_title">Habits &amp; routines</string>
+    <string name="routines_subtitle">Detect repeated daily habits (Gmail, Calendar, Slack) &amp; automate morning routines.</string>
+    <string name="routines_discovered">DISCOVERED HABITS &amp; SUGGESTIONS</string>
+    <string name="routines_none">No routines yet</string>
+    <string name="routines_none_hint">As you use apps like Gmail, Calendar and Slack, OpenDroid spots the patterns you repeat and suggests them here.</string>
+    <string name="routines_templates">SAMPLE ROUTINE TEMPLATES</string>
+    <string name="routines_habit_learning">Habit learning</string>
+    <string name="routines_detected">ROUTINE DETECTED</string>
+    <string name="routines_approve">Approve &amp; Automate</string>
+    <string name="routines_run_now">Run Routine Now</string>
+    <string name="routines_scan">Scan Habits</string>
+    <string name="routines_activate">Activate</string>
+    <string name="routines_running">Running…</string>
 </resources>
+
+
 
 
 

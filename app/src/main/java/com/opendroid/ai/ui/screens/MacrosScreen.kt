@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.models.Macro
@@ -64,7 +66,7 @@ fun MacrosScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Macros",
+                        text = stringResource(R.string.macros_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -77,7 +79,7 @@ fun MacrosScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.common_back),
                                 tint = colors.textSecondary,
                             )
                         }
@@ -89,7 +91,7 @@ fun MacrosScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Create Macro",
+                            contentDescription = stringResource(R.string.macros_create),
                             tint = colors.accentNeonGreen
                         )
                     }
@@ -131,13 +133,13 @@ fun MacrosScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Habits & routines",
+                                text = stringResource(R.string.routines_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Detect repeated daily habits (Gmail, Calendar, Slack) & automate morning routines.",
+                                text = stringResource(R.string.routines_subtitle),
                                 fontSize = 11.sp,
                                 color = colors.textSecondary,
                                 lineHeight = 16.sp
@@ -145,7 +147,7 @@ fun MacrosScreen(
                         }
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "View Routines",
+                            contentDescription = stringResource(R.string.macros_view_routines),
                             tint = colors.textSecondary
                         )
                     }
@@ -162,7 +164,7 @@ fun MacrosScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "New macro",
+                                text = stringResource(R.string.macros_new),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
@@ -171,7 +173,7 @@ fun MacrosScreen(
                             OutlinedTextField(
                                 value = newMacroName,
                                 onValueChange = { newMacroName = it },
-                                label = { Text("Macro Name", fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.macros_name), fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -185,7 +187,7 @@ fun MacrosScreen(
                             OutlinedTextField(
                                 value = newMacroTrigger,
                                 onValueChange = { newMacroTrigger = it },
-                                label = { Text("Voice TriggerPhrase", fontSize = 12.sp) },
+                                label = { Text(stringResource(R.string.macros_trigger_phrase), fontSize = 12.sp) },
                                 singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -216,13 +218,13 @@ fun MacrosScreen(
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
-                            Text("Add step details:", fontSize = 11.sp, color = colors.textSecondary)
+                            Text(stringResource(R.string.macros_add_step_details), fontSize = 11.sp, color = colors.textSecondary)
                             Spacer(modifier = Modifier.height(6.dp))
                             
                             OutlinedTextField(
                                 value = stepDesc,
                                 onValueChange = { stepDesc = it },
-                                label = { Text("Step Description", fontSize = 11.sp) },
+                                label = { Text(stringResource(R.string.macros_step_desc), fontSize = 11.sp) },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
                                     unfocusedBorderColor = colors.borderColor,
@@ -235,7 +237,7 @@ fun MacrosScreen(
                             OutlinedTextField(
                                 value = stepAction,
                                 onValueChange = { stepAction = it },
-                                label = { Text("Action Type (e.g. system/brightness)", fontSize = 11.sp) },
+                                label = { Text(stringResource(R.string.macros_action_type), fontSize = 11.sp) },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
                                     unfocusedBorderColor = colors.borderColor,
@@ -249,7 +251,7 @@ fun MacrosScreen(
                                 OutlinedTextField(
                                     value = stepParamKey,
                                     onValueChange = { stepParamKey = it },
-                                    label = { Text("Param Key", fontSize = 11.sp) },
+                                    label = { Text(stringResource(R.string.macros_param_key), fontSize = 11.sp) },
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = colors.accentNeonGreen,
                                         unfocusedBorderColor = colors.borderColor,
@@ -262,7 +264,7 @@ fun MacrosScreen(
                                 OutlinedTextField(
                                     value = stepParamVal,
                                     onValueChange = { stepParamVal = it },
-                                    label = { Text("Param Value", fontSize = 11.sp) },
+                                    label = { Text(stringResource(R.string.macros_param_value), fontSize = 11.sp) },
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = colors.accentNeonGreen,
                                         unfocusedBorderColor = colors.borderColor,
@@ -276,9 +278,9 @@ fun MacrosScreen(
                             OutlinedTextField(
                                 value = stepFallback,
                                 onValueChange = { stepFallback = it },
-                                label = { Text("Fallback Action (optional)", fontSize = 11.sp) },
+                                label = { Text(stringResource(R.string.macros_fallback), fontSize = 11.sp) },
                                 supportingText = {
-                                    Text("Runs once if the primary action fails.", fontSize = 10.sp)
+                                    Text(stringResource(R.string.macros_fallback_hint), fontSize = 10.sp)
                                 },
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = colors.accentNeonGreen,
@@ -315,7 +317,7 @@ fun MacrosScreen(
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.align(Alignment.End)
                             ) {
-                                Text("Add Step to List", fontSize = 11.sp)
+                                Text(stringResource(R.string.macros_add_step), fontSize = 11.sp)
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -329,7 +331,7 @@ fun MacrosScreen(
                                         macroSteps.clear()
                                     }
                                 ) {
-                                    Text("Discard", color = colors.accentRed)
+                                    Text(stringResource(R.string.common_discard), color = colors.accentRed)
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(
@@ -352,7 +354,7 @@ fun MacrosScreen(
                                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Text("Save Macro", fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.macros_save), fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -397,13 +399,13 @@ fun MacrosScreen(
                         }
                         Spacer(modifier = Modifier.height(18.dp))
                         Text(
-                            text = "No macros yet",
+                            text = stringResource(R.string.macros_none),
                             style = MaterialTheme.typography.titleMedium,
                             color = colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Save a completed task from Logs, or add one with the + button.",
+                            text = stringResource(R.string.macros_none_hint),
                             fontSize = 13.sp,
                             lineHeight = 18.sp,
                             color = colors.textSecondary,
@@ -478,7 +480,7 @@ fun MacroCard(
                 )
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Expand steps",
+                    contentDescription = stringResource(R.string.macros_expand),
                     tint = colors.textSecondary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -510,9 +512,9 @@ fun MacroCard(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.align(Alignment.End)
                         ) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(16.dp))
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.common_delete), modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Delete Macro", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.macros_delete), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -520,3 +522,5 @@ fun MacroCard(
         }
     }
 }
+
+

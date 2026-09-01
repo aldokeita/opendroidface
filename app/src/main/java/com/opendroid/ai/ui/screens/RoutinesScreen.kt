@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.opendroid.ai.data.models.HabitRoutine
@@ -49,7 +51,7 @@ fun RoutinesScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Habits & routines",
+                        text = stringResource(R.string.routines_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = AppTheme.colors.textPrimary,
@@ -61,7 +63,7 @@ fun RoutinesScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = AppTheme.colors.textSecondary
                         )
                     }
@@ -73,7 +75,7 @@ fun RoutinesScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Scan Habits",
+                            contentDescription = stringResource(R.string.routines_scan),
                             tint = AppTheme.colors.accentNeonGreen
                         )
                     }
@@ -96,7 +98,7 @@ fun RoutinesScreen(
             if (suggestedRoutines.isNotEmpty()) {
                 item {
                     Text(
-                        text = "DISCOVERED HABITS & SUGGESTIONS",
+                        text = stringResource(R.string.routines_discovered),
                         style = MaterialTheme.typography.labelSmall,
                         color = AppTheme.colors.textSecondary,
                         modifier = Modifier.padding(top = 8.dp)
@@ -154,13 +156,13 @@ fun RoutinesScreen(
                         }
                         Spacer(modifier = Modifier.height(18.dp))
                         Text(
-                            text = "No routines yet",
+                            text = stringResource(R.string.routines_none),
                             style = MaterialTheme.typography.titleMedium,
                             color = AppTheme.colors.textPrimary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "As you use apps like Gmail, Calendar and Slack, OpenDroid spots the patterns you repeat and suggests them here.",
+                            text = stringResource(R.string.routines_none_hint),
                             color = AppTheme.colors.textSecondary,
                             fontSize = 13.sp,
                             lineHeight = 18.sp,
@@ -198,7 +200,7 @@ fun RoutinesScreen(
             // ── 3. PRE-BUILT TEMPLATES ──────────────────────────────────
             item {
                 Text(
-                    text = "SAMPLE ROUTINE TEMPLATES",
+                    text = stringResource(R.string.routines_templates),
                         style = MaterialTheme.typography.labelSmall,
                         color = AppTheme.colors.textSecondary,
                     modifier = Modifier.padding(top = 8.dp)
@@ -259,7 +261,7 @@ fun RoutinesScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Habit learning",
+                                text = stringResource(R.string.routines_habit_learning),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = AppTheme.colors.textPrimary
                             )
@@ -302,7 +304,7 @@ fun SuggestedRoutineCard(
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
-                        text = "ROUTINE DETECTED",
+                        text = stringResource(R.string.routines_detected),
                         color = AppTheme.colors.accentNeonGreen,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -434,7 +436,7 @@ fun SuggestedRoutineCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Approve & Automate",
+                        text = stringResource(R.string.routines_approve),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
@@ -535,7 +537,7 @@ fun ActiveRoutineCard(
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Running...", color = AppTheme.colors.accentNeonGreen, fontSize = 12.sp)
+                        Text(stringResource(R.string.routines_running), color = AppTheme.colors.accentNeonGreen, fontSize = 12.sp)
                     } else {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
@@ -545,7 +547,7 @@ fun ActiveRoutineCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Run Routine Now",
+                            text = stringResource(R.string.routines_run_now),
                             color = AppTheme.colors.accentNeonGreen,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
@@ -556,7 +558,7 @@ fun ActiveRoutineCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.common_delete),
                         tint = AppTheme.colors.accentRed
                     )
                 }
@@ -609,10 +611,12 @@ fun RoutineTemplateCard(
             IconButton(onClick = onActivate) {
                 Icon(
                     imageVector = Icons.Default.AddCircleOutline,
-                    contentDescription = "Activate",
+                    contentDescription = stringResource(R.string.routines_activate),
                     tint = AppTheme.colors.accentNeonGreen
                 )
             }
         }
     }
 }
+
+

@@ -177,7 +177,43 @@
     <string name="memory_empty_graph">Tidak ada entitas yang cocok dengan filter ini.</string>
     <string name="memory_empty_session">Belum ada pesan di sesi yang sedang berjalan.</string>
     <string name="memory_empty_facts">Belum ada fakta di kategori ini.</string>
+
+    <!-- Makro dan rutinitas -->
+    <string name="macros_title">Makro</string>
+    <string name="macros_new">Makro baru</string>
+    <string name="macros_create">Buat makro</string>
+    <string name="macros_save">Simpan makro</string>
+    <string name="macros_name">Nama makro</string>
+    <string name="macros_trigger_phrase">Kalimat pemicu suara</string>
+    <string name="macros_step_desc">Keterangan langkah</string>
+    <string name="macros_action_type">Jenis aksi (mis. system/brightness)</string>
+    <string name="macros_param_key">Nama parameter</string>
+    <string name="macros_param_value">Isi parameter</string>
+    <string name="macros_fallback">Aksi cadangan (opsional)</string>
+    <string name="macros_fallback_hint">Dijalankan sekali kalau aksi utamanya gagal.</string>
+    <string name="macros_add_step_details">Isi detail langkahnya:</string>
+    <string name="macros_add_step">Tambahkan ke daftar</string>
+    <string name="macros_expand">Buka daftar langkah</string>
+    <string name="macros_delete">Hapus makro</string>
+    <string name="macros_none">Belum ada makro</string>
+    <string name="macros_none_hint">Simpan tugas yang sudah selesai dari Log, atau tambah sendiri lewat tombol +.</string>
+    <string name="common_discard">Buang</string>
+    <string name="macros_view_routines">Lihat rutinitas</string>
+    <string name="routines_title">Kebiasaan &amp; rutinitas</string>
+    <string name="routines_subtitle">Kenali kebiasaan harian yang berulang (Gmail, Calendar, Slack) &amp; otomatiskan rutinitas pagimu.</string>
+    <string name="routines_discovered">KEBIASAAN &amp; SARAN YANG DITEMUKAN</string>
+    <string name="routines_none">Belum ada rutinitas</string>
+    <string name="routines_none_hint">Sambil kamu memakai aplikasi seperti Gmail, Calendar, dan Slack, OpenDroid memperhatikan pola yang kamu ulang lalu menyarankannya di sini.</string>
+    <string name="routines_templates">CONTOH RUTINITAS</string>
+    <string name="routines_habit_learning">Belajar kebiasaan</string>
+    <string name="routines_detected">RUTINITAS TERDETEKSI</string>
+    <string name="routines_approve">Setujui &amp; otomatiskan</string>
+    <string name="routines_run_now">Jalankan sekarang</string>
+    <string name="routines_scan">Cari kebiasaan</string>
+    <string name="routines_activate">Aktifkan</string>
+    <string name="routines_running">Sedang jalan…</string>
 </resources>
+
 
 
 
