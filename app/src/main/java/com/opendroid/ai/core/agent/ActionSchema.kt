@@ -184,6 +184,57 @@ object ActionSchema {
             category = ActionCategory.SYSTEM
         ),
         ActionDefinition(
+            name = "TOGGLE_AUTO_BRIGHTNESS",
+            description = "Turns adaptive (automatic) screen brightness on or off.",
+            params = listOf(
+                ParamDefinition("state", ParamType.ENUM, false, "on, off or toggle", listOf("on", "off", "toggle"), "toggle")
+            ),
+            examples = listOf("turn off adaptive brightness", "auto brightness on", "matikan kecerahan otomatis"),
+            category = ActionCategory.SYSTEM,
+            isSimple = true
+        ),
+        ActionDefinition(
+            name = "TOGGLE_TOUCH_SOUNDS",
+            description = "Turns the keyboard and interface click sounds on or off.",
+            params = listOf(
+                ParamDefinition("state", ParamType.ENUM, false, "on, off or toggle", listOf("on", "off", "toggle"), "toggle")
+            ),
+            examples = listOf("turn off touch sounds", "matikan suara sentuh", "matikan bunyi keyboard"),
+            category = ActionCategory.SYSTEM,
+            isSimple = true
+        ),
+        ActionDefinition(
+            name = "TOGGLE_VIBRATE_ON_RING",
+            description = "Whether the phone also vibrates when it rings.",
+            params = listOf(
+                ParamDefinition("state", ParamType.ENUM, false, "on, off or toggle", listOf("on", "off", "toggle"), "toggle")
+            ),
+            examples = listOf("vibrate when ringing", "getar saat berdering", "matikan getar dering"),
+            category = ActionCategory.SYSTEM,
+            isSimple = true
+        ),
+        ActionDefinition(
+            name = "OPEN_SETTINGS_PAGE",
+            description = "Opens one exact page of the system settings. Use this for anything no other action can change directly — airplane mode, location, NFC, battery saver, the dark theme, developer options — so the user lands on the switch instead of hunting for it. NEVER claim the setting was changed; this only opens the page.",
+            params = listOf(
+                ParamDefinition(
+                    "page",
+                    ParamType.STRING,
+                    true,
+                    "Which page: airplane, battery, display, sound, wifi, bluetooth, location, nfc, storage, apps, accessibility, date, language, keyboard, security, privacy, developer, notification, vpn, data, hotspot, cast, print, screensaver, account, about"
+                )
+            ),
+            examples = listOf(
+                "open airplane mode settings",
+                "turn on airplane mode",
+                "buka pengaturan lokasi",
+                "nyalakan mode pesawat",
+                "buka pengaturan baterai",
+                "open developer options"
+            ),
+            category = ActionCategory.SYSTEM
+        ),
+        ActionDefinition(
             name = "TOGGLE_AUTO_ROTATE",
             description = "Turns screen auto-rotate on or off. Omit state to flip whatever it is now.",
             params = listOf(

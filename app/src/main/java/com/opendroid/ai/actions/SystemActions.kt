@@ -164,6 +164,10 @@ class SystemActions @Inject constructor(
         ToggleAutoRotateAction(),
         SetFontScaleAction(),
         ToggleHapticFeedbackAction(),
+        ToggleAutoBrightnessAction(),
+        ToggleTouchSoundsAction(),
+        ToggleVibrateOnRingAction(),
+        OpenSettingsPageAction(),
         OpenAppAction(),
         LockScreenAction(),
         RestartDeviceAction(),
@@ -479,6 +483,116 @@ class SystemActions @Inject constructor(
                     if (target) 1 else 0
                 )
                 "Touch vibration is ${if (target) "on" else "off"}."
+            }
+        }
+    }
+
+    /** Adaptive brightness. Writable, unlike most of the display settings. */
+    private class ToggleAutoBrightnessAction : Action {
+        override val name: String = "TOGGLE_AUTO_BRIGHTNESS"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult =
+            writeSystemSetting(context, "adaptive brightness") {
+                val target = resolveState(
+                    params["state"],
+                    current = Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+                    ) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+                )
+                Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    if (target) {
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+                    } else {
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+                    }
+                )
+                "Adaptive brightness is ${if (target) "on" else "off"}."
+            }
+    }
+
+    /** The clicks the keyboard and the launcher make. */
+    private class ToggleTouchSoundsAction : Action {
+        override val name: String = "TOGGLE_TOUCH_SOUNDS"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult =
+            writeSystemSetting(context, "touch sounds") {
+                val target = resolveState(
+                    params["state"],
+                    current = Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.SOUND_EFFECTS_ENABLED,
+                        1
+                    ) == 1
+                )
+                Settings.System.putInt(
+                    context.contentResolver,
+                    Settings.System.SOUND_EFFECTS_ENABLED,
+                    if (target) 1 else 0
+                )
+                "Touch sounds are ${if (target) "on" else "off"}."
+            }
+    }
+
+    /** Whether the phone also buzzes when it rings. */
+    private class ToggleVibrateOnRingAction : Action {
+        override val name: String = "TOGGLE_VIBRATE_ON_RING"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult =
+            writeSystemSetting(context, "vibrate when ringing") {
+                val target = resolveState(
+                    params["state"],
+                    current = Settings.System.getInt(
+                        context.contentResolver,
+                        "vibrate_when_ringing",
+                        0
+                    ) == 1
+                )
+                Settings.System.putInt(
+                    context.contentResolver,
+                    "vibrate_when_ringing",
+                    if (target) 1 else 0
+                )
+                "Vibrate when ringing is ${if (target) "on" else "off"}."
+            }
+    }
+
+    /**
+     * Opens one exact page of the system settings.
+     *
+     * Most of Android's switches cannot be written by an app that was
+     * sideloaded - airplane mode, location, NFC, battery saver and the dark
+     * theme all need WRITE_SECURE_SETTINGS, which is granted over ADB or not at
+     * all. Pretending otherwise would mean an assistant that says "done" and
+     * changes nothing.
+     *
+     * So for those, this does the next honest thing: it puts the user on the
+     * exact screen with the switch on it, one tap from finished, instead of at
+     * the top of Settings to go hunting.
+     */
+    private class OpenSettingsPageAction : Action {
+        override val name: String = "OPEN_SETTINGS_PAGE"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            val requested = params["page"]?.lowercase()?.trim().orEmpty()
+            val action = SETTINGS_PAGES[requested]
+                ?: SETTINGS_PAGES.entries.firstOrNull { requested.contains(it.key) }?.value
+                ?: Settings.ACTION_SETTINGS
+            return try {
+                context.startActivity(
+                    Intent(action).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                )
+                ActionResult(true, "Opened the ${requested.ifBlank { "settings" }} page.", null)
+            } catch (e: Exception) {
+                Log.e("OpenSettingsPage", "Failed for '$requested': ${e.localizedMessage}")
+                // Every page here is standard, but OEM builds do drop some.
+                return try {
+                    context.startActivity(
+                        Intent(Settings.ACTION_SETTINGS).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                    )
+                    ActionResult(true, "That page isn't on this phone, so I opened Settings.", null)
+                } catch (_: Exception) {
+                    ActionResult(false, null, "Couldn't open the settings.")
+                }
             }
         }
     }
@@ -1449,3 +1563,70 @@ private inline fun writeSystemSetting(
     Log.e("SystemSetting", "Failed to change $what: ${e.localizedMessage}")
     ActionResult(false, null, "Couldn't change the $what right now. Please try again.")
 }
+
+/**
+ * Reads an on/off/toggle parameter in either language, falling back to
+ * flipping whatever the setting is now.
+ */
+private fun resolveState(requested: String?, current: Boolean): Boolean =
+    when (requested?.lowercase()?.trim()) {
+        "on", "true", "enable", "enabled", "yes", "nyala", "hidup", "aktif", "nyalakan" -> true
+        "off", "false", "disable", "disabled", "no", "mati", "nonaktif", "matikan" -> false
+        else -> !current
+    }
+
+/**
+ * The settings screens worth naming, keyed by what a person calls them.
+ *
+ * Only actions Android documents as public. An OEM build that has dropped one
+ * falls back to the top of Settings rather than failing.
+ */
+private val SETTINGS_PAGES: Map<String, String> = mapOf(
+    "airplane" to Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+    "mode pesawat" to Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+    "pesawat" to Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+    "battery" to Settings.ACTION_BATTERY_SAVER_SETTINGS,
+    "baterai" to Settings.ACTION_BATTERY_SAVER_SETTINGS,
+    "display" to Settings.ACTION_DISPLAY_SETTINGS,
+    "layar" to Settings.ACTION_DISPLAY_SETTINGS,
+    "tampilan" to Settings.ACTION_DISPLAY_SETTINGS,
+    "sound" to Settings.ACTION_SOUND_SETTINGS,
+    "suara" to Settings.ACTION_SOUND_SETTINGS,
+    "wifi" to Settings.ACTION_WIFI_SETTINGS,
+    "bluetooth" to Settings.ACTION_BLUETOOTH_SETTINGS,
+    "location" to Settings.ACTION_LOCATION_SOURCE_SETTINGS,
+    "lokasi" to Settings.ACTION_LOCATION_SOURCE_SETTINGS,
+    "nfc" to Settings.ACTION_NFC_SETTINGS,
+    "storage" to Settings.ACTION_INTERNAL_STORAGE_SETTINGS,
+    "penyimpanan" to Settings.ACTION_INTERNAL_STORAGE_SETTINGS,
+    "apps" to Settings.ACTION_APPLICATION_SETTINGS,
+    "aplikasi" to Settings.ACTION_APPLICATION_SETTINGS,
+    "accessibility" to Settings.ACTION_ACCESSIBILITY_SETTINGS,
+    "aksesibilitas" to Settings.ACTION_ACCESSIBILITY_SETTINGS,
+    "date" to Settings.ACTION_DATE_SETTINGS,
+    "tanggal" to Settings.ACTION_DATE_SETTINGS,
+    "jam" to Settings.ACTION_DATE_SETTINGS,
+    "language" to Settings.ACTION_LOCALE_SETTINGS,
+    "bahasa" to Settings.ACTION_LOCALE_SETTINGS,
+    "keyboard" to Settings.ACTION_INPUT_METHOD_SETTINGS,
+    "papan ketik" to Settings.ACTION_INPUT_METHOD_SETTINGS,
+    "security" to Settings.ACTION_SECURITY_SETTINGS,
+    "keamanan" to Settings.ACTION_SECURITY_SETTINGS,
+    "privacy" to Settings.ACTION_PRIVACY_SETTINGS,
+    "privasi" to Settings.ACTION_PRIVACY_SETTINGS,
+    "developer" to Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS,
+    "notification" to Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS,
+    "notifikasi" to Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS,
+    "vpn" to Settings.ACTION_VPN_SETTINGS,
+    "data" to Settings.ACTION_DATA_ROAMING_SETTINGS,
+    "hotspot" to Settings.ACTION_WIRELESS_SETTINGS,
+    "cast" to Settings.ACTION_CAST_SETTINGS,
+    "print" to Settings.ACTION_PRINT_SETTINGS,
+    "dream" to Settings.ACTION_DREAM_SETTINGS,
+    "screensaver" to Settings.ACTION_DREAM_SETTINGS,
+    "sync" to Settings.ACTION_SYNC_SETTINGS,
+    "account" to Settings.ACTION_SYNC_SETTINGS,
+    "akun" to Settings.ACTION_SYNC_SETTINGS,
+    "about" to Settings.ACTION_DEVICE_INFO_SETTINGS,
+    "tentang" to Settings.ACTION_DEVICE_INFO_SETTINGS,
+)
