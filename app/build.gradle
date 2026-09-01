@@ -140,6 +140,16 @@ android {
             assets.srcDirs += "$projectDir/schemas".toString()
         }
     }
+    bundle {
+        language {
+            // The app switches its own language at runtime, so every
+            // translation has to be in the installed package. With language
+            // splitting on, Play ships only the device's locale and the
+            // in-app switch would find nothing to switch to.
+            enableSplit = false
+        }
+    }
+
     // `packagingOptions` was removed in AGP 9; `packaging` is the supported name.
     packaging {
         resources {
@@ -305,4 +315,5 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 }
+
 

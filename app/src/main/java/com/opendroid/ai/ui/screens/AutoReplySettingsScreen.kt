@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import com.opendroid.ai.data.models.AutoReplyConfig
 import com.opendroid.ai.data.repository.SettingsRepository
 import com.opendroid.ai.ui.theme.AppTheme
@@ -98,10 +100,10 @@ fun AutoReplySettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Auto-Reply Settings", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.auto_reply_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -377,26 +379,24 @@ fun AutoReplySettingsScreen(
                     AllowlistSection(config = config, onChange = { saveConfig(it) })
 
                     LongTextSection(
-                        title = "About you",
-                        hint = "Who you are, what you do, anything the assistant should know " +
-                            "before it writes as you. Never quoted into a reply.",
-                        placeholder = "e.g. I'm a software engineer with two kids, and I keep replies short when I'm at work.",
+                        title = stringResource(R.string.auto_reply_about_you),
+                        hint = stringResource(R.string.auto_reply_about_you_hint),
+                        placeholder = stringResource(R.string.auto_reply_about_you_example),
                         value = config.personaNotes,
                         onChange = { saveConfig(config.copy(personaNotes = it), debounce = true) },
                     )
 
                     LongTextSection(
-                        title = "How you write",
-                        hint = "Paste two or three of your own messages, exactly as you sent them. " +
-                            "An example is imitated far better than an adjective is followed.",
-                        placeholder = "Paste your own messages here, exactly as you sent them.",
+                        title = stringResource(R.string.auto_reply_how_you_write),
+                        hint = stringResource(R.string.auto_reply_how_you_write_hint),
+                        placeholder = stringResource(R.string.auto_reply_how_you_write_example),
                         value = config.styleNotes,
                         onChange = { saveConfig(config.copy(styleNotes = it), debounce = true) },
                     )
 
                     // Custom Prompt
                     Text(
-                        "Reply Tone",
+                        stringResource(R.string.auto_reply_tone),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = themeColors.textPrimary
@@ -411,7 +411,7 @@ fun AutoReplySettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                "Custom reply style (optional)",
+                                stringResource(R.string.auto_reply_tone_label),
                                 fontSize = 14.sp,
                                 color = themeColors.textSecondary
                             )
@@ -521,7 +521,7 @@ private fun AllowlistSection(
     var newContact by remember { mutableStateOf("") }
     var newNote by remember { mutableStateOf("") }
 
-    Text("Who it may reply to", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+    Text(stringResource(R.string.auto_reply_who), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
 
     Card(
         modifier = Modifier
@@ -533,9 +533,9 @@ private fun AllowlistSection(
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = if (config.whitelistedContacts.isEmpty()) {
-                    "Nobody yet. Auto-reply stays silent until you add a contact here."
+                    stringResource(R.string.auto_reply_nobody)
                 } else {
-                    "Only these contacts. Everyone else is ignored."
+                    stringResource(R.string.auto_reply_only_these)
                 },
                 fontSize = 12.sp,
                 color = if (config.whitelistedContacts.isEmpty()) colors.accentOrange else colors.textSecondary,
@@ -548,7 +548,7 @@ private fun AllowlistSection(
                         Text(contact, fontSize = 14.sp, color = colors.textPrimary)
                         val note = config.contactNotes[contact].orEmpty()
                         Text(
-                            text = note.ifBlank { "No note" },
+                            text = note.ifBlank { stringResource(R.string.auto_reply_no_note) },
                             fontSize = 11.sp,
                             color = colors.textSecondary,
                         )
@@ -561,7 +561,7 @@ private fun AllowlistSection(
                             )
                         )
                     }) {
-                        Text("Remove", fontSize = 12.sp, color = colors.accentRed)
+                        Text(stringResource(R.string.auto_reply_remove), fontSize = 12.sp, color = colors.accentRed)
                     }
                 }
             }
@@ -574,8 +574,8 @@ private fun AllowlistSection(
                 value = newContact,
                 onValueChange = { newContact = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Contact name, exactly as WhatsApp shows it", fontSize = 12.sp) },
-                placeholder = { Text("The name as it appears in your chat list", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                label = { Text(stringResource(R.string.auto_reply_contact_label), fontSize = 12.sp) },
+                placeholder = { Text(stringResource(R.string.auto_reply_contact_hint), color = colors.textSecondary.copy(alpha = 0.5f)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.accentNeonGreen,
@@ -591,8 +591,8 @@ private fun AllowlistSection(
                 value = newNote,
                 onValueChange = { newNote = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Who they are to you (optional)", fontSize = 12.sp) },
-                placeholder = { Text("partner, colleague, family…", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                label = { Text(stringResource(R.string.auto_reply_relation_label), fontSize = 12.sp) },
+                placeholder = { Text(stringResource(R.string.auto_reply_relation_hint), color = colors.textSecondary.copy(alpha = 0.5f)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.accentNeonGreen,
@@ -630,7 +630,7 @@ private fun AllowlistSection(
                 ),
                 modifier = Modifier.fillMaxWidth().height(46.dp),
             ) {
-                Text("Add contact", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.auto_reply_add_contact), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -676,5 +676,7 @@ private fun LongTextSection(
         }
     }
 }
+
+
 
 

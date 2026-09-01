@@ -93,6 +93,10 @@ fun OpenDroidTheme(
         }
     }
 
+    // Wrapping the whole theme means every screen inside it resolves strings in
+    // the chosen language, including ones that have not been converted yet -
+    // they simply keep resolving to English until they are.
+    ProvideAppLocale {
     CompositionLocalProvider(LocalOpenDroidColors provides palette) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -107,5 +111,6 @@ fun OpenDroidTheme(
                 content = content,
             )
         }
+    }
     }
 }

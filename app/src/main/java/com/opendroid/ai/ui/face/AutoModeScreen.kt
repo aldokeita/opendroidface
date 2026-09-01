@@ -80,7 +80,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.ui.theme.LocalOpenDroidColors
 import kotlinx.coroutines.delay
@@ -95,23 +98,40 @@ import kotlin.math.sin
  * [isListening] is the microphone's own state, which leads the agent's: the mic
  * is already open while the agent is still Idle.
  */
+@StringRes
 fun autoModeStatusLabel(
     state: AgentState,
     isListening: Boolean,
     paused: Boolean = false,
-): String = when {
-    isListening -> "Listening…"
-    state is AgentState.Thinking -> "Thinking…"
-    state is AgentState.PlanProposed -> "Waiting for your approval"
-    state is AgentState.ExecutingPlan -> state.currentStepDesc.ifBlank { "Working on it…" }
-    state is AgentState.Speaking -> "Speaking…"
-    state is AgentState.Error -> "Something went wrong"
-    state is AgentState.Listening -> "Listening…"
+): Int = when {
+    isListening -> R.string.hands_free_listening
+    state is AgentState.Thinking -> R.string.hands_free_thinking
+    state is AgentState.PlanProposed -> R.string.hands_free_waiting_approval
+    state is AgentState.ExecutingPlan -> R.string.hands_free_working
+    state is AgentState.Speaking -> R.string.hands_free_speaking
+    state is AgentState.Error -> R.string.hands_free_error
+    state is AgentState.Listening -> R.string.hands_free_listening
     // Only reachable now that the user stopped the microphone or it gave up.
     // While the mode is running the microphone reopens on its own, so inviting
     // a tap would be describing a screen that does not need one.
-    paused -> "Tap anywhere to speak"
-    else -> "Listening…"
+    paused -> R.string.hands_free_tap_to_speak
+    else -> R.string.hands_free_listening
+}
+
+/**
+ * The line under the face: the running step when there is one, otherwise the
+ * status.
+ *
+ * Kept apart from [autoModeStatusLabel] because a step description comes from
+ * the plan and is already in the user's language, while the statuses are
+ * resources - two different sources for the same line.
+ */
+@Composable
+fun autoModeStatusText(state: AgentState, isListening: Boolean, paused: Boolean): String {
+    if (!isListening && state is AgentState.ExecutingPlan && state.currentStepDesc.isNotBlank()) {
+        return state.currentStepDesc
+    }
+    return stringResource(autoModeStatusLabel(state, isListening, paused))
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -249,7 +269,7 @@ fun AutoModeScreen(
             Spacer(Modifier.height(if (landscape) 6.dp else 12.dp))
 
             Text(
-                text = autoModeStatusLabel(state, isListening, paused).uppercase(),
+                text = autoModeStatusText(state, isListening, paused).uppercase(),
                 color = colors.textSecondary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
@@ -313,7 +333,7 @@ fun AutoModeScreen(
                         .weight(1f)
                         .height(56.dp)
                 ) {
-                    Text("Reject", color = colors.textSecondary)
+                    Text(stringResource(R.string.plan_reject), color = colors.textSecondary)
                 }
                 Button(
                     onClick = onApprovePlan,
@@ -323,7 +343,7 @@ fun AutoModeScreen(
                         .weight(1f)
                         .height(56.dp)
                 ) {
-                    Text("Approve", color = Color.Black, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.plan_approve), color = Color.Black, fontWeight = FontWeight.Bold)
                 }
             }
         } else {
@@ -490,7 +510,7 @@ private fun TopControls(
             IconButton(onClick = onEnterKiosk) {
                 Icon(
                     imageVector = Icons.Default.Dock,
-                    contentDescription = "Dock mode",
+                    contentDescription = stringResource(R.string.hands_free_dock),
                     tint = colors.textSecondary.copy(alpha = 0.7f),
                 )
             }
@@ -498,7 +518,7 @@ private fun TopControls(
         IconButton(onClick = onClose) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Leave hands-free mode",
+                contentDescription = stringResource(R.string.hands_free_leave),
                 tint = colors.textSecondary.copy(alpha = 0.7f),
             )
         }
@@ -585,3 +605,4 @@ private fun VoiceMeter(
         )
     }
 }
+

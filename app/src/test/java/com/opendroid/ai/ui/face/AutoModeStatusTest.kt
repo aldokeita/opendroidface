@@ -1,14 +1,16 @@
 package com.opendroid.ai.ui.face
 
+import com.opendroid.ai.R
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.data.models.Plan
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 /**
- * In Auto mode this label is the only text on screen, so its wording is part of
- * the interface, not a detail.
+ * In Auto mode this label is the only text on screen, so which one is chosen is
+ * part of the interface, not a detail. It returns a resource now, so the words
+ * themselves live in strings.xml and exist in both languages.
  */
 class AutoModeStatusTest {
 
@@ -22,47 +24,48 @@ class AutoModeStatusTest {
 
     @Test
     fun `microphone state wins over the agent state`() {
-        // The mic opens before the agent has moved off Idle; showing "Tap to speak"
-        // while already recording would tell the user the opposite of the truth.
-        assertEquals("Listening…", autoModeStatusLabel(AgentState.Idle, isListening = true))
-        assertEquals("Listening…", autoModeStatusLabel(AgentState.Thinking, isListening = true))
+        // The mic opens before the agent has moved off Idle; showing "tap to
+        // speak" while already recording tells the user the opposite of the truth.
+        assertEquals(
+            R.string.hands_free_listening,
+            autoModeStatusLabel(AgentState.Idle, isListening = true)
+        )
+        assertEquals(
+            R.string.hands_free_listening,
+            autoModeStatusLabel(AgentState.Thinking, isListening = true)
+        )
     }
 
     @Test
     fun `an idle gap between turns is still listening, not an invitation to tap`() {
         // The microphone reopens on its own, so the gap after an answer is a
-        // pause in a conversation. Asking for a tap there would describe a
-        // screen that does not need one.
+        // pause in a conversation, not a screen waiting to be touched.
         assertEquals(
-            "Listening…",
+            R.string.hands_free_listening,
             autoModeStatusLabel(AgentState.Idle, isListening = false)
         )
     }
 
     @Test
     fun `only a stopped microphone invites the user to tap`() {
-        // The whole screen is the button, so the invitation has to say so -
-        // there is nothing left on screen to point at.
         assertEquals(
-            "Tap anywhere to speak",
+            R.string.hands_free_tap_to_speak,
             autoModeStatusLabel(AgentState.Idle, isListening = false, paused = true)
         )
     }
 
     @Test
-    fun `executing shows the current step and never an empty line`() {
+    fun `executing reports work in progress`() {
+        // The step's own description is preferred by the composable; the label
+        // is what covers a step that has none.
         assertEquals(
-            "Opening Settings",
+            R.string.hands_free_working,
             autoModeStatusLabel(AgentState.ExecutingPlan("Opening Settings"), isListening = false)
-        )
-        assertEquals(
-            "Working on it…",
-            autoModeStatusLabel(AgentState.ExecutingPlan("   "), isListening = false)
         )
     }
 
     @Test
-    fun `every state produces a non-blank label`() {
+    fun `every state resolves to a real string resource`() {
         val states = listOf(
             AgentState.Idle,
             AgentState.Listening,
@@ -74,19 +77,18 @@ class AutoModeStatusTest {
         )
         states.forEach { state ->
             listOf(true, false).forEach { listening ->
-                assertTrue(
-                    "$state listening=$listening",
-                    autoModeStatusLabel(state, listening).isNotBlank()
-                )
+                assertNotEquals("$state listening=$listening", 0, autoModeStatusLabel(state, listening))
             }
         }
     }
 
     @Test
     fun `a raw error message is never shown as the status line`() {
-        // Errors reach the user through the subtitle slot; the status line stays a
+        // Errors reach the user through the caption; the status line stays a
         // short human sentence so the face keeps reading as a face, not a log.
-        val label = autoModeStatusLabel(AgentState.Error("java.net.SocketTimeoutException"), false)
-        assertEquals("Something went wrong", label)
+        assertEquals(
+            R.string.hands_free_error,
+            autoModeStatusLabel(AgentState.Error("java.net.SocketTimeoutException"), false)
+        )
     }
 }

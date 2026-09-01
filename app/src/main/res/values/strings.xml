@@ -1,5 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only strings that are already wired up live here. The interface is being moved
+  across screen by screen, and a table full of resources nothing reads yet is
+  indistinguishable from a table full of dead ones - so each batch adds its own.
+-->
 <resources>
-    <string name="app_name">OpenDroid</string>
+    <string name="app_name" translatable="false">OpenDroid</string>
     <string name="accessibility_service_desc">Provides autonomous UI interaction, screen reading, and navigation assistance for OpenDroid Agent control.</string>
+
+    <!-- Navigation -->
+    <string name="nav_chat">Chat</string>
+    <string name="nav_memory">Memory</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Hands-free -->
+    <string name="hands_free_listening">Listening…</string>
+    <string name="hands_free_thinking">Thinking…</string>
+    <string name="hands_free_speaking">Speaking…</string>
+    <string name="hands_free_working">Working on it…</string>
+    <string name="hands_free_waiting_approval">Waiting for your approval</string>
+    <string name="hands_free_error">Something went wrong</string>
+    <string name="hands_free_tap_to_speak">Tap anywhere to speak</string>
+    <string name="hands_free_leave">Leave hands-free mode</string>
+    <string name="hands_free_dock">Dock mode</string>
+
+    <!-- Plan approval -->
+    <string name="plan_reject">Reject</string>
+    <string name="plan_approve">Approve</string>
+
+    <!-- Auto-reply -->
+    <string name="auto_reply_title">Auto-Reply Settings</string>
+    <string name="auto_reply_who">Who it may reply to</string>
+    <string name="auto_reply_nobody">Nobody yet. Auto-reply stays silent until you add a contact here.</string>
+    <string name="auto_reply_only_these">Only these contacts. Everyone else is ignored.</string>
+    <string name="auto_reply_no_note">No note</string>
+    <string name="auto_reply_remove">Remove</string>
+    <string name="auto_reply_contact_label">Contact name, exactly as WhatsApp shows it</string>
+    <string name="auto_reply_contact_hint">The name as it appears in your chat list</string>
+    <string name="auto_reply_relation_label">Who they are to you (optional)</string>
+    <string name="auto_reply_relation_hint">partner, colleague, family…</string>
+    <string name="auto_reply_add_contact">Add contact</string>
+    <string name="auto_reply_about_you">About you</string>
+    <string name="auto_reply_about_you_hint">Who you are, what you do, anything the assistant should know before it writes as you. Never quoted into a reply.</string>
+    <string name="auto_reply_about_you_example">e.g. I\'m a software engineer with two kids, and I keep replies short when I\'m at work.</string>
+    <string name="auto_reply_how_you_write">How you write</string>
+    <string name="auto_reply_how_you_write_hint">Paste two or three of your own messages, exactly as you sent them. An example is imitated far better than an adjective is followed.</string>
+    <string name="auto_reply_how_you_write_example">Paste your own messages here, exactly as you sent them.</string>
+    <string name="auto_reply_tone">Reply Tone</string>
+    <string name="auto_reply_tone_label">Custom reply style (optional)</string>
+
+    <!-- Common -->
+    <string name="common_back">Back</string>
 </resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bahasa Indonesia sehari-hari, bukan terjemahan kaku.
+  Pakai "kamu", bukan "Anda" - ini asisten pribadi, bukan surat resmi. Kalimatnya
+  pendek. Kata teknis yang memang dipakai orang sehari-hari (chat, model,
+  provider) dibiarkan apa adanya, karena menerjemahkannya justru bikin bingung.
+
+  Catatan: folder "values-in" bukan salah ketik. Kode bahasa Indonesia di Java
+  dan Android masih "in" - warisan ISO lama - dan "values-id" tidak akan pernah
+  terpakai.
+-->
+<resources>
+    <string name="accessibility_service_desc">Memberi OpenDroid kemampuan membaca layar, menekan tombol, dan berpindah antar aplikasi untuk menjalankan perintahmu.</string>
+
+    <!-- Navigasi -->
+    <string name="nav_chat">Chat</string>
+    <string name="nav_memory">Ingatan</string>
+    <string name="nav_settings">Setelan</string>
+
+    <!-- Tanpa tangan -->
+    <string name="hands_free_listening">Mendengarkan…</string>
+    <string name="hands_free_thinking">Mikir dulu…</string>
+    <string name="hands_free_speaking">Lagi ngomong…</string>
+    <string name="hands_free_working">Lagi dikerjain…</string>
+    <string name="hands_free_waiting_approval">Nunggu persetujuanmu</string>
+    <string name="hands_free_error">Ada yang nggak beres</string>
+    <string name="hands_free_tap_to_speak">Ketuk di mana aja buat ngomong</string>
+    <string name="hands_free_leave">Keluar dari mode tanpa tangan</string>
+    <string name="hands_free_dock">Mode dudukan</string>
+
+    <!-- Persetujuan rencana -->
+    <string name="plan_reject">Tolak</string>
+    <string name="plan_approve">Setuju</string>
+
+    <!-- Balas otomatis -->
+    <string name="auto_reply_title">Balas Otomatis</string>
+    <string name="auto_reply_who">Siapa yang boleh dibalas</string>
+    <string name="auto_reply_nobody">Belum ada. Balas otomatis diam saja sampai kamu menambahkan kontak di sini.</string>
+    <string name="auto_reply_only_these">Cuma kontak ini. Yang lain diabaikan.</string>
+    <string name="auto_reply_no_note">Tanpa catatan</string>
+    <string name="auto_reply_remove">Hapus</string>
+    <string name="auto_reply_contact_label">Nama kontak, persis seperti di WhatsApp</string>
+    <string name="auto_reply_contact_hint">Nama seperti yang muncul di daftar chat</string>
+    <string name="auto_reply_relation_label">Dia siapa buat kamu (opsional)</string>
+    <string name="auto_reply_relation_hint">pasangan, rekan kerja, keluarga…</string>
+    <string name="auto_reply_add_contact">Tambah kontak</string>
+    <string name="auto_reply_about_you">Tentang kamu</string>
+    <string name="auto_reply_about_you_hint">Kamu siapa, kerja apa, hal-hal yang perlu dia tahu sebelum menulis sebagai kamu. Tidak pernah dikutip ke dalam balasan.</string>
+    <string name="auto_reply_about_you_example">mis. Aku software engineer, punya dua anak, dan kalau lagi kerja balasanku pendek-pendek.</string>
+    <string name="auto_reply_how_you_write">Cara kamu menulis</string>
+    <string name="auto_reply_how_you_write_hint">Tempel dua atau tiga pesanmu sendiri, persis seperti yang kamu kirim. Contoh jauh lebih gampang ditiru daripada kata sifat.</string>
+    <string name="auto_reply_how_you_write_example">Tempel pesanmu sendiri di sini, persis seperti yang kamu kirim.</string>
+    <string name="auto_reply_tone">Gaya balasan</string>
+    <string name="auto_reply_tone_label">Gaya balasan sendiri (opsional)</string>
+
+    <!-- Umum -->
+    <string name="common_back">Kembali</string>
+</resources>

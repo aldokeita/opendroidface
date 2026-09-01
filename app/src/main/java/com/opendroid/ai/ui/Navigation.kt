@@ -45,6 +45,9 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -330,13 +333,18 @@ fun OpenDroidNavigation(
  * from Settings. What is left is the conversation, what the agent knows, and how
  * it is set up.
  */
-sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object Chat : Screen("chat", "Chat", Icons.Default.Chat)
+sealed class Screen(
+    val route: String,
+    /** Resolved where it is drawn, so it follows the app's language setting. */
+    @StringRes val title: Int,
+    val icon: ImageVector,
+) {
+    object Chat : Screen("chat", R.string.nav_chat, Icons.Default.Chat)
 
     // Psychology, not a star: the tab holds what the agent remembers and has
     // learned, and a star says "favourites" in every other app on the phone.
-    object Memory : Screen("memory", "Memory", Icons.Default.Psychology)
-    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+    object Memory : Screen("memory", R.string.nav_memory, Icons.Default.Psychology)
+    object Settings : Screen("settings", R.string.nav_settings, Icons.Default.Settings)
 }
 
 @Composable
@@ -735,7 +743,7 @@ private fun OpenDroidNavBar(
                         Box(modifier = Modifier.offset(riseOffset)) {
                             Icon(
                                 imageVector = tab.icon,
-                                contentDescription = tab.title,
+                                contentDescription = stringResource(tab.title),
                                 tint = colors.textSecondary,
                                 modifier = Modifier
                                     .size(23.dp)
@@ -753,7 +761,7 @@ private fun OpenDroidNavBar(
                         Spacer(modifier = Modifier.height(3.dp))
                         Box(modifier = Modifier.offset(riseOffset)) {
                             Text(
-                                text = tab.title,
+                                text = stringResource(tab.title),
                                 color = colors.textSecondary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
@@ -761,7 +769,7 @@ private fun OpenDroidNavBar(
                                 modifier = Modifier.graphicsLayer { alpha = 1f - crestOf() },
                             )
                             Text(
-                                text = tab.title,
+                                text = stringResource(tab.title),
                                 color = colors.textPrimary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
@@ -786,3 +794,5 @@ private fun OpenDroidNavBar(
         }
     }
 }
+
+
