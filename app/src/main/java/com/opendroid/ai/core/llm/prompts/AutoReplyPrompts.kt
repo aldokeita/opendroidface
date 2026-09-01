@@ -2,6 +2,10 @@ package com.opendroid.ai.core.llm.prompts
 
 object AutoReplyPrompts {
 
+    /** Kept in step with the engine, which drops a reply that is only this. */
+    private const val SKIP_TOKEN = com.opendroid.ai.core.agent.AutoReplyPolicy.SKIP_TOKEN
+
+
     /**
      * Shared security rules for every auto-reply prompt. Incoming messages come
      * from third parties (notifications), so they are untrusted input: they must
@@ -35,21 +39,49 @@ object AutoReplyPrompts {
         messageText: String,
         conversationHistory: String,
         userContext: String,
-        customTone: String?
+        customTone: String?,
+        personaNotes: String? = null,
+        styleNotes: String? = null,
+        contactNote: String? = null,
     ): String {
         val toneInstruction = customTone ?: "casual, friendly, and warm — like a real person texting"
+        // Written by the owner about themselves, so it is trusted background -
+        // unlike anything inside <untrusted_message>.
+        val persona = personaNotes?.takeIf { it.isNotBlank() }?.let {
+            "\n\nWHO YOU ARE WRITING AS:\n$it"
+        }.orEmpty()
+        // Examples beat adjectives: a model imitates a pasted message far more
+        // accurately than it follows "be casual".
+        val style = styleNotes?.takeIf { it.isNotBlank() }?.let {
+            "\n\nHOW $userName WRITES — imitate this closely, including length, " +
+                "punctuation, emoji use and choice of words:\n$it"
+        }.orEmpty()
+        val about = contactNote?.takeIf { it.isNotBlank() }?.let {
+            "\n\nWHO THIS PERSON IS TO $userName:\n$it"
+        }.orEmpty()
+
         return """
-            You are auto-replying on behalf of "$userName" to a WhatsApp message.
+            You are auto-replying on behalf of "$userName" to a WhatsApp message.$persona$style$about
 
             $SECURITY_RULES
+
+            READ THE CONVERSATION BEFORE YOU WRITE:
+            - Work out what is actually being asked or said, from the history as well
+              as the latest message. A reply that answers the wrong question is worse
+              than no reply, because $userName is the one who appears to have sent it.
+            - If you cannot tell what is being asked, or answering would need a fact,
+              a decision or a commitment $userName has not made, reply with exactly:
+              $SKIP_TOKEN
+              Nothing else. Silence is a correct answer and it costs nothing; a
+              confident guess sent in someone else's name cannot be taken back.
+            - Never invent plans, times, prices, promises or feelings on their behalf.
 
             RULES:
             - Write a short, natural reply (1-3 sentences max)
             - Match the tone: $toneInstruction
             - Use the conversation history and user context to give a relevant, personalized reply
             - Never reveal you are an AI or auto-reply system
-            - If you don't have enough context to give a meaningful reply, write a brief acknowledgment like "Got it, I'll get back to you soon!"
-            - Use casual language, emojis sparingly, no formal greetings
+            - Write in the same language the sender used
             - NEVER make up facts or commitments the user hasn't expressed
 
             MESSAGE FROM THIS PERSON:

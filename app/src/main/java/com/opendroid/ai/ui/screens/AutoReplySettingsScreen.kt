@@ -359,6 +359,26 @@ fun AutoReplySettingsScreen(
                         }
                     }
 
+                    AllowlistSection(config = config, onChange = { saveConfig(it) })
+
+                    LongTextSection(
+                        title = "About you",
+                        hint = "Who you are, what you do, anything the assistant should know " +
+                            "before it writes as you. Never quoted into a reply.",
+                        placeholder = "e.g. Aldo, 29, builds Android apps. Married to Nabila.",
+                        value = config.personaNotes,
+                        onChange = { saveConfig(config.copy(personaNotes = it), debounce = true) },
+                    )
+
+                    LongTextSection(
+                        title = "How you write",
+                        hint = "Paste two or three of your own messages, exactly as you sent them. " +
+                            "An example is imitated far better than an adjective is followed.",
+                        placeholder = "e.g. \"otw ya sayang, 10 menit lagi 🫶🏻\"\n\"iya nanti aku cek dulu\"",
+                        value = config.styleNotes,
+                        onChange = { saveConfig(config.copy(styleNotes = it), debounce = true) },
+                    )
+
                     // Custom Prompt
                     Text(
                         "Reply Tone",
@@ -469,3 +489,176 @@ private fun isAccessibilityServiceEnabled(context: Context): Boolean {
     val enabledServicesSetting = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: ""
     return enabledServicesSetting.contains(expectedComponentName)
 }
+
+/**
+ * The contacts auto-reply is allowed to answer, and who each of them is.
+ *
+ * The engine has always had an allowlist and nothing ever let anyone fill it
+ * in, so switching auto-reply on meant replying to everyone who wrote. An
+ * empty list now means nobody, and this is where it stops being empty.
+ */
+@Composable
+private fun AllowlistSection(
+    config: AutoReplyConfig,
+    onChange: (AutoReplyConfig) -> Unit,
+) {
+    val colors = AppTheme.colors
+    var newContact by remember { mutableStateOf("") }
+    var newNote by remember { mutableStateOf("") }
+
+    Text("Who it may reply to", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.borderColor, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = if (config.whitelistedContacts.isEmpty()) {
+                    "Nobody yet. Auto-reply stays silent until you add a contact here."
+                } else {
+                    "Only these contacts. Everyone else is ignored."
+                },
+                fontSize = 12.sp,
+                color = if (config.whitelistedContacts.isEmpty()) colors.accentOrange else colors.textSecondary,
+            )
+
+            config.whitelistedContacts.sorted().forEach { contact ->
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(contact, fontSize = 14.sp, color = colors.textPrimary)
+                        val note = config.contactNotes[contact].orEmpty()
+                        Text(
+                            text = note.ifBlank { "No note" },
+                            fontSize = 11.sp,
+                            color = colors.textSecondary,
+                        )
+                    }
+                    TextButton(onClick = {
+                        onChange(
+                            config.copy(
+                                whitelistedContacts = config.whitelistedContacts - contact,
+                                contactNotes = config.contactNotes.filterKeys { it != contact },
+                            )
+                        )
+                    }) {
+                        Text("Remove", fontSize = 12.sp, color = colors.accentRed)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider(color = colors.borderColor.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            OutlinedTextField(
+                value = newContact,
+                onValueChange = { newContact = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Contact name, exactly as WhatsApp shows it", fontSize = 12.sp) },
+                placeholder = { Text("Sayangku 🫶🏻", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colors.accentNeonGreen,
+                    unfocusedBorderColor = colors.borderColor,
+                    focusedTextColor = colors.textPrimary,
+                    unfocusedTextColor = colors.textPrimary,
+                    cursorColor = colors.accentNeonGreen,
+                ),
+                shape = RoundedCornerShape(12.dp),
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedTextField(
+                value = newNote,
+                onValueChange = { newNote = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Who they are to you (optional)", fontSize = 12.sp) },
+                placeholder = { Text("my wife", color = colors.textSecondary.copy(alpha = 0.5f)) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colors.accentNeonGreen,
+                    unfocusedBorderColor = colors.borderColor,
+                    focusedTextColor = colors.textPrimary,
+                    unfocusedTextColor = colors.textPrimary,
+                    cursorColor = colors.accentNeonGreen,
+                ),
+                shape = RoundedCornerShape(12.dp),
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    val name = newContact.trim()
+                    if (name.isNotEmpty()) {
+                        onChange(
+                            config.copy(
+                                whitelistedContacts = config.whitelistedContacts + name,
+                                contactNotes = if (newNote.isBlank()) {
+                                    config.contactNotes
+                                } else {
+                                    config.contactNotes + mapOf(name to newNote.trim())
+                                },
+                            )
+                        )
+                        newContact = ""
+                        newNote = ""
+                    }
+                },
+                enabled = newContact.isNotBlank(),
+                shape = RoundedCornerShape(24.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.accentGreenButton,
+                    contentColor = colors.background,
+                ),
+                modifier = Modifier.fillMaxWidth().height(46.dp),
+            ) {
+                Text("Add contact", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+/** A titled multi-line field with a sentence explaining what it is for. */
+@Composable
+private fun LongTextSection(
+    title: String,
+    hint: String,
+    placeholder: String,
+    value: String?,
+    onChange: (String?) -> Unit,
+) {
+    val colors = AppTheme.colors
+    Text(title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, colors.borderColor, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(hint, fontSize = 12.sp, color = colors.textSecondary)
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedTextField(
+                value = value.orEmpty(),
+                onValueChange = { onChange(it.ifBlank { null }) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(placeholder, color = colors.textSecondary.copy(alpha = 0.5f)) },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colors.accentNeonGreen,
+                    unfocusedBorderColor = colors.borderColor,
+                    focusedTextColor = colors.textPrimary,
+                    unfocusedTextColor = colors.textPrimary,
+                    cursorColor = colors.accentNeonGreen,
+                ),
+                shape = RoundedCornerShape(12.dp),
+                minLines = 3,
+                maxLines = 6,
+            )
+        }
+    }
+}
+

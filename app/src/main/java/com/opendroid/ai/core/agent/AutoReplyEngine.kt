@@ -131,10 +131,14 @@ class AutoReplyEngine @Inject constructor(
 
                 // Generate and send reply
                 val replyText = generateReply(notification, freshConfig)
-                if (replyText.isNullOrBlank()) {
-                    Log.w(TAG, "LLM returned empty reply, skipping")
+                if (!AutoReplyPolicy.shouldSend(replyText)) {
+                    // Either nothing came back, or the model said it could not
+                    // tell what was being asked. Saying nothing is a valid
+                    // answer here - a wrong guess is sent in the owner's name.
+                    Log.d(TAG, "No reply sent to ${notification.contactName}: not enough context")
                     return@launch
                 }
+                requireNotNull(replyText)
 
                 val sent = dispatchReply(notification, sbn, replyText, context)
                 if (sent) {
@@ -186,20 +190,10 @@ class AutoReplyEngine @Inject constructor(
         }
         if (!appEnabled) return false
 
-        // Check blacklist
+        // The allowlist is the whole gate. An empty one means nobody: see
+        // AutoReplyPolicy for why that is the safer reading of an empty box.
         val contact = notification.contactName ?: notification.title
-        if (config.blacklistedContacts.any { it.equals(contact, ignoreCase = true) }) {
-            return false
-        }
-
-        // Check whitelist (if set, only reply to whitelisted contacts)
-        if (config.whitelistedContacts.isNotEmpty()) {
-            if (!config.whitelistedContacts.any { it.equals(contact, ignoreCase = true) }) {
-                return false
-            }
-        }
-
-        return true
+        return AutoReplyPolicy.isAllowed(contact, config)
     }
 
     private suspend fun generateReply(notification: NotificationEntity, config: AutoReplyConfig): String? {
@@ -227,7 +221,10 @@ class AutoReplyEngine @Inject constructor(
                 notification.packageName.contains("whatsapp", ignoreCase = true) ->
                     AutoReplyPrompts.buildWhatsAppReplyPrompt(
                         userName, senderName, notification.text,
-                        conversationHistory, userContext, config.customPrompt
+                        conversationHistory, userContext, config.customPrompt,
+                        personaNotes = config.personaNotes,
+                        styleNotes = config.styleNotes,
+                        contactNote = AutoReplyPolicy.noteFor(senderName, config)
                     )
                 notification.category == "EMAIL" ->
                     AutoReplyPrompts.buildEmailReplyPrompt(
