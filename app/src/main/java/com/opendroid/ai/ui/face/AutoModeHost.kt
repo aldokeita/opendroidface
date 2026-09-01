@@ -85,7 +85,7 @@ fun AutoModeHost(
                 transcript = ""
                 quietRounds = 0
                 if (text.isNotBlank()) {
-                    viewModel.sendMessage(text, context)
+                    viewModel.sendMessage(text, context, askedByVoice = true)
                 }
             },
             onPartialResult = { partial -> transcript = partial },

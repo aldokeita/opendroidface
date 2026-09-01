@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.opendroid.ai.core.face.FaceMood
+import com.opendroid.ai.core.voice.SpeechOutputStore
 import com.opendroid.ai.core.voice.VoiceAmplitude
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -28,6 +29,7 @@ interface FaceEntryPoint {
     fun faceMood(): FaceMood
     fun motionStore(): MotionStore
     fun transcriptVisibilityStore(): TranscriptVisibilityStore
+    fun speechOutputStore(): SpeechOutputStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -77,6 +79,13 @@ fun rememberMotionStore(): MotionStore {
 fun rememberTranscriptVisibilityStore(): TranscriptVisibilityStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).transcriptVisibilityStore() }
+}
+
+/** Whether typed questions also get spoken answers. */
+@Composable
+fun rememberSpeechOutputStore(): SpeechOutputStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).speechOutputStore() }
 }
 
 /** The process-wide mood, published by the agent. */

@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.opendroid.ai.core.agent.AgentLoop
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
+import com.opendroid.ai.core.voice.shouldSpeakReply
 import com.opendroid.ai.core.voice.TextToSpeechEngine
 import com.opendroid.ai.core.voice.VoiceAmplitude
 import com.opendroid.ai.core.voice.VoiceApprovalIntent
@@ -43,6 +44,9 @@ class OpenDroidService : Service() {
 
     @Inject
     lateinit var voiceLanguageStore: com.opendroid.ai.ui.face.VoiceLanguageStore
+
+    @Inject
+    lateinit var speechOutputStore: com.opendroid.ai.core.voice.SpeechOutputStore
 
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var speechRecognitionEngine: SpeechRecognitionEngine
@@ -88,10 +92,13 @@ class OpenDroidService : Service() {
             }
         }
 
-        // Bind Agent Loop TTS
-        agentLoop.onSpeakCallback = { text ->
-            textToSpeechEngine.speak(text)
-        }
+        // Bind Agent Loop TTS.
+        //
+        // One gate for all ten speaking sites in AgentLoop: an answer is spoken
+        // when the question was spoken, or when the user asked for everything to
+        // be read aloud. A typed question used to be answered out loud with no
+        // way to stop it.
+        agentLoop.onSpeakCallback = { text -> speakIfAsked(text) }
 
         // Set TTS completion listener to transition back to Idle
         textToSpeechEngine.onCompletionListener = {
@@ -134,12 +141,26 @@ class OpenDroidService : Service() {
                     if (!showFloatingButton) {
                         pendingApprovalListen = true
                     }
-                    textToSpeechEngine.speak(
+                    // Only for a plan the user asked for out loud. Read over a
+                    // typed request it is the app announcing itself to a room.
+                    speakIfAsked(
                         "I've planned: ${state.plan.goal}, ${state.plan.estimatedSteps} steps. " +
                         "Say approve to run, or cancel."
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Speaks only what the user asked to hear.
+     *
+     * The wake-word greeting is not routed through here: nothing reaches it
+     * except by speaking first.
+     */
+    private fun speakIfAsked(text: String) {
+        if (shouldSpeakReply(agentLoop.askedByVoice, speechOutputStore.speakTypedReplies.value)) {
+            textToSpeechEngine.speak(text)
         }
     }
 
@@ -196,7 +217,9 @@ class OpenDroidService : Service() {
         // Start speech recognizer for query input
         speechRecognitionEngine.startListening(
             onResult = { query ->
-                agentLoop.processQuery(query, this)
+                // Spoken in, spoken out: this path only exists because the user
+                // talked to the phone.
+                agentLoop.processQuery(query, this, askedByVoice = true)
                 // Resume wake word detection only if floating button is disabled
                 if (!showFloatingButton) {
                     wakeWordDetector.startListening {

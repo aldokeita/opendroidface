@@ -14,6 +14,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.opendroid.ai.core.llm.providers.CodexProvider
 import com.opendroid.ai.core.llm.codex.CodexAccountState
+import com.opendroid.ai.ui.face.rememberSpeechOutputStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -1773,7 +1774,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "ELEVENLABS VOICE SYNTHESIS",
+                                text = "VOICE",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -1789,6 +1790,12 @@ fun SettingsScreen(
                                 modifier = Modifier.padding(top = 16.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                SpeakTypedRepliesRow()
+                                Text(
+                                    text = "ELEVENLABS",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = colors.textSecondary
+                                )
                                 SecureApiKeyField(
                                     value = config.elevenLabsApiKey,
                                     onValueChange = { viewModel.updateElevenLabsApiKey(it) },
@@ -2954,6 +2961,43 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
                 Text("Sign out", fontSize = 12.sp, color = colors.textSecondary)
             }
         }
+    }
+}
+
+/**
+ * Whether a typed question also gets a spoken answer.
+ *
+ * Off by default. Speech follows the question - spoken in, spoken out - so this
+ * exists for people who want the phone to read everything, not as the way to
+ * stop it talking over a typed conversation.
+ */
+@Composable
+private fun SpeakTypedRepliesRow() {
+    val colors = LocalOpenDroidColors.current
+    val store = rememberSpeechOutputStore()
+    val speakTyped by store.speakTypedReplies.collectAsState()
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text("Speak typed replies", fontSize = 14.sp, color = colors.textPrimary)
+            Text(
+                text = "Answers to spoken questions are always read aloud.",
+                fontSize = 11.sp,
+                color = colors.textSecondary
+            )
+        }
+        Switch(
+            checked = speakTyped,
+            onCheckedChange = { store.setSpeakTypedReplies(it) },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = colors.accentNeonGreen,
+                checkedTrackColor = colors.accentNeonGreen.copy(alpha = 0.5f)
+            )
+        )
     }
 }
 

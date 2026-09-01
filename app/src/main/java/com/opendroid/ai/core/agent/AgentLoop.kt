@@ -212,6 +212,21 @@ class AgentLoop @Inject constructor(
     var onSpeakCallback: ((String) -> Unit)? = null
 
     /**
+     * Whether the query being answered came in through the microphone.
+     *
+     * The service reads this to decide whether the answer is spoken. It lives
+     * here rather than being threaded through every speaking site because there
+     * are ten of them - plan traces, re-evaluation speech, contact pickers -
+     * and they all belong to the same turn.
+     */
+    @Volatile
+    var askedByVoice: Boolean = false
+        private set
+
+    /**
+     * @param askedByVoice true when this query was spoken rather than typed. A
+     * typed question gets a typed answer unless the user asked otherwise; the
+     * app should not start talking in a room where they chose to be quiet.
      * @param explicitSessionId The session this message actually belongs to (whatever chat
      * the caller was looking at when the user hit send), if the caller can determine it.
      * Used to decide whether this message answers a pending awaitUserResponse() prompt -
@@ -221,7 +236,12 @@ class AgentLoop @Inject constructor(
      * pre-multi-session behavior: a null session is always assumed to answer whatever
      * prompt is currently pending, and otherwise falls back to resolving "current".
      */
-    fun processQuery(query: String, context: Context, explicitSessionId: String? = null) {
+    fun processQuery(
+        query: String,
+        context: Context,
+        explicitSessionId: String? = null,
+        askedByVoice: Boolean = false,
+    ) {
         // The previous answer's mood belonged to the previous answer. Left in place
         // the face would greet a new request still wearing its reaction to the last.
         faceMood.clear()
@@ -241,6 +261,13 @@ class AgentLoop @Inject constructor(
         val pendingAtScheduleTime = pendingUserInput
         val isAnsweringPendingQuestion = waitingSession != null &&
                 (explicitSessionId == null || explicitSessionId == waitingSession)
+
+        // Only a genuinely new query decides how its answer is delivered. A reply
+        // to a pending prompt belongs to the turn that asked it - tapping a name
+        // in a contact picker must not silence a conversation held out loud.
+        if (!isAnsweringPendingQuestion) {
+            this.askedByVoice = askedByVoice
+        }
 
         if (waitingSession != null && !isAnsweringPendingQuestion) {
             // A brand-new message arrived in a different session while another task is

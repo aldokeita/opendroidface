@@ -157,10 +157,14 @@ class ChatViewModel @Inject constructor(
         return sessionId
     }
 
-    fun sendMessage(query: String, context: Context) {
+    /**
+     * @param askedByVoice the text came from the microphone rather than the
+     * keyboard, which is what decides whether the answer is read aloud.
+     */
+    fun sendMessage(query: String, context: Context, askedByVoice: Boolean = false) {
         if (query.isBlank()) return
         val sessionId = pinTaskSessionSnapshot()
-        agentLoop.processQuery(query, context, sessionId)
+        agentLoop.processQuery(query, context, sessionId, askedByVoice)
     }
 
     /**
