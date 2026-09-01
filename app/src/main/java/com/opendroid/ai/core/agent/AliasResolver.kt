@@ -265,7 +265,27 @@ object AliasResolver {
     private val compoundIntentWords = setOf(
         "send", "message", "text", "msg", "call", "dial", "ring",
         "email", "mail", "navigate", "directions", "search", "find",
-        "play", "book", "order", "remind"
+        "play", "book", "order", "remind",
+        // The same words in the other language this app is used in. Without
+        // them an Indonesian request went straight past the guard: "bukakan
+        // percakapan whatsapp istriku" tripped nothing, matched "whatsapp",
+        // and opened the app instead of reaching the planner.
+        "kirim", "pesan", "chat", "percakapan", "obrolan", "balas", "balasan",
+        "telepon", "panggil", "hubungi", "cari", "carikan", "putar",
+        "pesan-kan", "ingatkan", "kirimkan", "bacakan", "buatkan"
+    )
+
+    /**
+     * Words that carry no request of their own.
+     *
+     * Used to decide whether a sentence is *only* the alias it contains. See
+     * [isJustTheAlias].
+     */
+    private val fillerWords = setOf(
+        "please", "can", "you", "could", "would", "just", "now", "for", "me",
+        "the", "a", "an", "to", "my", "app", "application",
+        "tolong", "coba", "bisa", "kamu", "aku", "saya", "dong", "ya", "yuk",
+        "sekarang", "buka", "bukakan", "aplikasi", "ke", "di", "nya",
     )
 
     /**
@@ -360,11 +380,34 @@ object AliasResolver {
             return null
         }
 
-        // 5. Longest partial match — only for simple, single-intent inputs
+        // 5. Longest partial match — only when the sentence IS the alias.
+        //
+        // This used to fire on any sentence that merely contained an alias
+        // keyword, which is how "bukakan percakapan whatsapp istriku" became
+        // OPEN_APP WhatsApp: the shortcut answered a request nobody made and
+        // the planner - which has CLICK_TEXT, TYPE_TEXT and GET_SCREEN_TEXT and
+        // could have opened the actual conversation - was never asked.
+        //
+        // A shortcut is only a shortcut when it skips work that was not wanted.
         return aliases.entries
             .filter { (key, _) -> cleaned.contains(key) || lower.contains(key) }
             .maxByOrNull { it.key.length }
+            ?.takeIf { isJustTheAlias(cleaned, lower, it.key) }
             ?.value
+    }
+
+    /**
+     * True when everything the user said is the alias plus filler.
+     *
+     * Anything left over is a request the fast path cannot serve - a name, a
+     * message, a screen to reach - and it belongs to the planner.
+     */
+    private fun isJustTheAlias(cleaned: String, lower: String, key: String): Boolean {
+        val source = if (cleaned.contains(key)) cleaned else lower
+        val remainder = source.replace(key, " ")
+        return remainder
+            .split(Regex("""[^\p{L}\p{N}]+"""))
+            .none { word -> word.isNotBlank() && word !in fillerWords }
     }
 
     // ── Alarm shortcut helpers ──────────────────────────

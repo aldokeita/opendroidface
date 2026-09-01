@@ -154,12 +154,32 @@ class IntentClassifier @Inject constructor(
             "pay", "check", "split", "run", "create", "schedule", "list", "read", "write", "delete", "click",
             "type", "scroll", "get", "show", "whatsapp", "call", "sms", "email", "alarm", "timer", "reminder",
             "note", "notes", "calendar", "weather", "news", "flashlight", "flash", "wifi", "bluetooth",
-            "brightness", "volume", "screenshot", "dnd", "mute", "unmute"
+            "brightness", "volume", "screenshot", "dnd", "mute", "unmute",
+            // The same verbs in the other language this app is used in. Without
+            // them an Indonesian request scored almost nothing and came out
+            // SIMPLE, which caps the planner at one step - so a request that
+            // needed three could only ever open an app and stop.
+            "buka", "bukakan", "nyalakan", "matikan", "hidupkan", "kirim", "kirimkan",
+            "panggil", "telepon", "hubungi", "putar", "setel", "pasang", "atur",
+            "ambil", "baca", "bacakan", "tulis", "hapus", "cari", "carikan",
+            "tampilkan", "ketik", "gulir", "balas", "ubah", "jadwalkan", "catat"
         )
-        
+
         val sequenceConjunctions = listOf(
-            "and then", "then", "after that", "next", "also", "followed by", "afterwards", "later"
+            "and then", "then", "after that", "next", "also", "followed by", "afterwards", "later",
+            "lalu", "kemudian", "setelah itu", "habis itu", "terus"
         )
+
+        // Reaching a named thing inside an app is never one step: the app has to
+        // open, settle, and then be navigated. Scoring alone missed this,
+        // because "open my conversation with X" reads as a single verb.
+        val inAppTargets = listOf(
+            "conversation", "chat with", "thread", "message from", "reply to",
+            "percakapan", "obrolan", "chat ", "pesan dari", "balas"
+        )
+        if (inAppTargets.any { lowercaseQuery.contains(it) }) {
+            return QueryComplexity.MEDIUM
+        }
         
         // Check for multiple commands separated by punctuation
         val commandSeparators = Pattern.compile("[,.;]")

@@ -132,6 +132,32 @@ $schema
             Example — CORRECT:
               Step 1: SEND_WHATSAPP {contact: "Mom", message: "Hi"}
 
+            SECTION E2: REACHING SOMETHING NO ACTION COVERS
+            The action list does not have an entry for every screen in every app.
+            When a request names something inside an app — a specific conversation,
+            a setting page, a row in a list — do NOT settle for OPEN_APP and stop
+            there. Opening the app and leaving the user where they started is a
+            failed request, not a completed one.
+
+            Drive the interface yourself with the general steps:
+              OPEN_APP → WAIT → GET_SCREEN_TEXT → CLICK_TEXT → TYPE_TEXT → PRESS_ENTER → SCROLL
+
+            Example — "open my conversation with Sarah on WhatsApp":
+              Step 1: OPEN_APP {appName: "WhatsApp"}
+              Step 2: WAIT {seconds: 2}
+              Step 3: CLICK_TEXT {text: "Sarah"}
+
+            Example — "read what Sarah last said":
+              Step 1: OPEN_APP {appName: "WhatsApp"}
+              Step 2: WAIT {seconds: 2}
+              Step 3: CLICK_TEXT {text: "Sarah"}
+              Step 4: WAIT {seconds: 1}
+              Step 5: GET_SCREEN_TEXT {}
+
+            Use GET_SCREEN_TEXT before clicking whenever you are unsure what is on
+            screen. It is cheap, and guessing a label that is not there wastes the
+            whole plan.
+
             SECTION F: DEPENDENCY & FALLBACK RULES
             - "dependsOn" defaults to [] (empty array) for most steps. Only use dependsOn when a step genuinely needs data output from a prior step (e.g., using a search result, user input from ASK_USER, or contact lookup).
             - Do NOT add dependsOn for simple sequential ordering — steps already execute in order.
