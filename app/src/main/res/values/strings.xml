@@ -123,5 +123,28 @@
     <string name="settings_toggle_voice">Toggle Voice Section</string>
     <string name="settings_toggle_planning">Toggle Planning Section</string>
     <string name="settings_toggle_token">Toggle Token Visibility</string>
+
+    <!-- Chat -->
+    <string name="chat_greeting_title">Hi, I\'m OpenDroid</string>
+    <string name="chat_greeting_subtitle">Ask me to run something on this phone, or just talk.</string>
+    <string name="chat_input_hint">Message OpenDroid</string>
+    <string name="chat_new">New chat</string>
+    <string name="chat_history">Chats</string>
+    <string name="chat_desktop_bridge">Desktop bridge</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_edit_message">Edit message</string>
+    <string name="chat_editing">Editing message</string>
+    <string name="chat_cancel_edit">Cancel edit</string>
+    <string name="common_save">Save</string>
+    <string name="common_dismiss">Dismiss</string>
+    <string name="chat_rename">Rename chat</string>
+    <string name="chat_delete">Delete chat</string>
+    <string name="chat_delete_confirm">Delete chat?</string>
+    <string name="chat_clear">Clear this conversation</string>
+    <string name="chat_none_yet">No chats yet</string>
+    <string name="chat_incomplete">Incomplete response</string>
+    <string name="plan_needs_approval">NEEDS APPROVAL</string>
+    <string name="plan_not_allowlisted">NOT IN YOUR ALLOWLIST</string>
 </resources>
+
 

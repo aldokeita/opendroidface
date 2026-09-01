@@ -41,6 +41,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -276,14 +278,14 @@ fun ChatScreen(
                     IconButton(onClick = { showDesktopBridge = true }) {
                         Icon(
                             imageVector = Icons.Default.Computer,
-                            contentDescription = "Desktop bridge",
+                            contentDescription = stringResource(R.string.chat_desktop_bridge),
                             tint = colors.textSecondary
                         )
                     }
                     IconButton(onClick = { viewModel.newChat() }) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "New chat",
+                            contentDescription = stringResource(R.string.chat_new),
                             tint = colors.textSecondary
                         )
                     }
@@ -291,7 +293,7 @@ fun ChatScreen(
                         IconButton(onClick = { showChatMenu = true }) {
                             Icon(
                                 imageVector = Icons.Default.Forum,
-                                contentDescription = "Chats",
+                                contentDescription = stringResource(R.string.chat_history),
                                 tint = colors.textSecondary
                             )
                         }
@@ -302,7 +304,7 @@ fun ChatScreen(
                         ) {
                             if (sessions.isEmpty()) {
                                 DropdownMenuItem(
-                                    text = { Text("No chats yet", color = TextSecondary, fontSize = 13.sp) },
+                                    text = { Text(stringResource(R.string.chat_none_yet), color = TextSecondary, fontSize = 13.sp) },
                                     onClick = {},
                                     enabled = false
                                 )
@@ -355,7 +357,7 @@ fun ChatScreen(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Rename chat",
+                                                    contentDescription = stringResource(R.string.chat_rename),
                                                     tint = TextSecondary,
                                                     modifier = Modifier.size(16.dp)
                                                 )
@@ -369,7 +371,7 @@ fun ChatScreen(
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Delete,
-                                                    contentDescription = "Delete chat",
+                                                    contentDescription = stringResource(R.string.chat_delete),
                                                     tint = AccentRed,
                                                     modifier = Modifier.size(16.dp)
                                                 )
@@ -389,7 +391,7 @@ fun ChatScreen(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        "Clear this conversation",
+                                        stringResource(R.string.chat_clear),
                                         color = colors.accentRed,
                                         fontSize = 13.sp,
                                     )
@@ -580,14 +582,14 @@ fun ChatScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Editing message",
+                                text = stringResource(R.string.chat_editing),
                                 fontSize = 11.sp,
                                 color = AccentCyan,
                                 modifier = Modifier.weight(1f)
                             )
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Cancel edit",
+                                contentDescription = stringResource(R.string.chat_cancel_edit),
                                 tint = TextSecondary,
                                 modifier = Modifier
                                     .size(16.dp)
@@ -682,7 +684,7 @@ fun ChatScreen(
                                     onValueChange = { inputQuery = it; voiceError = null },
                                     placeholder = {
                                         Text(
-                                            "Message OpenDroid",
+                                            stringResource(R.string.chat_input_hint),
                                             color = colors.textSecondary,
                                             fontSize = 15.sp,
                                         )
@@ -717,7 +719,7 @@ fun ChatScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Send",
+                                    contentDescription = stringResource(R.string.chat_send),
                                     tint = colors.background,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -754,7 +756,7 @@ fun ChatScreen(
         AlertDialog(
             onDismissRequest = { sessionPendingDelete = null },
             containerColor = DarkSurface,
-            title = { Text("Delete chat?", color = TextPrimary) },
+            title = { Text(stringResource(R.string.chat_delete_confirm), color = TextPrimary) },
             text = {
                 Text(
                     "\"${session.title}\" and its messages will be permanently deleted.",
@@ -766,12 +768,12 @@ fun ChatScreen(
                     viewModel.deleteChat(session.id)
                     sessionPendingDelete = null
                 }) {
-                    Text("Delete", color = AccentRed, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.common_delete), color = AccentRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { sessionPendingDelete = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.common_cancel), color = TextSecondary)
                 }
             }
         )
@@ -781,7 +783,7 @@ fun ChatScreen(
         AlertDialog(
             onDismissRequest = { sessionPendingRename = null },
             containerColor = DarkSurface,
-            title = { Text("Rename chat", color = TextPrimary) },
+            title = { Text(stringResource(R.string.chat_rename), color = TextPrimary) },
             text = {
                 TextField(
                     value = renameText,
@@ -803,12 +805,12 @@ fun ChatScreen(
                     viewModel.renameSession(session.id, renameText)
                     sessionPendingRename = null
                 }) {
-                    Text("Save", color = AccentNeonGreen, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.common_save), color = AccentNeonGreen, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { sessionPendingRename = null }) {
-                    Text("Cancel", color = TextSecondary)
+                    Text(stringResource(R.string.common_cancel), color = TextSecondary)
                 }
             }
         )
@@ -848,7 +850,7 @@ private fun EmptyChatHero(
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Hi, I'm OpenDroid",
+            text = stringResource(R.string.chat_greeting_title),
             fontFamily = Montserrat,
             fontWeight = FontWeight.SemiBold,
             fontSize = 23.sp,
@@ -857,7 +859,7 @@ private fun EmptyChatHero(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Ask me to run something on this phone, or just talk.",
+            text = stringResource(R.string.chat_greeting_subtitle),
             fontSize = 14.sp,
             lineHeight = 20.sp,
             color = colors.textSecondary,
@@ -1026,7 +1028,7 @@ fun ChatBubble(
                     if (!isAgent && onEditRequested != null) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit message",
+                            contentDescription = stringResource(R.string.chat_edit_message),
                             tint = colors.textSecondary.copy(alpha = 0.7f),
                             modifier = Modifier
                                 .size(13.dp)
@@ -1133,7 +1135,7 @@ fun ProposedPlanPrompt(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "NEEDS APPROVAL",
+                text = stringResource(R.string.plan_needs_approval),
                 fontSize = 10.sp,
                 letterSpacing = 1.6.sp,
                 fontWeight = FontWeight.Medium,
@@ -1165,7 +1167,7 @@ fun ProposedPlanPrompt(
             HorizontalDivider(color = colors.borderColor.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "NOT IN YOUR ALLOWLIST",
+                text = stringResource(R.string.plan_not_allowlisted),
                 fontSize = 10.sp,
                 letterSpacing = 1.4.sp,
                 fontWeight = FontWeight.Medium,
@@ -1239,7 +1241,7 @@ fun ProposedPlanPrompt(
                     .weight(1f)
                     .height(50.dp),
             ) {
-                Text("Reject", fontSize = 14.sp)
+                Text(stringResource(R.string.plan_reject), fontSize = 14.sp)
             }
             Button(
                 onClick = { onApprove(checkedGrants) },
@@ -1252,7 +1254,7 @@ fun ProposedPlanPrompt(
                     .weight(1f)
                     .height(50.dp),
             ) {
-                Text("Approve", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.plan_approve), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -1494,7 +1496,7 @@ private fun ChatErrorRecoveryCard(
             }
             if (error.partialMessageId != null) {
                 Text(
-                    text = "Incomplete response",
+                    text = stringResource(R.string.chat_incomplete),
                     color = AccentCyan,
                     fontSize = 11.sp,
                 )
@@ -1524,7 +1526,7 @@ private fun ChatErrorRecoveryCard(
                 TextButton(onClick = { detailsExpanded = !detailsExpanded }) {
                     Text(if (detailsExpanded) "Hide details" else "Technical details")
                 }
-                TextButton(onClick = onDismiss) { Text("Dismiss") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_dismiss)) }
             }
             if (detailsExpanded) {
                 val detail = buildString {
@@ -1547,3 +1549,5 @@ private fun ChatErrorRecoveryCard(
         }
     }
 }
+
+

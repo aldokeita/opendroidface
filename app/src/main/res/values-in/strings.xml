@@ -127,5 +127,28 @@
     <string name="settings_toggle_voice">Buka bagian suara</string>
     <string name="settings_toggle_planning">Buka bagian perencanaan</string>
     <string name="settings_toggle_token">Tampilkan atau sembunyikan token</string>
+
+    <!-- Chat -->
+    <string name="chat_greeting_title">Hai, aku OpenDroid</string>
+    <string name="chat_greeting_subtitle">Suruh aku ngerjain sesuatu di HP ini, atau ngobrol aja.</string>
+    <string name="chat_input_hint">Tulis pesan…</string>
+    <string name="chat_new">Chat baru</string>
+    <string name="chat_history">Riwayat</string>
+    <string name="chat_desktop_bridge">Jembatan desktop</string>
+    <string name="chat_send">Kirim</string>
+    <string name="chat_edit_message">Ubah pesan</string>
+    <string name="chat_editing">Lagi mengubah pesan</string>
+    <string name="chat_cancel_edit">Batal mengubah</string>
+    <string name="common_save">Simpan</string>
+    <string name="common_dismiss">Tutup</string>
+    <string name="chat_rename">Ganti nama chat</string>
+    <string name="chat_delete">Hapus chat</string>
+    <string name="chat_delete_confirm">Hapus chat ini?</string>
+    <string name="chat_clear">Bersihkan percakapan ini</string>
+    <string name="chat_none_yet">Belum ada chat</string>
+    <string name="chat_incomplete">Jawabannya nggak lengkap</string>
+    <string name="plan_needs_approval">PERLU PERSETUJUAN</string>
+    <string name="plan_not_allowlisted">BELUM KAMU IZINKAN</string>
 </resources>
+
 
