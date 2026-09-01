@@ -208,7 +208,33 @@
     <string name="routines_scan">Scan Habits</string>
     <string name="routines_activate">Activate</string>
     <string name="routines_running">Running…</string>
+
+    <!-- Onboarding and permissions -->
+    <string name="onb_hello">Hello! I am OpenDroid</string>
+    <string name="onb_intro">Your open autonomous device assistant. Please introduce yourself so I can serve you personally.</string>
+    <string name="onb_name_label">What should I call you?</string>
+    <string name="onb_name_hint">Enter your name</string>
+    <string name="onb_birthday_label">When is your birthday?</string>
+    <string name="onb_birthday_pick">Pick your birthday</string>
+    <string name="onb_birthday_hint">e.g. MM/DD/YYYY</string>
+    <string name="onb_start">Let\'s Go</string>
+    <string name="onb_need_both">Please enter both your name and birth date.</string>
+    <string name="onb_save_failed">Your details could not be saved securely. Please try again.</string>
+    <string name="onb_perm_title">Permissions Setup</string>
+    <string name="onb_perm_subtitle">Let\'s give me permission so I can serve you well</string>
+    <string name="onb_perm_body">To allow me to interact with your device, run commands, list files, and operate system features, some standard Android permissions are required.</string>
+    <string name="onb_perm_grant">Grant Permissions</string>
+    <string name="perm_required">Required Permissions</string>
+    <string name="perm_subtitle">Configure permissions below to enable full autonomous features.</string>
+    <string name="perm_needs_settings">NEEDS A TRIP TO SETTINGS</string>
+    <string name="perm_grant_all">Grant all permissions?</string>
+    <string name="perm_proceed">Proceed to OpenDroid Agent</string>
+    <string name="common_continue">Continue</string>
+    <string name="perm_continue_hint">You can continue now and grant the rest later in Settings → Permissions.</string>
+    <string name="perm_batch_intro">Android will ask for the remaining runtime permissions in one batch:</string>
 </resources>
+
+
 
 
 

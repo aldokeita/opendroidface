@@ -18,6 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -128,7 +130,7 @@ fun IntroductionPanel(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Hello! I am OpenDroid",
+            text = stringResource(R.string.onb_hello),
             fontFamily = Montserrat,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
@@ -139,7 +141,7 @@ fun IntroductionPanel(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Your open autonomous device assistant. Please introduce yourself so I can serve you personally.",
+            text = stringResource(R.string.onb_intro),
             fontSize = 14.sp,
             color = colors.textSecondary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -162,8 +164,8 @@ fun IntroductionPanel(
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text("What should I call you?", color = colors.textSecondary) },
-            placeholder = { Text("Enter your name", color = colors.textSecondary.copy(alpha = 0.6f)) },
+            label = { Text(stringResource(R.string.onb_name_label), color = colors.textSecondary) },
+            placeholder = { Text(stringResource(R.string.onb_name_hint), color = colors.textSecondary.copy(alpha = 0.6f)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colors.accentNeonGreen,
                 unfocusedBorderColor = colors.borderColor,
@@ -185,13 +187,13 @@ fun IntroductionPanel(
         OutlinedTextField(
             value = dob,
             onValueChange = onDobChange,
-            label = { Text("When is your birthday?", color = colors.textSecondary) },
-            placeholder = { Text("e.g. MM/DD/YYYY", color = colors.textSecondary.copy(alpha = 0.6f)) },
+            label = { Text(stringResource(R.string.onb_birthday_label), color = colors.textSecondary) },
+            placeholder = { Text(stringResource(R.string.onb_birthday_hint), color = colors.textSecondary.copy(alpha = 0.6f)) },
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
-                        contentDescription = "Pick your birthday",
+                        contentDescription = stringResource(R.string.onb_birthday_pick),
                         tint = colors.accentNeonGreen
                     )
                 }
@@ -227,11 +229,11 @@ fun IntroductionPanel(
                             showDatePicker = false
                         },
                         enabled = datePickerState.selectedDateMillis != null
-                    ) { Text("OK", color = colors.accentNeonGreen, fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.common_ok), color = colors.accentNeonGreen, fontWeight = FontWeight.Bold) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) {
-                        Text("Cancel", color = colors.textSecondary)
+                        Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                     }
                 }
             ) {
@@ -242,7 +244,7 @@ fun IntroductionPanel(
         if (showError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Please enter both your name and birth date.",
+                text = stringResource(R.string.onb_need_both),
                 color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
@@ -252,7 +254,7 @@ fun IntroductionPanel(
         if (storageError) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Your details could not be saved securely. Please try again.",
+                text = stringResource(R.string.onb_save_failed),
                 color = colors.accentRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
@@ -267,7 +269,7 @@ fun IntroductionPanel(
             colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Let's Go", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(stringResource(R.string.onb_start), fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
@@ -311,7 +313,7 @@ fun PermissionPromptPanel(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Permissions Setup",
+            text = stringResource(R.string.onb_perm_title),
             fontFamily = Montserrat,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
@@ -322,7 +324,7 @@ fun PermissionPromptPanel(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Let's give me permission so I can serve you well",
+            text = stringResource(R.string.onb_perm_subtitle),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = colors.textPrimary,
@@ -332,7 +334,7 @@ fun PermissionPromptPanel(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "To allow me to interact with your device, run commands, list files, and operate system features, some standard Android permissions are required.",
+            text = stringResource(R.string.onb_perm_body),
             fontSize = 14.sp,
             color = colors.textSecondary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -346,7 +348,8 @@ fun PermissionPromptPanel(
             colors = ButtonDefaults.buttonColors(containerColor = colors.accentNeonGreen, contentColor = colors.background),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Grant Permissions", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(stringResource(R.string.onb_perm_grant), fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
+

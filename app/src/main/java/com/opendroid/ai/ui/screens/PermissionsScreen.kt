@@ -60,6 +60,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -100,7 +102,7 @@ fun PermissionsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Permissions",
+                        text = stringResource(R.string.settings_permissions),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -112,7 +114,7 @@ fun PermissionsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = colors.textSecondary,
                         )
                     }
@@ -241,10 +243,10 @@ fun PermissionsPanel(
             .map { card -> cardTitle(card) }
         AlertDialog(
             onDismissRequest = { showGrantAllConfirm = false },
-            title = { Text("Grant all permissions?") },
+            title = { Text(stringResource(R.string.perm_grant_all)) },
             text = {
                 Text(
-                    "Android will ask for the remaining runtime permissions in one batch:\n\n" +
+                    stringResource(R.string.perm_batch_intro) + "\n\n" +
                         pendingGroups.joinToString("\n") { group -> "• $group" },
                 )
             },
@@ -257,10 +259,10 @@ fun PermissionsPanel(
                             isGrantAll = true,
                         )
                     },
-                ) { Text("Continue") }
+                ) { Text(stringResource(R.string.common_continue)) }
             },
             dismissButton = {
-                TextButton(onClick = { showGrantAllConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showGrantAllConfirm = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
@@ -306,14 +308,14 @@ private fun PermissionsPanelContent(
             .padding(24.dp),
     ) {
         Text(
-            text = "Required Permissions",
+            text = stringResource(R.string.perm_required),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = colors.textPrimary,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Configure permissions below to enable full autonomous features.",
+            text = stringResource(R.string.perm_subtitle),
             fontSize = 13.sp,
             color = colors.textSecondary,
         )
@@ -391,7 +393,7 @@ private fun PermissionsPanelContent(
             Spacer(modifier = Modifier.height(16.dp))
             if (!allRequirementsHeld) {
                 Text(
-                    text = "You can continue now and grant the rest later in Settings → Permissions.",
+                    text = stringResource(R.string.perm_continue_hint),
                     fontSize = 12.sp,
                     color = colors.textSecondary,
                 )
@@ -410,7 +412,7 @@ private fun PermissionsPanelContent(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
-                    text = "Proceed to OpenDroid Agent",
+                    text = stringResource(R.string.perm_proceed),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                 )
@@ -424,7 +426,7 @@ private fun ManualSettingsHeader() {
     val colors = LocalOpenDroidColors.current
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "NEEDS A TRIP TO SETTINGS",
+            text = stringResource(R.string.perm_needs_settings),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textSecondary,
         )
@@ -754,3 +756,5 @@ private fun cardDescription(card: PermissionCardId): String = when (card) {
     PermissionCardId.ACCESSIBILITY ->
         "Enables full agent screen automation (clicks & inputs)."
 }
+
+

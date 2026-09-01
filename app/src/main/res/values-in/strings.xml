@@ -212,7 +212,33 @@
     <string name="routines_scan">Cari kebiasaan</string>
     <string name="routines_activate">Aktifkan</string>
     <string name="routines_running">Sedang jalan…</string>
+
+    <!-- Perkenalan dan izin -->
+    <string name="onb_hello">Halo! Aku OpenDroid</string>
+    <string name="onb_intro">Asisten perangkatmu yang terbuka dan bisa bekerja sendiri. Kenalan dulu yuk, biar aku bisa membantumu dengan lebih pas.</string>
+    <string name="onb_name_label">Aku panggil kamu apa?</string>
+    <string name="onb_name_hint">Tulis namamu</string>
+    <string name="onb_birthday_label">Kapan ulang tahunmu?</string>
+    <string name="onb_birthday_pick">Pilih tanggal lahir</string>
+    <string name="onb_birthday_hint">mis. HH/BB/TTTT</string>
+    <string name="onb_start">Mulai</string>
+    <string name="onb_need_both">Isi dulu nama dan tanggal lahirmu.</string>
+    <string name="onb_save_failed">Datamu gagal disimpan dengan aman. Coba lagi ya.</string>
+    <string name="onb_perm_title">Pengaturan izin</string>
+    <string name="onb_perm_subtitle">Beri aku izin dulu, biar aku bisa benar-benar membantu</string>
+    <string name="onb_perm_body">Supaya aku bisa mengoperasikan HP-mu, menjalankan perintah, membaca berkas, dan mengatur fitur sistem, ada beberapa izin Android yang perlu kamu berikan.</string>
+    <string name="onb_perm_grant">Berikan izin</string>
+    <string name="perm_required">Izin yang dibutuhkan</string>
+    <string name="perm_subtitle">Atur izin di bawah ini supaya semua kemampuannya bisa dipakai.</string>
+    <string name="perm_needs_settings">HARUS LEWAT SETELAN HP</string>
+    <string name="perm_grant_all">Berikan semua izin?</string>
+    <string name="perm_proceed">Lanjut ke OpenDroid</string>
+    <string name="common_continue">Lanjut</string>
+    <string name="perm_continue_hint">Kamu bisa lanjut sekarang dan memberikan sisanya nanti di Setelan → Izin.</string>
+    <string name="perm_batch_intro">Android akan meminta sisa izinnya sekaligus:</string>
 </resources>
+
+
 
 
 
