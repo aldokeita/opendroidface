@@ -55,4 +55,77 @@
 
     <!-- Umum -->
     <string name="common_back">Kembali</string>
+
+    <!-- Setelan -->
+    <string name="settings_title">Setelan</string>
+    <string name="settings_brain">Otak</string>
+    <string name="settings_brain_subtitle">Siapa yang menjawab, dan apa yang dia butuhkan.</string>
+    <string name="settings_provider">PROVIDER</string>
+    <string name="settings_model">MODEL</string>
+    <string name="settings_api_key">API KEY</string>
+    <string name="settings_model_name">Nama model</string>
+    <string name="settings_refresh_models">Muat ulang daftar model</string>
+    <string name="settings_show_models">Buka daftar model</string>
+    <string name="settings_dropdown">Buka pilihan</string>
+    <string name="settings_test_connection">Tes koneksi</string>
+    <string name="settings_planning_fallbacks">CADANGAN PERENCANA</string>
+    <string name="settings_keys_other">KEY PROVIDER LAIN</string>
+    <string name="settings_chatgpt_account">AKUN CHATGPT</string>
+    <string name="settings_sign_out">Keluar</string>
+    <string name="settings_accent">WARNA AKSEN</string>
+    <string name="settings_accent_hint">Dipakai di semua halaman, bilah navigasi, dan cahayanya.</string>
+    <string name="settings_voice">SUARA</string>
+    <string name="settings_elevenlabs">ELEVENLABS</string>
+    <string name="settings_assistant_language">Bahasa</string>
+    <string name="settings_speak_typed">Bacakan jawaban chat</string>
+    <string name="settings_speak_typed_hint">Pertanyaan lewat suara selalu dijawab dengan suara.</string>
+    <string name="settings_indonesian_voice">Suara Indonesia</string>
+    <string name="settings_voice_engine_default">Bawaan sistem</string>
+    <string name="settings_toggle_voice_list">Buka daftar suara</string>
+    <string name="common_selected">Dipilih</string>
+    <string name="settings_elevenlabs_key">API Key ElevenLabs</string>
+    <string name="settings_elevenlabs_voice">Voice ID ElevenLabs</string>
+    <string name="settings_benchmark">Uji kecepatan</string>
+    <string name="settings_benchmark_hint">Lihat grafik langsung perbandingan kecepatan &amp; jeda.</string>
+    <string name="settings_auto_reply">Balas otomatis</string>
+    <string name="settings_auto_reply_hint">Atur balasan otomatis untuk WhatsApp, SMS &amp; Email.</string>
+    <string name="settings_notif_history">Riwayat notifikasi</string>
+    <string name="settings_notif_history_hint">Lihat notifikasi yang tertangkap dan catatan balasan otomatis.</string>
+    <string name="settings_routines">Kebiasaan &amp; rutinitas</string>
+    <string name="settings_routines_hint">Kenali pola harian yang berulang &amp; otomatiskan rutinitas pagimu.</string>
+    <string name="settings_permissions">Izin</string>
+    <string name="settings_permissions_hint">Tinjau dan berikan izin mikrofon, penyimpanan, aksesibilitas, dan lainnya.</string>
+    <string name="settings_crash_log">Catatan error</string>
+    <string name="settings_crash_log_hint">Lihat dan bagikan error yang terekam di HP ini.</string>
+    <string name="settings_about">Tentang</string>
+    <string name="settings_about_hint">Info versi, fitur, dan teknologi yang dipakai.</string>
+    <string name="settings_help">Pusat bantuan</string>
+    <string name="settings_help_hint">Panduan, tanya jawab, dan cara mengatasi masalah.</string>
+    <string name="settings_privacy">Kebijakan privasi</string>
+    <string name="settings_privacy_hint">Bagaimana OpenDroid memperlakukan datamu.</string>
+    <string name="settings_terms">Ketentuan layanan</string>
+    <string name="settings_terms_hint">Syarat dan ketentuan pemakaian OpenDroid.</string>
+    <string name="settings_license">Lisensi</string>
+    <string name="settings_license_hint">Lisensi sumber terbuka dan kredit pihak ketiga.</string>
+    <string name="settings_planning_section">PERENCANAAN &amp; OTOMATISASI</string>
+    <string name="settings_multi_agent">Mode perencanaan multi-agen</string>
+    <string name="settings_multi_agent_hint">Pakai agen pengkritik dan penggabung rencana supaya rencananya lebih aman dan matang.</string>
+    <string name="settings_floating">Tombol mengambang</string>
+    <string name="settings_floating_hint">Tampilkan gelembung kecil untuk membuka aplikasi atau langsung merekam perintah.</string>
+    <string name="settings_auto_mode">Mode otomatis</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_ok">OK</string>
+    <string name="common_delete">Hapus</string>
+    <string name="common_import">Impor</string>
+    <string name="common_download">Unduh</string>
+    <string name="common_pause">Jeda</string>
+    <string name="common_resume">Lanjut</string>
+    <string name="common_go">Buka</string>
+    <string name="common_revoke">Cabut</string>
+    <string name="common_info">Info</string>
+    <string name="settings_toggle_keys">Buka bagian key</string>
+    <string name="settings_toggle_voice">Buka bagian suara</string>
+    <string name="settings_toggle_planning">Buka bagian perencanaan</string>
+    <string name="settings_toggle_token">Tampilkan atau sembunyikan token</string>
 </resources>
+

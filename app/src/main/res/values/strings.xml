@@ -51,4 +51,77 @@
 
     <!-- Common -->
     <string name="common_back">Back</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_brain">Brain</string>
+    <string name="settings_brain_subtitle">Who answers, and what it needs to.</string>
+    <string name="settings_provider">PROVIDER</string>
+    <string name="settings_model">MODEL</string>
+    <string name="settings_api_key">API KEY</string>
+    <string name="settings_model_name">Model name</string>
+    <string name="settings_refresh_models">Refresh models</string>
+    <string name="settings_show_models">Show models dropdown</string>
+    <string name="settings_dropdown">Dropdown</string>
+    <string name="settings_test_connection">Test connection</string>
+    <string name="settings_planning_fallbacks">PLANNING FALLBACKS</string>
+    <string name="settings_keys_other">KEYS FOR OTHER PROVIDERS</string>
+    <string name="settings_chatgpt_account">CHATGPT ACCOUNT</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_accent">ACCENT</string>
+    <string name="settings_accent_hint">Used across every screen, the navigation bar and its glow.</string>
+    <string name="settings_voice">VOICE</string>
+    <string name="settings_elevenlabs">ELEVENLABS</string>
+    <string name="settings_assistant_language">Assistant language</string>
+    <string name="settings_speak_typed">Speak typed replies</string>
+    <string name="settings_speak_typed_hint">Answers to spoken questions are always read aloud.</string>
+    <string name="settings_indonesian_voice">Indonesian voice</string>
+    <string name="settings_voice_engine_default">Engine default</string>
+    <string name="settings_toggle_voice_list">Toggle voice list</string>
+    <string name="common_selected">Selected</string>
+    <string name="settings_elevenlabs_key">ElevenLabs API Key</string>
+    <string name="settings_elevenlabs_voice">ElevenLabs Voice ID</string>
+    <string name="settings_benchmark">Latency benchmark</string>
+    <string name="settings_benchmark_hint">View live charts comparing speeds &amp; latency.</string>
+    <string name="settings_auto_reply">Auto-reply</string>
+    <string name="settings_auto_reply_hint">Configure AI auto-reply for WhatsApp, SMS &amp; Email.</string>
+    <string name="settings_notif_history">Notification history</string>
+    <string name="settings_notif_history_hint">View captured notifications and auto-reply log.</string>
+    <string name="settings_routines">Habits &amp; routines</string>
+    <string name="settings_routines_hint">Detect repeated daily patterns &amp; automate morning routines.</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_permissions_hint">Review and grant microphone, storage, accessibility &amp; other permissions.</string>
+    <string name="settings_crash_log">Crash log</string>
+    <string name="settings_crash_log_hint">View and share crashes recorded on this device.</string>
+    <string name="settings_about">About</string>
+    <string name="settings_about_hint">Version info, features, and technology stack.</string>
+    <string name="settings_help">Help center</string>
+    <string name="settings_help_hint">Guides, FAQs, and troubleshooting.</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_privacy_hint">How OpenDroid handles your data and privacy.</string>
+    <string name="settings_terms">Terms of Use</string>
+    <string name="settings_terms_hint">Usage terms and conditions for OpenDroid.</string>
+    <string name="settings_license">License</string>
+    <string name="settings_license_hint">Open-source license and third-party credits.</string>
+    <string name="settings_planning_section">PLANNING &amp; AUTOMATION</string>
+    <string name="settings_multi_agent">Multi-Agent Planning Mode</string>
+    <string name="settings_multi_agent_hint">Use critic and plan merger agents for safer, more robust plan generation.</string>
+    <string name="settings_floating">Show Floating Button</string>
+    <string name="settings_floating_hint">Show a tiny floating bubble to launch the app or record commands directly.</string>
+    <string name="settings_auto_mode">Auto Mode</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_import">Import</string>
+    <string name="common_download">Download</string>
+    <string name="common_pause">Pause</string>
+    <string name="common_resume">Resume</string>
+    <string name="common_go">Go</string>
+    <string name="common_revoke">Revoke</string>
+    <string name="common_info">Info</string>
+    <string name="settings_toggle_keys">Toggle Keys Section</string>
+    <string name="settings_toggle_voice">Toggle Voice Section</string>
+    <string name="settings_toggle_planning">Toggle Planning Section</string>
+    <string name="settings_toggle_token">Toggle Token Visibility</string>
 </resources>
+

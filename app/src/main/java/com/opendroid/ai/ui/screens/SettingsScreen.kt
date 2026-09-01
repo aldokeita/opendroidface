@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.opendroid.ai.core.llm.providers.CodexProvider
+import androidx.compose.ui.res.stringResource
+import com.opendroid.ai.R
 import com.opendroid.ai.core.llm.codex.CodexAccountState
 import androidx.compose.ui.text.style.TextAlign
 import com.opendroid.ai.core.language.AppLanguage
@@ -170,7 +172,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Settings",
+                        text = stringResource(R.string.settings_title),
                         fontFamily = Montserrat,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -267,18 +269,18 @@ fun SettingsScreen(
                         // done: who answers, which model, and the key that lets
                         // it. These were three separate places on the page.
                         Text(
-                            text = "Brain",
+                            text = stringResource(R.string.settings_brain),
                             style = MaterialTheme.typography.titleMedium,
                             color = colors.textPrimary
                         )
                         Text(
-                            text = "Who answers, and what it needs to.",
+                            text = stringResource(R.string.settings_brain_subtitle),
                             fontSize = 12.sp,
                             color = colors.textSecondary,
                         )
                         Spacer(modifier = Modifier.height(18.dp))
                         Text(
-                            text = "PROVIDER",
+                            text = stringResource(R.string.settings_provider),
                             style = MaterialTheme.typography.labelSmall,
                             color = colors.textSecondary
                         )
@@ -308,7 +310,7 @@ fun SettingsScreen(
                                 )
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Dropdown",
+                                    contentDescription = stringResource(R.string.settings_dropdown),
                                     tint = colors.accentNeonGreen
                                 )
                             }
@@ -383,7 +385,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "MODEL",
+                                text = stringResource(R.string.settings_model),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -400,7 +402,7 @@ fun SettingsScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Refresh models",
+                                        contentDescription = stringResource(R.string.settings_refresh_models),
                                         tint = colors.textSecondary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -423,7 +425,7 @@ fun SettingsScreen(
                                 value = config.activeModel,
                                 onValueChange = { viewModel.updateActiveModel(it) },
                                 placeholder = {
-                                    Text("Model name", color = colors.textSecondary, fontSize = 15.sp)
+                                    Text(stringResource(R.string.settings_model_name), color = colors.textSecondary, fontSize = 15.sp)
                                 },
                                 textStyle = LocalTextStyle.current.copy(
                                     fontSize = 15.sp,
@@ -434,7 +436,7 @@ fun SettingsScreen(
                                     IconButton(onClick = { modelDropdownExpanded = !modelDropdownExpanded }) {
                                         Icon(
                                             imageVector = Icons.Default.ArrowDropDown,
-                                            contentDescription = "Show models dropdown",
+                                            contentDescription = stringResource(R.string.settings_show_models),
                                             tint = colors.accentNeonGreen
                                         )
                                     }
@@ -575,7 +577,7 @@ fun SettingsScreen(
                         if (providerNeedsKey) {
                             Spacer(modifier = Modifier.height(18.dp))
                             Text(
-                                text = "API KEY",
+                                text = stringResource(R.string.settings_api_key),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -622,7 +624,7 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "PLANNING FALLBACKS",
+                                text = stringResource(R.string.settings_planning_fallbacks),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
@@ -696,13 +698,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Latency benchmark",
+                                text = stringResource(R.string.settings_benchmark),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "View live charts comparing speeds & latency.",
+                                text = stringResource(R.string.settings_benchmark_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
@@ -964,7 +966,7 @@ fun SettingsScreen(
                                             IconButton(onClick = { showToken = !showToken }) {
                                                 Icon(
                                                     imageVector = if (showToken) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                                    contentDescription = "Toggle Token Visibility",
+                                                    contentDescription = stringResource(R.string.settings_toggle_token),
                                                     tint = colors.textSecondary
                                                 )
                                             }
@@ -1262,9 +1264,9 @@ fun SettingsScreen(
                                                         modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                     ) {
-                                                        Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(12.dp), tint = colors.textPrimary)
+                                                        Icon(Icons.Default.Pause, contentDescription = stringResource(R.string.common_pause), modifier = Modifier.size(12.dp), tint = colors.textPrimary)
                                                         Spacer(modifier = Modifier.width(4.dp))
-                                                        Text("Pause", fontSize = 10.sp, color = colors.textPrimary)
+                                                        Text(stringResource(R.string.common_pause), fontSize = 10.sp, color = colors.textPrimary)
                                                     }
                                                 } else if (status == ModelStatus.PAUSED) {
                                                     Button(
@@ -1279,9 +1281,9 @@ fun SettingsScreen(
                                                         modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                     ) {
-                                                        Icon(Icons.Default.PlayArrow, contentDescription = "Resume", modifier = Modifier.size(12.dp), tint = colors.background)
+                                                        Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.common_resume), modifier = Modifier.size(12.dp), tint = colors.background)
                                                         Spacer(modifier = Modifier.width(4.dp))
-                                                        Text("Resume", fontSize = 10.sp, color = colors.background)
+                                                        Text(stringResource(R.string.common_resume), fontSize = 10.sp, color = colors.background)
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.width(6.dp))
@@ -1291,7 +1293,7 @@ fun SettingsScreen(
                                                     modifier = Modifier.height(28.dp).padding(horizontal = 4.dp),
                                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                                                 ) {
-                                                    Text("Cancel", fontSize = 10.sp, color = Color.White)
+                                                    Text(stringResource(R.string.common_cancel), fontSize = 10.sp, color = Color.White)
                                                 }
                                             }
                                         }
@@ -1347,7 +1349,7 @@ fun SettingsScreen(
                                                                 modifier = Modifier.weight(1f).height(32.dp),
                                                                 contentPadding = PaddingValues(horizontal = 4.dp)
                                                             ) {
-                                                                Text("Download", fontSize = 11.sp, color = colors.background)
+                                                                Text(stringResource(R.string.common_download), fontSize = 11.sp, color = colors.background)
                                                             }
                                                         }
 
@@ -1361,7 +1363,7 @@ fun SettingsScreen(
                                                             modifier = Modifier.weight(1f).height(32.dp),
                                                             contentPadding = PaddingValues(horizontal = 4.dp)
                                                         ) {
-                                                            Text("Import", fontSize = 11.sp, color = colors.textPrimary)
+                                                            Text(stringResource(R.string.common_import), fontSize = 11.sp, color = colors.textPrimary)
                                                         }
                                                     }
                                                     
@@ -1390,7 +1392,7 @@ fun SettingsScreen(
                                                              modifier = Modifier.height(32.dp),
                                                              contentPadding = PaddingValues(horizontal = 8.dp)
                                                          ) {
-                                                             Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(14.dp), tint = colors.accentRed)
+                                                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.common_delete), modifier = Modifier.size(14.dp), tint = colors.accentRed)
                                                          }
                                                     }
                                                     
@@ -1402,7 +1404,7 @@ fun SettingsScreen(
                                                         modifier = Modifier.height(32.dp),
                                                         contentPadding = PaddingValues(horizontal = 8.dp)
                                                     ) {
-                                                        Icon(Icons.Default.Info, contentDescription = "Info", modifier = Modifier.size(14.dp), tint = colors.textSecondary)
+                                                        Icon(Icons.Default.Info, contentDescription = stringResource(R.string.common_info), modifier = Modifier.size(14.dp), tint = colors.textSecondary)
                                                     }
                                                 }
                                             }
@@ -1536,7 +1538,7 @@ fun SettingsScreen(
                                                     ) {
                                                         Icon(
                                                             Icons.Default.Delete,
-                                                            contentDescription = "Delete",
+                                                            contentDescription = stringResource(R.string.common_delete),
                                                             modifier = Modifier.size(14.dp),
                                                             tint = colors.accentRed
                                                         )
@@ -1705,13 +1707,13 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "KEYS FOR OTHER PROVIDERS",
+                                text = stringResource(R.string.settings_keys_other),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (keysSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Toggle Keys Section",
+                                contentDescription = stringResource(R.string.settings_toggle_keys),
                                 tint = colors.textSecondary
                             )
                         }
@@ -1750,7 +1752,7 @@ fun SettingsScreen(
                                         TextButton(
                                             onClick = { viewModel.testConnection(providerName) }
                                         ) {
-                                            Text("Test connection", fontSize = 11.sp)
+                                            Text(stringResource(R.string.settings_test_connection), fontSize = 11.sp)
                                         }
                                     }
                                     Text(
@@ -1781,13 +1783,13 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "VOICE",
+                                text = stringResource(R.string.settings_voice),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (voiceSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Toggle Voice Section",
+                                contentDescription = stringResource(R.string.settings_toggle_voice),
                                 tint = colors.textSecondary
                             )
                         }
@@ -1801,19 +1803,19 @@ fun SettingsScreen(
                                 SpeakTypedRepliesRow()
                                 IndonesianVoicePicker()
                                 Text(
-                                    text = "ELEVENLABS",
+                                    text = stringResource(R.string.settings_elevenlabs),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colors.textSecondary
                                 )
                                 SecureApiKeyField(
                                     value = config.elevenLabsApiKey,
                                     onValueChange = { viewModel.updateElevenLabsApiKey(it) },
-                                    label = "ElevenLabs API Key"
+                                    label = stringResource(R.string.settings_elevenlabs_key)
                                 )
                                 OutlinedTextField(
                                     value = config.elevenLabsVoiceId,
                                     onValueChange = { viewModel.updateElevenLabsVoiceId(it) },
-                                    label = { Text("ElevenLabs Voice ID", fontSize = 12.sp) },
+                                    label = { Text(stringResource(R.string.settings_elevenlabs_voice), fontSize = 12.sp) },
                                     singleLine = true,
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = colors.accentNeonGreen,
@@ -1850,13 +1852,13 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "PLANNING & AUTOMATION",
+                                text = stringResource(R.string.settings_planning_section),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary
                             )
                             Icon(
                                 imageVector = if (planningSectionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Toggle Planning Section",
+                                contentDescription = stringResource(R.string.settings_toggle_planning),
                                 tint = colors.textSecondary
                             )
                         }
@@ -1868,7 +1870,7 @@ fun SettingsScreen(
                         val autoMode = config.resolvedAutoMode()
 
                         Text(
-                            text = "Auto Mode",
+                            text = stringResource(R.string.settings_auto_mode),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.textPrimary
@@ -1929,7 +1931,7 @@ fun SettingsScreen(
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { showYoloWarning = false }) {
-                                        Text("Cancel", color = colors.textSecondary)
+                                        Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                                     }
                                 }
                             )
@@ -1968,7 +1970,7 @@ fun SettingsScreen(
                                         )
                                     }
                                     TextButton(onClick = { viewModel.revokeGrant(action) }) {
-                                        Text("Revoke", color = colors.accentRed, fontSize = 12.sp)
+                                        Text(stringResource(R.string.common_revoke), color = colors.accentRed, fontSize = 12.sp)
                                     }
                                 }
                             }
@@ -1989,13 +1991,13 @@ fun SettingsScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Multi-Agent Planning Mode",
+                                    text = stringResource(R.string.settings_multi_agent),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "Use critic and plan merger agents for safer, more robust plan generation.",
+                                    text = stringResource(R.string.settings_multi_agent_hint),
                                     fontSize = 12.sp,
                                     color = colors.textSecondary
                                 )
@@ -2026,13 +2028,13 @@ fun SettingsScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Show Floating Button",
+                                    text = stringResource(R.string.settings_floating),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "Show a tiny floating bubble to launch the app or record commands directly.",
+                                    text = stringResource(R.string.settings_floating_hint),
                                     fontSize = 12.sp,
                                     color = colors.textSecondary
                                 )
@@ -2108,27 +2110,27 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Forum,
-                            contentDescription = "Auto-reply",
+                            contentDescription = stringResource(R.string.settings_auto_reply),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Auto-reply",
+                                text = stringResource(R.string.settings_auto_reply),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Configure AI auto-reply for WhatsApp, SMS & Email.",
+                                text = stringResource(R.string.settings_auto_reply_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2151,27 +2153,27 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
-                            contentDescription = "Notification history",
+                            contentDescription = stringResource(R.string.settings_notif_history),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Notification history",
+                                text = stringResource(R.string.settings_notif_history),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "View captured notifications and auto-reply log.",
+                                text = stringResource(R.string.settings_notif_history_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2194,27 +2196,27 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Security,
-                            contentDescription = "Permissions",
+                            contentDescription = stringResource(R.string.settings_permissions),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Permissions",
+                                text = stringResource(R.string.settings_permissions),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Review and grant microphone, storage, accessibility & other permissions.",
+                                text = stringResource(R.string.settings_permissions_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2270,20 +2272,20 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Habits & routines",
+                                text = stringResource(R.string.settings_routines),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Detect repeated daily patterns & automate morning routines.",
+                                text = stringResource(R.string.settings_routines_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2306,27 +2308,27 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.BugReport,
-                            contentDescription = "Crash log",
+                            contentDescription = stringResource(R.string.settings_crash_log),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Crash log",
+                                text = stringResource(R.string.settings_crash_log),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "View and share crashes recorded on this device.",
+                                text = stringResource(R.string.settings_crash_log_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2349,7 +2351,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Privacy Policy",
+                            contentDescription = stringResource(R.string.settings_privacy),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -2362,14 +2364,14 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "How OpenDroid handles your data and privacy.",
+                                text = stringResource(R.string.settings_privacy_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2392,7 +2394,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Gavel,
-                            contentDescription = "Terms of Use",
+                            contentDescription = stringResource(R.string.settings_terms),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -2405,14 +2407,14 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Usage terms and conditions for OpenDroid.",
+                                text = stringResource(R.string.settings_terms_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2442,20 +2444,20 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Help center",
+                                text = stringResource(R.string.settings_help),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Guides, FAQs, and troubleshooting.",
+                                text = stringResource(R.string.settings_help_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2478,27 +2480,27 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Description,
-                            contentDescription = "License",
+                            contentDescription = stringResource(R.string.settings_license),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "License",
+                                text = stringResource(R.string.settings_license),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Open-source license and third-party credits.",
+                                text = stringResource(R.string.settings_license_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2521,7 +2523,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "About",
+                            contentDescription = stringResource(R.string.settings_about),
                             tint = colors.textSecondary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -2534,14 +2536,14 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Version info, features, and technology stack.",
+                                text = stringResource(R.string.settings_about_hint),
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
                         }
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Go",
+                            contentDescription = stringResource(R.string.common_go),
                             tint = colors.textSecondary
                         )
                     }
@@ -2592,12 +2594,12 @@ fun SettingsScreen(
                     onClick = { showAuthRequiredDialog = null },
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("OK", color = colors.background)
+                    Text(stringResource(R.string.common_ok), color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAuthRequiredDialog = null }) {
-                    Text("Cancel", color = colors.textSecondary)
+                    Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                 }
             },
             containerColor = colors.cardBackground,
@@ -2625,12 +2627,12 @@ fun SettingsScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("Download", color = colors.background)
+                    Text(stringResource(R.string.common_download), color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCellularWarningDialog = null }) {
-                    Text("Cancel", color = colors.textSecondary)
+                    Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                 }
             },
             containerColor = colors.cardBackground,
@@ -2658,12 +2660,12 @@ fun SettingsScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                 ) {
-                    Text("Resume", color = colors.background)
+                    Text(stringResource(R.string.common_resume), color = colors.background)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingCellularResumeModelId = null }) {
-                    Text("Cancel", color = colors.textSecondary)
+                    Text(stringResource(R.string.common_cancel), color = colors.textSecondary)
                 }
             },
             containerColor = colors.cardBackground,
@@ -2718,7 +2720,7 @@ fun SettingsScreen(
                         onClick = { viewModel.clearImportStatus() },
                         colors = ButtonDefaults.buttonColors(containerColor = colors.accentOrange)
                     ) {
-                        Text("OK", color = colors.background)
+                        Text(stringResource(R.string.common_ok), color = colors.background)
                     }
                 }
             },
@@ -2876,13 +2878,13 @@ private fun AccentPicker() {
 
     Column {
         Text(
-            text = "ACCENT",
+            text = stringResource(R.string.settings_accent),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textSecondary
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Used across every screen, the navigation bar and its glow.",
+            text = stringResource(R.string.settings_accent_hint),
             fontSize = 12.sp,
             color = colors.textSecondary
         )
@@ -2928,7 +2930,7 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
 
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-        text = "CHATGPT ACCOUNT",
+        text = stringResource(R.string.settings_chatgpt_account),
         style = MaterialTheme.typography.labelSmall,
         color = colors.textSecondary
     )
@@ -2967,7 +2969,7 @@ private fun CodexSignIn(viewModel: SettingsViewModel) {
         }
         if (signedIn) {
             TextButton(onClick = { viewModel.signOutOfCodex() }) {
-                Text("Sign out", fontSize = 12.sp, color = colors.textSecondary)
+                Text(stringResource(R.string.settings_sign_out), fontSize = 12.sp, color = colors.textSecondary)
             }
         }
     }
@@ -2986,7 +2988,7 @@ private fun AppLanguageRow() {
     val selected by store.language.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text("Assistant language", fontSize = 14.sp, color = colors.textPrimary)
+        Text(stringResource(R.string.settings_assistant_language), fontSize = 14.sp, color = colors.textPrimary)
         Text(
             text = "What it answers and speaks in. The model still reads whatever you write.",
             fontSize = 11.sp,
@@ -3045,9 +3047,9 @@ private fun SpeakTypedRepliesRow() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text("Speak typed replies", fontSize = 14.sp, color = colors.textPrimary)
+            Text(stringResource(R.string.settings_speak_typed), fontSize = 14.sp, color = colors.textPrimary)
             Text(
-                text = "Answers to spoken questions are always read aloud.",
+                text = stringResource(R.string.settings_speak_typed_hint),
                 fontSize = 11.sp,
                 color = colors.textSecondary
             )
@@ -3100,7 +3102,7 @@ private fun IndonesianVoicePicker() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Indonesian voice", fontSize = 14.sp, color = colors.textPrimary)
+                Text(stringResource(R.string.settings_indonesian_voice), fontSize = 14.sp, color = colors.textPrimary)
                 Text(
                     text = if (voices.isEmpty()) {
                         "Reading the installed voices…"
@@ -3113,7 +3115,7 @@ private fun IndonesianVoicePicker() {
             }
             Icon(
                 imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = "Toggle voice list",
+                contentDescription = stringResource(R.string.settings_toggle_voice_list),
                 tint = colors.textSecondary
             )
         }
@@ -3121,7 +3123,7 @@ private fun IndonesianVoicePicker() {
         AnimatedVisibility(visible = expanded) {
             Column(modifier = Modifier.padding(top = 8.dp)) {
                 VoiceChoiceRow(
-                    label = "Engine default",
+                    label = stringResource(R.string.settings_voice_engine_default),
                     detail = "Whatever the system picks",
                     isSelected = selected == null,
                     onClick = { store.selectIndonesian(null) },
@@ -3168,7 +3170,7 @@ private fun VoiceChoiceRow(
         if (isSelected) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
+                contentDescription = stringResource(R.string.common_selected),
                 tint = colors.accentNeonGreen,
                 modifier = Modifier.size(18.dp)
             )
@@ -3186,3 +3188,4 @@ private fun CodexAccountState.SignedIn.describe(): String {
         ?: return who
     return "$who · ChatGPT $plan"
 }
+
