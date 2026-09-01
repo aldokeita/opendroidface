@@ -5,6 +5,8 @@ import android.media.MediaPlayer
 import android.media.audiofx.Visualizer
 import android.os.SystemClock
 import android.speech.tts.TextToSpeech
+import android.util.Log
+import com.opendroid.ai.BuildConfig
 import com.opendroid.ai.data.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,14 @@ class TextToSpeechEngine(
     private var mouthTicker: Runnable? = null
 
     var onCompletionListener: (() -> Unit)? = null
+
+    /**
+     * The language to speak in, as an IETF tag, or null to decide per utterance.
+     *
+     * Same seam as [SpeechRecognitionEngine.languageTag] and fed from the same
+     * setting: what the microphone listens in is what the mouth answers in.
+     */
+    var languageTag: String? = null
 
     init {
         tts = TextToSpeech(context, this)
@@ -153,13 +163,35 @@ class TextToSpeechEngine(
     }
 
     override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            val result = tts?.setLanguage(Locale.getDefault())
-            if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
-                isInitialized = true
-            }
-        }
+        // The language is chosen per utterance now, so a device locale the
+        // engine happens not to carry no longer leaves this permanently mute.
+        isInitialized = status == TextToSpeech.SUCCESS
     }
+
+    /**
+     * Points the engine at the right language for [text] and reports whether it
+     * got there.
+     *
+     * A locale the engine cannot speak falls back to the device's, because a
+     * mispronounced answer is still an answer and silence is not. Callers do
+     * not act on the result beyond that; it exists so the failure is visible in
+     * debug builds rather than being a mystery on one phone.
+     */
+    private fun applyLanguage(text: String): Boolean {
+        val engine = tts ?: return false
+        val wanted = SpokenLanguage.localeFor(text, languageTag)
+        val result = engine.setLanguage(wanted)
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Speaking as ${wanted.toLanguageTag()} (setLanguage=$result, voice=${engine.voice?.name})")
+        }
+        if (result.isUsable()) return true
+
+        Log.w(TAG, "No voice data for ${wanted.toLanguageTag()}; falling back to the device language.")
+        return engine.setLanguage(Locale.getDefault()).isUsable()
+    }
+
+    private fun Int.isUsable(): Boolean =
+        this != TextToSpeech.LANG_MISSING_DATA && this != TextToSpeech.LANG_NOT_SUPPORTED
 
     fun speak(text: String) {
         scope.launch {
@@ -179,6 +211,7 @@ class TextToSpeechEngine(
             // Local fallback — must run on main thread
             if (isInitialized) {
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    applyLanguage(text)
                     tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "opendroid_tts")
                 }
             }
@@ -193,10 +226,13 @@ class TextToSpeechEngine(
             .replace("\n", "\\n")
             .replace("\r", "\\r")
             .replace("\t", "\\t")
+        // Multilingual, not monolingual. The monolingual model is English-only:
+        // handed Indonesian, it renders the letters with English phonetics, and
+        // the result is an English speaker sounding out words they do not know.
         val jsonPayload = """
             {
               "text": "$escapedText",
-              "model_id": "eleven_monolingual_v1",
+              "model_id": "eleven_multilingual_v2",
               "voice_settings": {
                 "stability": 0.5,
                 "similarity_boost": 0.75
@@ -261,5 +297,6 @@ class TextToSpeechEngine(
         const val MOUTH_OPEN_MS = 110L
         /** Roughly 15fps: fast enough to look like speech, cheap enough to ignore. */
         const val MOUTH_TICK_MS = 65L
+        const val TAG = "TextToSpeechEngine"
     }
 }

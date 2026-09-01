@@ -41,6 +41,9 @@ class OpenDroidService : Service() {
     @Inject
     lateinit var voiceAmplitude: VoiceAmplitude
 
+    @Inject
+    lateinit var voiceLanguageStore: com.opendroid.ai.ui.face.VoiceLanguageStore
+
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var speechRecognitionEngine: SpeechRecognitionEngine
     private lateinit var textToSpeechEngine: TextToSpeechEngine
@@ -75,6 +78,15 @@ class OpenDroidService : Service() {
         // agent is produced here rather than by any screen - so this is the only
         // place that can publish its level.
         textToSpeechEngine = TextToSpeechEngine(this, settingsRepository, voiceAmplitude)
+
+        // The language chip in hands-free sets what the microphone listens in.
+        // The mouth follows the same choice, so a conversation held in one
+        // language is not answered in the accent of another.
+        serviceScope.launch {
+            voiceLanguageStore.tag.collect { tag ->
+                textToSpeechEngine.languageTag = tag
+            }
+        }
 
         // Bind Agent Loop TTS
         agentLoop.onSpeakCallback = { text ->
