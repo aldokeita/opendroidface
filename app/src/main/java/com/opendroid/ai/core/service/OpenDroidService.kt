@@ -48,6 +48,9 @@ class OpenDroidService : Service() {
     @Inject
     lateinit var speechOutputStore: com.opendroid.ai.core.voice.SpeechOutputStore
 
+    @Inject
+    lateinit var ttsVoiceStore: com.opendroid.ai.core.voice.TtsVoiceStore
+
     private lateinit var wakeWordDetector: WakeWordDetector
     private lateinit var speechRecognitionEngine: SpeechRecognitionEngine
     private lateinit var textToSpeechEngine: TextToSpeechEngine
@@ -81,7 +84,7 @@ class OpenDroidService : Service() {
         // The robot face draws whatever voice is active, and speech spoken by the
         // agent is produced here rather than by any screen - so this is the only
         // place that can publish its level.
-        textToSpeechEngine = TextToSpeechEngine(this, settingsRepository, voiceAmplitude)
+        textToSpeechEngine = TextToSpeechEngine(this, settingsRepository, voiceAmplitude, ttsVoiceStore)
 
         // The language chip in hands-free sets what the microphone listens in.
         // The mouth follows the same choice, so a conversation held in one

@@ -14,7 +14,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.opendroid.ai.core.llm.providers.CodexProvider
 import com.opendroid.ai.core.llm.codex.CodexAccountState
+import com.opendroid.ai.core.voice.SpokenLanguage
+import com.opendroid.ai.core.voice.TtsVoicePreview
+import com.opendroid.ai.core.voice.voiceDisplayLabel
 import com.opendroid.ai.ui.face.rememberSpeechOutputStore
+import com.opendroid.ai.ui.face.rememberTtsVoiceStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -1791,6 +1795,7 @@ fun SettingsScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 SpeakTypedRepliesRow()
+                                IndonesianVoicePicker()
                                 Text(
                                     text = "ELEVENLABS",
                                     style = MaterialTheme.typography.labelSmall,
@@ -3000,6 +3005,122 @@ private fun SpeakTypedRepliesRow() {
         )
     }
 }
+
+/**
+ * Choosing the Indonesian voice, by ear.
+ *
+ * Android exposes a voice's locale, quality and latency, but not its gender and
+ * not a name anyone would recognise - so there is no honest way to label one
+ * "male". Every installed voice is listed instead, and tapping one speaks a
+ * sample immediately: the only way to tell them apart is to hear them.
+ */
+@Composable
+private fun IndonesianVoicePicker() {
+    val colors = LocalOpenDroidColors.current
+    val context = LocalContext.current
+    val store = rememberTtsVoiceStore()
+    val selected by store.indonesianVoice.collectAsState()
+
+    var voices by remember { mutableStateOf<List<String>>(emptyList()) }
+    var expanded by remember { mutableStateOf(false) }
+
+    val previewer = remember(context) { TtsVoicePreview(context) }
+    DisposableEffect(previewer) {
+        previewer.start(SpokenLanguage.INDONESIAN) { names -> voices = names }
+        onDispose { previewer.release() }
+    }
+
+    val currentLabel = selected
+        ?.let { name -> voices.indexOf(name).takeIf { it >= 0 }?.let { voiceDisplayLabel(name, it) } ?: name }
+        ?: "Engine default"
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = voices.isNotEmpty()) { expanded = !expanded },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Indonesian voice", fontSize = 14.sp, color = colors.textPrimary)
+                Text(
+                    text = if (voices.isEmpty()) {
+                        "Reading the installed voices…"
+                    } else {
+                        "$currentLabel · ${voices.size} installed. Tap one to hear it."
+                    },
+                    fontSize = 11.sp,
+                    color = colors.textSecondary
+                )
+            }
+            Icon(
+                imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = "Toggle voice list",
+                tint = colors.textSecondary
+            )
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                VoiceChoiceRow(
+                    label = "Engine default",
+                    detail = "Whatever the system picks",
+                    isSelected = selected == null,
+                    onClick = { store.selectIndonesian(null) },
+                )
+                voices.forEachIndexed { index, name ->
+                    VoiceChoiceRow(
+                        label = voiceDisplayLabel(name, index),
+                        detail = name,
+                        isSelected = selected == name,
+                        onClick = {
+                            store.selectIndonesian(name)
+                            previewer.preview(name, VOICE_SAMPLE)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VoiceChoiceRow(
+    label: String,
+    detail: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val colors = LocalOpenDroidColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                fontSize = 13.sp,
+                color = if (isSelected) colors.accentNeonGreen else colors.textPrimary
+            )
+            Text(text = detail, fontSize = 10.sp, color = colors.textSecondary)
+        }
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Selected",
+                tint = colors.accentNeonGreen,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+private const val VOICE_SAMPLE =
+    "Halo, aku OpenDroid. Ada yang bisa kubantu hari ini?"
 
 private fun CodexAccountState.SignedIn.describe(): String {
     val who = email.ifBlank { "Signed in" }

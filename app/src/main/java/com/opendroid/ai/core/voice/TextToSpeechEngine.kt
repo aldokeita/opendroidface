@@ -26,6 +26,9 @@ class TextToSpeechEngine(
     // Optional so existing callers keep working; only a caller that draws the
     // speaking voice needs to pass one.
     private val amplitude: VoiceAmplitude? = null,
+    // Optional for the same reason: a caller that never speaks Indonesian has
+    // no choice to honour.
+    private val voiceStore: TtsVoiceStore? = null,
 ) : TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = null
@@ -166,6 +169,15 @@ class TextToSpeechEngine(
         // The language is chosen per utterance now, so a device locale the
         // engine happens not to carry no longer leaves this permanently mute.
         isInitialized = status == TextToSpeech.SUCCESS
+        if (isInitialized && BuildConfig.DEBUG) {
+            val indonesian = runCatching {
+                tts?.voices.orEmpty()
+                    .filter { it.locale.language == SpokenLanguage.INDONESIAN.language }
+                    .map { it.name }
+                    .sorted()
+            }.getOrDefault(emptyList())
+            Log.i(TAG, "Indonesian voices on this device: $indonesian")
+        }
     }
 
     /**
@@ -181,13 +193,34 @@ class TextToSpeechEngine(
         val engine = tts ?: return false
         val wanted = SpokenLanguage.localeFor(text, languageTag)
         val result = engine.setLanguage(wanted)
-        if (BuildConfig.DEBUG) {
-            Log.i(TAG, "Speaking as ${wanted.toLanguageTag()} (setLanguage=$result, voice=${engine.voice?.name})")
+        if (result.isUsable()) {
+            applyPreferredVoice(engine, wanted)
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "Speaking as ${wanted.toLanguageTag()} as ${engine.voice?.name}")
+            }
+            return true
         }
-        if (result.isUsable()) return true
 
         Log.w(TAG, "No voice data for ${wanted.toLanguageTag()}; falling back to the device language.")
         return engine.setLanguage(Locale.getDefault()).isUsable()
+    }
+
+    /**
+     * Applies the user's chosen voice, when there is one and it belongs to the
+     * language being spoken.
+     *
+     * Setting the language already replaced the voice, so this has to come
+     * after it, every time. A choice made for Indonesian must not follow an
+     * English answer: the engine would either refuse it or read English in an
+     * Indonesian mouth.
+     */
+    private fun applyPreferredVoice(engine: TextToSpeech, spoken: Locale) {
+        if (spoken.language != SpokenLanguage.INDONESIAN.language) return
+        val wanted = voiceStore?.indonesianVoice?.value ?: return
+        val voice = runCatching {
+            engine.voices.orEmpty().firstOrNull { it.name == wanted && it.locale.language == spoken.language }
+        }.getOrNull() ?: return
+        engine.voice = voice
     }
 
     private fun Int.isUsable(): Boolean =

@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.opendroid.ai.core.face.FaceMood
 import com.opendroid.ai.core.voice.SpeechOutputStore
+import com.opendroid.ai.core.voice.TtsVoiceStore
 import com.opendroid.ai.core.voice.VoiceAmplitude
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -30,6 +31,7 @@ interface FaceEntryPoint {
     fun motionStore(): MotionStore
     fun transcriptVisibilityStore(): TranscriptVisibilityStore
     fun speechOutputStore(): SpeechOutputStore
+    fun ttsVoiceStore(): TtsVoiceStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -86,6 +88,13 @@ fun rememberTranscriptVisibilityStore(): TranscriptVisibilityStore {
 fun rememberSpeechOutputStore(): SpeechOutputStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).speechOutputStore() }
+}
+
+/** The chosen Indonesian voice, shared with the speaking engine in the service. */
+@Composable
+fun rememberTtsVoiceStore(): TtsVoiceStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).ttsVoiceStore() }
 }
 
 /** The process-wide mood, published by the agent. */
