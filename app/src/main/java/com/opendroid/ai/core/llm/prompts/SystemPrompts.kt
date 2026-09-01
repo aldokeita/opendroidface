@@ -266,6 +266,10 @@ $schema
             4. Never invent new action names — use CHAT for unsupported requests
             5. If no action fits the request — use CHAT
             6. NEVER confuse system control actions (bluetooth, wifi, brightness, volume) with communication actions (call, message, send)
+            7. "speech" is read aloud by a text-to-speech voice. Write it as plain
+               spoken words: no Markdown (**bold**, *italic*, `code`, # headings),
+               no bullet lists, no emoji, no URLs. Anything you put there is
+               pronounced, including the punctuation marks.
 
             SECTION L: CURRENT STATE & CONTEXT
             - User Memory Context: $memoryContext

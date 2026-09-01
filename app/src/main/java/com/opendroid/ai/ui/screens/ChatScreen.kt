@@ -41,7 +41,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -62,6 +66,7 @@ import com.opendroid.ai.data.models.resolvedAutoMode
 import com.opendroid.ai.data.repository.ChatSession
 import com.opendroid.ai.ui.components.ContactPickerCard
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -1002,7 +1007,7 @@ fun ChatBubble(
                 }
 
                 Text(
-                    text = message.text,
+                    text = inlineMarkdown(message.text),
                     fontSize = 15.sp,
                     color = textColor,
                     lineHeight = 23.sp
@@ -1252,6 +1257,48 @@ fun ProposedPlanPrompt(
         }
     }
 }
+
+/**
+ * Draws the emphasis models write instead of printing its punctuation.
+ *
+ * Nothing rendered Markdown here, so an answer arrived as `**Selesai!**` and
+ * the asterisks sat on screen as literal characters. This is the smallest
+ * useful subset - bold, italic, inline code - done in one pass; anything more
+ * (headings, lists, tables) is a document format, and chat bubbles are not
+ * documents.
+ */
+private fun inlineMarkdown(text: String): AnnotatedString = buildAnnotatedString {
+    var index = 0
+    while (index < text.length) {
+        val match = INLINE_MARKUP.find(text, index)
+        if (match == null) {
+            append(text.substring(index))
+            return@buildAnnotatedString
+        }
+        append(text.substring(index, match.range.first))
+
+        val (marker, content) = when {
+            match.groupValues[1].isNotEmpty() -> "***" to match.groupValues[1]
+            match.groupValues[2].isNotEmpty() -> "**" to match.groupValues[2]
+            match.groupValues[3].isNotEmpty() -> "*" to match.groupValues[3]
+            else -> "`" to match.groupValues[4]
+        }
+        val style = when (marker) {
+            "***" -> SpanStyle(fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Italic)
+            "**" -> SpanStyle(fontWeight = FontWeight.SemiBold)
+            "*" -> SpanStyle(fontStyle = FontStyle.Italic)
+            else -> SpanStyle(fontFamily = FontFamily.Monospace)
+        }
+        withStyle(style) { append(content) }
+        index = match.range.last + 1
+    }
+}
+
+/** Longest marker first, so `***both***` is not read as bold plus a stray star. */
+private val INLINE_MARKUP = Regex(
+    """\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*|`([^`]+)`""",
+    RegexOption.DOT_MATCHES_ALL,
+)
 
 /** `SEND_MESSAGE` reads as shouting; `Send message` reads as a thing it does. */
 private fun String.asActionLabel(): String =

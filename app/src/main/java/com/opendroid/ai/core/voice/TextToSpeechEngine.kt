@@ -233,7 +233,14 @@ class TextToSpeechEngine(
     private fun Int.isUsable(): Boolean =
         this != TextToSpeech.LANG_MISSING_DATA && this != TextToSpeech.LANG_NOT_SUPPORTED
 
-    fun speak(text: String) {
+    fun speak(raw: String) {
+        // Formatting is pronounced. Cleaning it here, at the one door to the
+        // speaker, keeps what is stored and shown exactly as the model wrote it.
+        val text = SpeechText.forSpeech(raw)
+        if (text.isBlank()) {
+            onCompletionListener?.invoke()
+            return
+        }
         scope.launch {
             val config = settingsRepository.llmConfig.first()
             val apiKey = config.elevenLabsApiKey
