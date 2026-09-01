@@ -51,32 +51,40 @@ fun AutoModeHost(
     val faceColorId by faceColorStore.colorId.collectAsState()
     val motionStore = rememberMotionStore()
     val motionSetting by motionStore.setting.collectAsState()
+    val transcriptStore = rememberTranscriptVisibilityStore()
+    val showTranscript by transcriptStore.visible.collectAsState()
 
     var isListening by remember { mutableStateOf(false) }
     var transcript by remember { mutableStateOf("") }
     var voiceError by remember { mutableStateOf<String?>(null) }
-    // Auto-restart is deliberately one-shot per answer: it re-arms only after the
-    // agent has actually produced something. Restarting on every Idle would put
-    // the microphone in a loop with its own recognition errors.
-    var awaitingAnswer by remember { mutableStateOf(false) }
     // Dock mode. rememberSaveable so a rotation on a stand does not drop out of it.
     var kiosk by rememberSaveable { mutableStateOf(false) }
-    // Silent listens in a row, counted so a dock with a refused microphone stops
-    // re-arming instead of draining the battery overnight.
-    var silences by remember { mutableIntStateOf(0) }
+    // Attempts in a row that produced nothing - silence, or an error. Counted so
+    // a refused or broken microphone stops re-arming instead of looping, and
+    // reset the moment something is actually heard.
+    var quietRounds by remember { mutableIntStateOf(0) }
+    // The user stopped the microphone, or it gave up. Nothing reopens until they
+    // ask, which is the only thing keeping "always listening" from overriding a
+    // deliberate stop.
+    var micPaused by remember { mutableStateOf(false) }
+    // What the agent last said, kept so the caption does not blank out the
+    // instant speech ends.
+    var lastReply by remember { mutableStateOf("") }
+    // Whether the agent spoke since the microphone was last open.
+    var spokeLast by remember { mutableStateOf(false) }
 
     fun startListening() {
         if (isListening) return
         voiceError = null
         transcript = ""
         isListening = true
+        spokeLast = false
         recognizer.startListening(
             onResult = { text ->
                 isListening = false
                 transcript = ""
-                silences = 0
+                quietRounds = 0
                 if (text.isNotBlank()) {
-                    awaitingAnswer = true
                     viewModel.sendMessage(text, context)
                 }
             },
@@ -85,6 +93,10 @@ fun AutoModeHost(
                 isListening = false
                 transcript = ""
                 voiceError = err
+                // Errors count towards the same limit as silence. Without this a
+                // continuously failing recognizer and the reopen below would
+                // spin against each other.
+                quietRounds += 1
             },
             // Hearing nothing is what an open microphone does when nobody speaks.
             // Showing it as "No speech match found" made the screen look broken
@@ -93,7 +105,7 @@ fun AutoModeHost(
                 isListening = false
                 transcript = ""
                 voiceError = null
-                silences += 1
+                quietRounds += 1
             },
         )
     }
@@ -119,22 +131,28 @@ fun AutoModeHost(
     // the mode is that the user does not have to press anything first.
     LaunchedEffect(Unit) { requestListening() }
 
-    // Dock mode listens on its own: there is no one holding the phone to tap it.
-    // Only while the agent is idle, so it never records the assistant's own voice,
-    // and it gives up after enough silence to survive a night on a stand.
-    LaunchedEffect(kiosk, agentState, isListening, silences) {
-        if (shouldReopenMic(kiosk, agentState, isListening, silences)) {
-            delay(KIOSK_RETRY_DELAY_MILLIS)
+    // The microphone runs itself for as long as the mode is open. Only while the
+    // agent is idle, so it never records the assistant's own voice, and it stops
+    // once enough attempts in a row have heard nothing.
+    LaunchedEffect(kiosk, agentState, isListening, quietRounds, micPaused) {
+        if (shouldReopenMic(kiosk, agentState, isListening, quietRounds, micPaused)) {
+            delay(reopenDelayAfter(kiosk, spokeLast))
             requestListening()
         }
     }
 
-    // Hands-free turn taking. The mic reopens only once the agent has gone quiet
-    // after answering, so it never records the assistant's own speech.
-    LaunchedEffect(agentState, isListening) {
-        if (agentState is AgentState.Idle && awaitingAnswer && !isListening) {
-            awaitingAnswer = false
-            requestListening()
+    // Giving up is a state the user can see and undo, not a silent stop.
+    LaunchedEffect(quietRounds, kiosk) {
+        if (quietRounds >= silenceLimitFor(kiosk)) micPaused = true
+    }
+
+    // Keep the last spoken answer for the caption, and remember that the last
+    // thing to happen was speech so the reopen above waits for the room to go
+    // quiet rather than recording the end of it.
+    LaunchedEffect(agentState) {
+        (agentState as? AgentState.Speaking)?.let { speaking ->
+            spokeLast = true
+            speaking.text.takeIf { it.isNotBlank() }?.let { lastReply = it }
         }
     }
 
@@ -161,13 +179,22 @@ fun AutoModeHost(
             isListening = isListening,
             amplitude = amplitude,
             transcript = transcript,
+            reply = lastReply,
+            showTranscript = showTranscript,
+            paused = micPaused,
             errorMessage = voiceError,
             onToggleListening = {
-                if (isListening) {
+                if (isListening || !micPaused) {
+                    // Stopping has to latch, or the reopen above would start the
+                    // microphone again a moment later and the tap would look
+                    // like it did nothing.
                     recognizer.cancel()
                     isListening = false
                     transcript = ""
+                    micPaused = true
                 } else {
+                    micPaused = false
+                    quietRounds = 0
                     requestListening()
                 }
             },
@@ -190,9 +217,14 @@ fun AutoModeHost(
             onCycleFaceColor = { faceColorStore.select(nextFaceColor(faceColorId)) },
             motionLabel = motionLabel(motionSetting),
             onCycleMotion = { motionStore.select(nextMotionSetting(motionSetting)) },
+            transcriptLabel = transcriptLabel(showTranscript),
+            onToggleTranscript = { transcriptStore.toggle() },
             kiosk = kiosk,
             onEnterKiosk = {
-                silences = 0
+                // The dock is entered on purpose, so it starts listening even if
+                // the microphone had given up in the hand.
+                quietRounds = 0
+                micPaused = false
                 kiosk = true
             },
             onLeaveKiosk = { kiosk = false },

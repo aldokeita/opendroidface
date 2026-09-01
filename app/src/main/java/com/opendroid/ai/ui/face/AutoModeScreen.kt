@@ -57,6 +57,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -94,7 +95,11 @@ import kotlin.math.sin
  * [isListening] is the microphone's own state, which leads the agent's: the mic
  * is already open while the agent is still Idle.
  */
-fun autoModeStatusLabel(state: AgentState, isListening: Boolean): String = when {
+fun autoModeStatusLabel(
+    state: AgentState,
+    isListening: Boolean,
+    paused: Boolean = false,
+): String = when {
     isListening -> "Listening…"
     state is AgentState.Thinking -> "Thinking…"
     state is AgentState.PlanProposed -> "Waiting for your approval"
@@ -102,7 +107,11 @@ fun autoModeStatusLabel(state: AgentState, isListening: Boolean): String = when 
     state is AgentState.Speaking -> "Speaking…"
     state is AgentState.Error -> "Something went wrong"
     state is AgentState.Listening -> "Listening…"
-    else -> "Tap anywhere to speak"
+    // Only reachable now that the user stopped the microphone or it gave up.
+    // While the mode is running the microphone reopens on its own, so inviting
+    // a tap would be describing a screen that does not need one.
+    paused -> "Tap anywhere to speak"
+    else -> "Listening…"
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -115,6 +124,13 @@ fun AutoModeScreen(
     onToggleListening: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The agent's last spoken answer, drawn only when [showTranscript]. */
+    reply: String = "",
+    showTranscript: Boolean = true,
+    /** The microphone is stopped and will not reopen by itself. */
+    paused: Boolean = false,
+    transcriptLabel: String? = null,
+    onToggleTranscript: (() -> Unit)? = null,
     amplitude: Float = 0f,
     onApprovePlan: (() -> Unit)? = null,
     onRejectPlan: (() -> Unit)? = null,
@@ -199,6 +215,8 @@ fun AutoModeScreen(
                 onCycleFaceColor = onCycleFaceColor,
                 motionLabel = motionLabel,
                 onCycleMotion = onCycleMotion,
+                transcriptLabel = transcriptLabel,
+                onToggleTranscript = onToggleTranscript,
                 onClose = onClose,
                 onEnterKiosk = onEnterKiosk,
                 modifier = Modifier.align(Alignment.TopCenter),
@@ -231,7 +249,7 @@ fun AutoModeScreen(
             Spacer(Modifier.height(if (landscape) 6.dp else 12.dp))
 
             Text(
-                text = autoModeStatusLabel(state, isListening).uppercase(),
+                text = autoModeStatusLabel(state, isListening, paused).uppercase(),
                 color = colors.textSecondary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
@@ -239,33 +257,38 @@ fun AutoModeScreen(
                 textAlign = TextAlign.Center,
             )
 
-            // The transcript is the loud line: it is what the user is actually
-            // reading back. Its box keeps a fixed minimum so the face does not
-            // jump every time a partial result arrives.
-            val subtitle = errorMessage ?: transcript
-            val subtitleAlpha by animateFloatAsState(
-                targetValue = if (subtitle.isBlank()) 0f else 1f,
+            // An error is not part of the conversation and is shown whatever the
+            // caption setting says: hiding "microphone permission is required"
+            // would leave a screen that simply does nothing.
+            val caption = captionFor(errorMessage, transcript, reply, isListening, showTranscript)
+            val captionAlpha by animateFloatAsState(
+                targetValue = if (caption.text.isBlank()) 0f else 1f,
                 animationSpec = tween(180),
-                label = "subtitleAlpha"
+                label = "captionAlpha"
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     // Landscape has no vertical room to reserve for text that is
                     // usually absent; there the box collapses to the line itself.
-                    .heightIn(min = if (landscape) 30.dp else 84.dp)
-                    .padding(top = if (landscape) 8.dp else 14.dp),
+                    .heightIn(min = if (landscape) 26.dp else 72.dp)
+                    .padding(top = if (landscape) 8.dp else 14.dp)
+                    .alpha(captionAlpha),
                 contentAlignment = Alignment.TopCenter,
             ) {
-                Text(
-                    text = subtitle,
-                    color = if (errorMessage != null) colors.accentRed else colors.textPrimary,
-                    fontSize = if (landscape) 15.sp else 20.sp,
-                    fontWeight = FontWeight.Light,
-                    textAlign = TextAlign.Center,
+                TypingText(
+                    text = caption.text,
+                    // Speech the user is still saying arrives a word at a time
+                    // already; typing it out a second time would lag behind the
+                    // person's own voice.
+                    animate = caption.typed && !reduceMotion,
+                    color = when {
+                        errorMessage != null -> colors.accentRed
+                        caption.typed -> colors.textPrimary
+                        else -> colors.textSecondary
+                    },
+                    fontSize = if (landscape) 13.sp else 15.sp,
                     maxLines = if (landscape) 1 else 3,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.alpha(subtitleAlpha),
                 )
             }
         }
@@ -331,6 +354,75 @@ fun AutoModeScreen(
     }
 }
 
+/**
+ * What the one caption line should say, and whether it should be typed out.
+ *
+ * @param typed the text is the agent's, arriving all at once, so it reads
+ * better revealed a character at a time. Speech being recognised is already
+ * arriving piece by piece and is shown as it comes.
+ */
+data class AutoModeCaption(val text: String, val typed: Boolean)
+
+fun captionFor(
+    errorMessage: String?,
+    transcript: String,
+    reply: String,
+    isListening: Boolean,
+    showTranscript: Boolean,
+): AutoModeCaption {
+    if (errorMessage != null) return AutoModeCaption(errorMessage, typed = false)
+    if (!showTranscript) return AutoModeCaption("", typed = false)
+    // While the microphone is open the user's own words take the line, even if
+    // an answer is still on screen: what they are saying now is the live thing.
+    if (isListening && transcript.isNotBlank()) return AutoModeCaption(transcript, typed = false)
+    if (isListening) return AutoModeCaption("", typed = false)
+    return AutoModeCaption(reply, typed = reply.isNotBlank())
+}
+
+/**
+ * Text revealed a character at a time, at a readable pace rather than a
+ * dramatic one.
+ *
+ * The reveal is a state read in the layout phase only through the string, so a
+ * long answer costs one text measure per tick and nothing else on the screen
+ * recomposes. With [animate] false the whole string is drawn at once, which is
+ * both the reduced-motion path and the path for text that is already streaming.
+ */
+@Composable
+private fun TypingText(
+    text: String,
+    animate: Boolean,
+    color: Color,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    maxLines: Int,
+) {
+    var shown by remember(text, animate) { mutableIntStateOf(if (animate) 0 else text.length) }
+    LaunchedEffect(text, animate) {
+        if (!animate) {
+            shown = text.length
+            return@LaunchedEffect
+        }
+        // Fast enough to keep up with speech, slow enough to read as typing.
+        while (shown < text.length) {
+            delay(TYPING_STEP_MILLIS)
+            shown = (shown + TYPING_CHARS_PER_STEP).coerceAtMost(text.length)
+        }
+    }
+
+    Text(
+        text = text.take(shown),
+        color = color,
+        fontSize = fontSize,
+        fontWeight = FontWeight.Light,
+        textAlign = TextAlign.Center,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+private const val TYPING_STEP_MILLIS = 26L
+private const val TYPING_CHARS_PER_STEP = 2
+
 /** Language, colour and exit — kept small and dim so the face owns the screen. */
 @Composable
 private fun TopControls(
@@ -340,6 +432,8 @@ private fun TopControls(
     onCycleFaceColor: (() -> Unit)?,
     motionLabel: String?,
     onCycleMotion: (() -> Unit)?,
+    transcriptLabel: String?,
+    onToggleTranscript: (() -> Unit)?,
     onClose: () -> Unit,
     onEnterKiosk: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -368,6 +462,16 @@ private fun TopControls(
                 fontSize = 11.sp,
                 letterSpacing = 1.5.sp,
                 modifier = Modifier.clickable(onClick = onCycleMotion),
+            )
+        }
+        if (transcriptLabel != null && onToggleTranscript != null) {
+            Spacer(Modifier.width(16.dp))
+            Text(
+                text = transcriptLabel.uppercase(),
+                color = colors.textSecondary.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                letterSpacing = 1.5.sp,
+                modifier = Modifier.clickable(onClick = onToggleTranscript),
             )
         }
         Spacer(Modifier.weight(1f))

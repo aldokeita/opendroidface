@@ -27,6 +27,7 @@ interface FaceEntryPoint {
     fun faceStyleStore(): FaceStyleStore
     fun faceMood(): FaceMood
     fun motionStore(): MotionStore
+    fun transcriptVisibilityStore(): TranscriptVisibilityStore
 }
 
 private fun entryPoint(context: Context): FaceEntryPoint =
@@ -69,6 +70,13 @@ fun rememberFaceStyleStore(): FaceStyleStore {
 fun rememberMotionStore(): MotionStore {
     val context: Context = LocalContext.current.applicationContext
     return remember(context) { entryPoint(context).motionStore() }
+}
+
+/** Whether hands-free draws the words it is speaking. */
+@Composable
+fun rememberTranscriptVisibilityStore(): TranscriptVisibilityStore {
+    val context: Context = LocalContext.current.applicationContext
+    return remember(context) { entryPoint(context).transcriptVisibilityStore() }
 }
 
 /** The process-wide mood, published by the agent. */

@@ -29,12 +29,23 @@ class AutoModeStatusTest {
     }
 
     @Test
-    fun `idle with a closed microphone invites the user to speak`() {
-        // The whole screen is the button now, so the invitation has to say so -
+    fun `an idle gap between turns is still listening, not an invitation to tap`() {
+        // The microphone reopens on its own, so the gap after an answer is a
+        // pause in a conversation. Asking for a tap there would describe a
+        // screen that does not need one.
+        assertEquals(
+            "Listening…",
+            autoModeStatusLabel(AgentState.Idle, isListening = false)
+        )
+    }
+
+    @Test
+    fun `only a stopped microphone invites the user to tap`() {
+        // The whole screen is the button, so the invitation has to say so -
         // there is nothing left on screen to point at.
         assertEquals(
             "Tap anywhere to speak",
-            autoModeStatusLabel(AgentState.Idle, isListening = false)
+            autoModeStatusLabel(AgentState.Idle, isListening = false, paused = true)
         )
     }
 

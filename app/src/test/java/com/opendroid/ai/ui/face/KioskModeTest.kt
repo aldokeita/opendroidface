@@ -23,9 +23,34 @@ class KioskModeTest {
     }
 
     @Test
-    fun `hands-free without the dock never re-arms on its own`() {
-        // Outside the dock someone is holding the phone; the mic is theirs to open.
-        assertFalse(shouldReopenMic(kiosk = false, AgentState.Idle, isListening = false, consecutiveSilences = 0))
+    fun `hands-free in the hand also listens without being asked`() {
+        // The whole point of the mode is not touching the phone; requiring a tap
+        // between turns made a spoken conversation a sequence of taps.
+        assertTrue(shouldReopenMic(kiosk = false, AgentState.Idle, isListening = false, consecutiveSilences = 0))
+    }
+
+    @Test
+    fun `a stopped microphone stays stopped`() {
+        // Otherwise the reopen would undo the user's tap a moment after it landed.
+        assertFalse(
+            shouldReopenMic(
+                kiosk = false,
+                state = AgentState.Idle,
+                isListening = false,
+                consecutiveSilences = 0,
+                paused = true,
+            )
+        )
+        assertFalse(shouldReopenMic(true, AgentState.Idle, false, 0, paused = true))
+    }
+
+    @Test
+    fun `hands-free gives up sooner than the dock`() {
+        // Someone is holding this phone: hand control back rather than retry for
+        // an hour. A dock has nobody to hand it back to.
+        assertTrue(shouldReopenMic(false, AgentState.Idle, false, HANDS_FREE_MAX_SILENT_RETRIES - 1))
+        assertFalse(shouldReopenMic(false, AgentState.Idle, false, HANDS_FREE_MAX_SILENT_RETRIES))
+        assertTrue(HANDS_FREE_MAX_SILENT_RETRIES < KIOSK_MAX_SILENT_RETRIES)
     }
 
     @Test
@@ -55,6 +80,24 @@ class KioskModeTest {
         // all night and be flat by morning.
         assertTrue(shouldReopenMic(true, AgentState.Idle, false, KIOSK_MAX_SILENT_RETRIES - 1))
         assertFalse(shouldReopenMic(true, AgentState.Idle, false, KIOSK_MAX_SILENT_RETRIES))
+    }
+
+    @Test
+    fun `the microphone waits longer after the agent has spoken`() {
+        // Speaking ends when the engine says the utterance is done, which is
+        // before the sound has left the room. Reopening on the short delay lets
+        // the microphone hear the tail of the assistant's own voice, and an
+        // agent that answers itself keeps answering itself.
+        assertTrue(reopenDelayAfter(kiosk = false, spokeLast = true) >= SPEECH_SETTLE_MILLIS)
+        assertTrue(
+            reopenDelayAfter(false, spokeLast = true) > reopenDelayAfter(false, spokeLast = false)
+        )
+    }
+
+    @Test
+    fun `the dock's own pacing is never shortened by the settle time`() {
+        assertTrue(reopenDelayAfter(kiosk = true, spokeLast = false) == KIOSK_RETRY_DELAY_MILLIS)
+        assertTrue(reopenDelayAfter(true, spokeLast = true) >= KIOSK_RETRY_DELAY_MILLIS)
     }
 
     @Test
