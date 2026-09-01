@@ -11,6 +11,9 @@ import androidx.core.app.NotificationCompat
 import com.opendroid.ai.core.agent.AgentLoop
 import com.opendroid.ai.core.agent.AgentPhrases
 import com.opendroid.ai.core.language.speechTag
+import com.opendroid.ai.ui.face.SPEECH_SETTLE_MILLIS
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import com.opendroid.ai.core.agent.AgentState
 import com.opendroid.ai.core.voice.SpeechRecognitionEngine
 import com.opendroid.ai.core.voice.shouldSpeakReply
@@ -62,6 +65,10 @@ class OpenDroidService : Service() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var showFloatingButton = false
+
+    /** The orb's microphone is on and re-arms itself until tapped again. */
+    @Volatile private var micLoopActive = false
+    private var micLoopJob: kotlinx.coroutines.Job? = null
     @Volatile private var pendingApprovalListen = false
 
     companion object {
@@ -102,6 +109,19 @@ class OpenDroidService : Service() {
         serviceScope.launch {
             appLanguageStore.language.collect { language ->
                 textToSpeechEngine.appLanguageTag = language.speechTag()
+                // The recognizer had no language at all here, so the orb and
+                // the wake word always transcribed in the device language -
+                // Indonesian speech arrived as English-sounding nonsense, and
+                // the agent was answering a question nobody asked.
+                speechRecognitionEngine.languageTag =
+                    language.speechTag() ?: voiceLanguageStore.tag.value
+            }
+        }
+        serviceScope.launch {
+            voiceLanguageStore.tag.collect { tag ->
+                if (appLanguageStore.language.value.speechTag() == null) {
+                    speechRecognitionEngine.languageTag = tag
+                }
             }
         }
 
@@ -219,6 +239,14 @@ class OpenDroidService : Service() {
         }
     }
 
+    /**
+     * Opens the microphone and, until the user closes it again, keeps opening
+     * it after every answer.
+     *
+     * A tap on the orb used to buy exactly one sentence: say a thing, get an
+     * answer, tap again. A conversation is not one sentence, and the orb is
+     * there so the phone does not have to be touched.
+     */
     private fun startListeningForQuery() {
         // Temporarily pause wake word to avoid hearing itself
         wakeWordDetector.stopListening()
@@ -240,6 +268,7 @@ class OpenDroidService : Service() {
                     }
                 } else {
                     agentLoop.setAgentState(AgentState.Idle)
+                    reopenMicAfterAnswer()
                 }
             },
             onError = { _ ->
@@ -250,9 +279,41 @@ class OpenDroidService : Service() {
                         textToSpeechEngine.speak("OpenDroid online.")
                         startListeningForQuery()
                     }
+                } else {
+                    reopenMicAfterAnswer()
                 }
             }
         )
+    }
+
+    /**
+     * Waits for the agent to finish, then listens again.
+     *
+     * Only once the state is back to Idle, so the microphone is never open
+     * while the assistant is speaking - the settle delay is there because the
+     * state leaves Speaking before the sound has left the room, and an agent
+     * that hears itself keeps answering itself.
+     */
+    private fun reopenMicAfterAnswer() {
+        micLoopJob?.cancel()
+        micLoopJob = serviceScope.launch {
+            agentLoop.agentState.first { it is AgentState.Idle }
+            delay(SPEECH_SETTLE_MILLIS)
+            if (micLoopActive) startListeningForQuery()
+        }
+    }
+
+    /** Tap to start, tap again to stop. */
+    private fun toggleMicLoop() {
+        if (micLoopActive) {
+            micLoopActive = false
+            micLoopJob?.cancel()
+            speechRecognitionEngine.cancel()
+            agentLoop.setAgentState(AgentState.Idle)
+        } else {
+            micLoopActive = true
+            startListeningForQuery()
+        }
     }
 
     /**
@@ -280,7 +341,7 @@ class OpenDroidService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_TRIGGER_RECORD) {
-            startListeningForQuery()
+            toggleMicLoop()
         }
         return START_STICKY
     }

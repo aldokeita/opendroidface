@@ -184,6 +184,26 @@ object ActionSchema {
             category = ActionCategory.SYSTEM
         ),
         ActionDefinition(
+            name = "SET_SCREEN_TIMEOUT",
+            description = "Sets how long the screen stays on before sleeping. Convert whatever the user says into seconds.",
+            params = listOf(
+                ParamDefinition(
+                    "seconds",
+                    ParamType.INT,
+                    true,
+                    "Screen timeout in seconds. Rounded to the nearest value Android offers (15, 30, 60, 120, 300, 600, 1800)."
+                )
+            ),
+            examples = listOf(
+                "set screen timeout to 30 seconds",
+                "keep the screen on for 5 minutes",
+                "screen timeout 1 minute",
+                "atur screen timeout 30 detik",
+                "layar mati setelah 2 menit"
+            ),
+            category = ActionCategory.SYSTEM
+        ),
+        ActionDefinition(
             name = "SET_VOLUME",
             description = "Sets device volume. Type defaults to media if not specified.",
             params = listOf(

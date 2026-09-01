@@ -223,9 +223,13 @@ class OpenDroidAccessibilityService : AccessibilityService() {
             private var initialTouchY = 0f
             private var isClick = false
             private val touchSlop = 10f
+            // Long press opens the app; a tap starts listening. It was the
+            // other way round, which put the thing the orb exists for behind
+            // the slower gesture: nobody floats a button over every screen in
+            // order to open an app they could open from the launcher.
             private val longPressRunnable = Runnable {
                 isClick = false
-                triggerMicrophoneAction()
+                openMainActivityAction()
             }
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
@@ -358,7 +362,7 @@ class OpenDroidAccessibilityService : AccessibilityService() {
     private inner class TouchTargetView(context: Context) : View(context) {
         override fun performClick(): Boolean {
             super.performClick()
-            openMainActivityAction()
+            triggerMicrophoneAction()
             return true
         }
     }

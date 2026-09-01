@@ -160,6 +160,7 @@ class SystemActions @Inject constructor(
         ToggleFlashlightAction(),
         SetVolumeAction(),
         SetBrightnessAction(),
+        SetScreenTimeoutAction(),
         OpenAppAction(),
         LockScreenAction(),
         RestartDeviceAction(),
@@ -351,6 +352,58 @@ class SystemActions @Inject constructor(
                 Log.e("SetVolume", "Volume failed: ${e.localizedMessage}")
                 ActionResult(false, null, "Couldn't change the volume right now. Please try again.")
             }
+        }
+    }
+
+    /**
+     * Sets how long the screen stays on. Asking for this used to reach no
+     * action at all, so the planner fell back to opening the Settings app and
+     * leaving the user to find the slider themselves.
+     */
+    private class SetScreenTimeoutAction : Action {
+        override val name: String = "SET_SCREEN_TIMEOUT"
+        override suspend fun execute(params: Map<String, String>, context: Context): ActionResult {
+            val seconds = params["seconds"]?.toIntOrNull()
+                ?: return ActionResult(false, null, "No screen timeout was given.")
+            // Android's own choices, and the ones a launcher offers. A value
+            // between them is rounded to the nearest rather than refused: the
+            // user asked for roughly that long, not for a list entry.
+            val allowed = listOf(15, 30, 60, 120, 300, 600, 1800)
+            val chosen = allowed.minByOrNull { kotlin.math.abs(it - seconds) } ?: 30
+
+            return try {
+                if (Settings.System.canWrite(context)) {
+                    Settings.System.putInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_OFF_TIMEOUT,
+                        chosen * 1000
+                    )
+                    ActionResult(true, "Screen timeout is set to ${describe(chosen)}.", null)
+                } else {
+                    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                        data = "package:${context.packageName}".toUri()
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    ActionResult(
+                        false,
+                        "I need your permission to change system settings. I've opened the settings page — " +
+                            "just flip the switch to allow OpenDroid, then try again!",
+                        null,
+                        true
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("SetScreenTimeout", "Screen timeout failed: ${e.localizedMessage}")
+                ActionResult(false, null, "Couldn't change the screen timeout right now. Please try again.")
+            }
+        }
+
+        private fun describe(seconds: Int): String = when {
+            seconds < 60 -> "$seconds seconds"
+            seconds == 60 -> "1 minute"
+            seconds % 60 == 0 -> "${seconds / 60} minutes"
+            else -> "$seconds seconds"
         }
     }
 
