@@ -14,7 +14,9 @@
 package com.opendroid.ai.ui.theme
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -48,7 +50,23 @@ fun ProvideAppLocale(content: @Composable () -> Unit) {
 
     val localized = remember(context, locale, configuration) {
         val updated = Configuration(configuration).apply { setLocale(locale) }
-        context.createConfigurationContext(updated) to updated
+        // A ContextWrapper around the original, NOT the bare context that
+        // createConfigurationContext hands back.
+        //
+        // That bare context is a ContextImpl with no Activity behind it, and
+        // hiltViewModel() finds its Activity by unwrapping the ContextWrapper
+        // chain - so providing it crashed every screen that asks for a view
+        // model, which is all of them:
+        //
+        //   Expected an activity context for creating a HiltViewModelFactory
+        //
+        // Wrapping keeps the Activity reachable and swaps only the resources,
+        // which is the only part that had to change.
+        val localizedResources = context.createConfigurationContext(updated).resources
+        val wrapper = object : ContextWrapper(context) {
+            override fun getResources(): Resources = localizedResources
+        }
+        wrapper to updated
     }
 
     CompositionLocalProvider(
@@ -75,4 +93,5 @@ fun Context.localizedFor(language: AppLanguage): Context {
     val configuration = Configuration(resources.configuration).apply { setLocale(locale) }
     return createConfigurationContext(configuration)
 }
+
 
